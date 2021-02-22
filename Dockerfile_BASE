@@ -1,0 +1,6 @@
+# Install frontend requirements
+FROM node:14.5 as firmwaredroid-frontend-base
+RUN mkdir -p /usr/src/app/build
+WORKDIR /usr/src/app
+COPY . /usr/src/app
+RUN yarn

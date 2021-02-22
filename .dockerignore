@@ -1,0 +1,11 @@
+# root files
+.gitignore
+.gitmodules
+.travis.yml
+.gitlab-ci.yml
+
+# folders
+venv
+.idea
+__pycache__
+node_modules/*
