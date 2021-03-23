@@ -1,4 +1,3 @@
-
 // Routing
 import {
   BrowserRouter as Router,
@@ -12,14 +11,21 @@ import ProfilePage from "./pages/ProfilePage";
 import SearchPage from "./pages/SearchPage";
 import ScanReportPage from "./pages/ScanReportPage";
 import LoginPage from "./pages/LoginPage";
-import CreditsPage from "./pages/CreditsPage"
 // Themes
 import { ThemeProvider } from 'styled-components';
 import { lightTheme, darkTheme } from './assets/theming/theme';
 import { GlobalStyles } from './assets/theming/global';
 import { useDarkMode } from './hooks/theming/useDarkMode';
-import ThemeToggle from './components/toggle/ThemeToggle/ThemeToggle';
-import Link from "react-router-dom/es/Link";
+
+import TopNavbar from "./components/navigation/Navbar/TopNavbar";
+import Container from "react-bootstrap/esm/Container";
+
+
+const styles = {
+  grid: {
+    paddingTop: 40
+  }
+};
 
 
 function App() {
@@ -34,48 +40,44 @@ function App() {
     <ThemeProvider theme={themeMode}>
       <>
         <GlobalStyles />
-        <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-        <h1>It's a {theme === 'light' ? 'light theme' : 'dark theme'}!</h1>
-        <Router>
-          <Switch>
+        <TopNavbar theme={theme} toggleTheme={toggleTheme} />
+        <Container fluid style={styles.grid}>
+          <Router>
+            <Switch>
+              <Route path="/about">
+                <AboutPage />
+              </Route>
 
-            <Route path="/about">
-              <AboutPage />
-            </Route>
+              <Route path="/login">
+                <LoginPage />
+              </Route>
 
-            <Route path="/login">
-              <LoginPage />
-            </Route>
+              <Route path="/admin">
+                <AdminPage />
+              </Route>
 
-            <Route path="/admin">
-              <AdminPage />
-            </Route>
+              <Route path="/profile">
+                <ProfilePage />
+              </Route>
 
-            <Route path="/profile">
-              <ProfilePage />
-            </Route>
+              <Route path="/search">
+                <SearchPage />
+              </Route>
 
-            <Route path="/search">
-              <SearchPage />
-            </Route>
+              <Route path="/scanreport">
+                <ScanReportPage />
+              </Route>
 
-            <Route path="/scanreport">
-              <ScanReportPage />
-            </Route>
+              <Route path="/">
+                <LandingPage theme={theme}/>
+              </Route>
 
-            <Route path="/credits">
-              <CreditsPage />
-            </Route>
-
-            <Route path="/">
-              <LandingPage />
-            </Route>
-
-          </Switch>
-        </Router>
+            </Switch>
+          </Router>
+        </Container>
         <footer>
           <small>
-            <a href="/credits" className="active">Credits</a>
+            <a href="/about" className="active">Credits</a>
           </small>
         </footer>
       </>
