@@ -19,11 +19,14 @@ import { useDarkMode } from './hooks/theming/useDarkMode';
 
 import TopNavbar from "./components/navigation/Navbar/TopNavbar";
 import Container from "react-bootstrap/esm/Container";
+import RegisterPage from "./pages/RegisterPage";
+import UploadPage from "./pages/UploadPage";
 
 
 const styles = {
   grid: {
-    paddingTop: 40
+    paddingTop: 40,
+    height: '100vh'
   }
 };
 
@@ -53,7 +56,7 @@ function App() {
               </Route>
 
               <Route path="/admin">
-                <AdminPage />
+                <AdminPage theme={theme}/>
               </Route>
 
               <Route path="/profile">
@@ -66,6 +69,14 @@ function App() {
 
               <Route path="/scanreport">
                 <ScanReportPage />
+              </Route>
+
+              <Route path="/upload">
+                <UploadPage />
+              </Route>
+
+              <Route path="/register">
+                <RegisterPage />
               </Route>
 
               <Route path="/">

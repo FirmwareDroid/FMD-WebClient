@@ -1,4 +1,3 @@
-import { string } from 'prop-types';
 import FormControl from "react-bootstrap/esm/FormControl";
 import Button from "react-bootstrap/esm/Button";
 import Form from "react-bootstrap/esm/Form";

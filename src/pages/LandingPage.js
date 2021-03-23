@@ -1,5 +1,5 @@
 import Container from "react-bootstrap/esm/Container";
-import FirmwareTable from "../components/tables/FirmwareTable/FirmwareTable";
+import FirmwareTable from "../components/tables/FirmwareTables/FirmwareTable";
 import { string } from 'prop-types';
 import SearchEngine from "../components/search/SearchEngine";
 

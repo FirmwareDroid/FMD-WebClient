@@ -1,13 +1,14 @@
-
-
+import Container from "react-bootstrap/esm/Container";
+import SearchEngine from "../components/search/SearchEngine";
 
 
 function SearchPage() {
   return (
-    <div>
+    <Container>
       <h2>SearchPage</h2>
       <p>Hello SearchPage</p>
-    </div>
+      <SearchEngine/>
+    </Container>
   );
 }
 

@@ -1,7 +1,4 @@
 
-
-
-
 function ScanReportPage() {
   return (
     <div>

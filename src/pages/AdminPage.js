@@ -1,13 +1,23 @@
+import Container from "react-bootstrap/esm/Container";
+import Tabs from "react-bootstrap/esm/Tabs";
+import Tab from "react-bootstrap/esm/Tab";
+import AdminUserTable from "../components/tables/UserTables/AdminUserTable";
 
 
-
-
-function AdminPage() {
+const AdminPage = ({ theme }) => {
   return (
-    <div>
-      <h2>AdminPage</h2>
-      <p>Hello AdminPage</p>
-    </div>
+    <Container>
+      <h2>Administration</h2>
+      <Tabs defaultActiveKey="users" id="uncontrolled-tab-example" variant="pills">
+        <Tab eventKey="users" title="Users">
+          <p>Test Users</p>
+          <AdminUserTable theme={theme}/>
+        </Tab>
+        <Tab eventKey="settings" title="Settings">
+
+        </Tab>
+      </Tabs>
+    </Container>
   );
 }
 

@@ -1,22 +1,22 @@
-import LoginForm from "../components/login/LoginForm";
 import Container from "react-bootstrap/esm/Container";
 import Col from "react-bootstrap/esm/Col";
 import Row from "react-bootstrap/esm/Row";
 import React from "react";
+import RegisterUserForm from "../components/register/RegisterUserForm";
 
 
-function LoginPage() {
+function RegisterPage() {
   return (
     <Container>
       <Row>
         <Col md={{ span: 6, offset: 3 }}>
-          <h3>Sign in</h3>
-          <LoginForm/>
+          <h3>Sign up</h3>
+          <RegisterUserForm />
         </Col>
       </Row>
     </Container>
   );
 }
 
-export default LoginPage;
+export default RegisterPage;
 

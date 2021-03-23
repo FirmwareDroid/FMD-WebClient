@@ -30,12 +30,14 @@ const TopNavbar = ({ theme, toggleTheme }) => {
             <Navbar bg={theme} variant={theme} sticky="top">
                 <Navbar.Brand href="/">FirmwareDroid</Navbar.Brand>
                 <Nav className="mr-auto">
-                  <Nav.Link href="/about">About</Nav.Link>
+                  <Nav.Link href="/search">Search</Nav.Link>
                   <Nav.Link href="/upload">Upload</Nav.Link>
+                  <Nav.Link href="/about">About</Nav.Link>
                 </Nav>
                 <Nav className="pullRight">
                   <ThemeToggle toggleTheme={toggleTheme} theme={theme}/>
-                  <Nav.Link href="/login">Login</Nav.Link>
+                  <Nav.Link href="/login">Sign in</Nav.Link>
+                  <Nav.Link href="/register">Sign up</Nav.Link>
                 </Nav>
             </Navbar>
         </Col>
