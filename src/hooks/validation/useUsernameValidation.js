@@ -9,12 +9,14 @@ import { useState, useEffect } from "react";
  * @returns {[bool]} -
  */
 const useUsernameValidation = ({username = "", requiredLength = 4, maxLength=40}) => {
-  const [validLength, setValidLength] = useState(false);
+  const [isValidLength, setIsValidLength] = useState(false);
   const [isValidUsername, setIsValidUsername] = useState(false);
   const [isInvalidUsername, setIsInvalidUsername] = useState(false);
 
   useEffect(() => {
-    setValidLength(username.length >= requiredLength && username.length <= maxLength);
+    let validLength = username.length >= requiredLength && username.length <= maxLength
+    setIsValidLength(validLength);
+    // eslint-disable-next-line
     let validName = /^[a-zA-Z0-9]*$/.test(username);
 
     if (username){
@@ -28,7 +30,7 @@ const useUsernameValidation = ({username = "", requiredLength = 4, maxLength=40}
     }else{
       setIsValidUsername(false);
     }
-  }, [username, requiredLength, maxLength]);
+  }, [username, requiredLength, maxLength, isValidLength]);
 
   return [isValidUsername, isInvalidUsername];
 };

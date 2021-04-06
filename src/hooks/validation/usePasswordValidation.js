@@ -48,7 +48,8 @@ const usePasswordValidation = ({firstPassword = "", secondPassword = "", require
         setIsInvalidPasswordMatch(true);
       }
     }
-  }, [firstPassword, secondPassword, requiredLength, maxLength]);
+  }, [firstPassword, secondPassword, requiredLength, maxLength, hasNumber, lowerCase, specialChar, upperCase,
+    validLength]);
 
   return [isValidPassword, isInvalidPassword, isValidPasswordMatch, isInvalidPasswordMatch];
 };
