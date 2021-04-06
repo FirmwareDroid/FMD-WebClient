@@ -13,8 +13,7 @@ function AboutPage() {
         <h2>Credits</h2>
         <h4>Icons</h4>
         <ul>
-          <li><small><b>Sun</b> icon made by <a href="https://www.flaticon.com/authors/smalllikeart">smalllikeart</a> from <a href="https://www.flaticon.com">www.flaticon.com</a></small></li>
-          <li><small><b>Moon</b> icon made by <a href="https://www.freepik.com/home">Freepik</a> from <a href="https://www.flaticon.com">www.flaticon.com</a></small></li>
+          <li><small>Icons from <a href="https://icons.getbootstrap.com/">icons.getbootstrap.com</a></small></li>
         </ul>
         <p>...and many more.</p>
         <h2>Licence and Terms of Service</h2>

@@ -85,12 +85,12 @@ function App() {
 
             </Switch>
           </Router>
+          <footer>
+            <small>
+              <a href="/about" className="active">Credits</a>
+            </small>
+          </footer>
         </Container>
-        <footer>
-          <small>
-            <a href="/about" className="active">Credits</a>
-          </small>
-        </footer>
       </>
     </ThemeProvider>
   );

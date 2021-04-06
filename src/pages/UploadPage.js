@@ -1,20 +1,25 @@
-import Dropzone from 'react-dropzone'
+
 import Container from "react-bootstrap/esm/Container";
+import Col from "react-bootstrap/esm/Col";
+import Row from "react-bootstrap/esm/Row";
+import FirmwareUploadDropzone from "../components/dropzone/UploadDropzones/FirmwareUploadDropzone";
+
+
+
+
 
 
 function UploadPage() {
   return (
     <Container>
-      <Dropzone onDrop={acceptedFiles => console.log(acceptedFiles)}>
-        {({getRootProps, getInputProps}) => (
-          <section>
-            <div {...getRootProps()}>
-              <input {...getInputProps()} />
-              <p>Drag 'n' drop some files here, or click to select files</p>
-            </div>
-          </section>
-        )}
-      </Dropzone>
+      <Row>
+        <Col md={{ span: 12, offset: 0 }}>
+          <h2>Upload Android Firmware</h2>
+          <p>Upload an Android firmware archive and let FirmwareDroid scan it's contents.</p>
+          <FirmwareUploadDropzone />
+          <p>By uploading a file you agree to the terms and conditions of this service.</p>
+        </Col>
+      </Row>
     </Container>
   );
 }
