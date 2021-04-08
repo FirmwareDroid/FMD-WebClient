@@ -1,7 +1,10 @@
-# Create react build
-FROM firmwaredroid-frontend-base as firmwaredroid-frontend
-COPY . /usr/src/app
-RUN yarn build
+FROM node:14.5 as firmwaredroid-frontend
 
-#Deploy build to server
-COPY ./build /usr/src/app/build
+# Build frontend
+RUN mkdir -p /usr/src/app/build
+COPY . /usr/src/app
+WORKDIR /usr/src/app
+RUN ls /usr/src/app
+
+RUN yarn
+RUN yarn build
