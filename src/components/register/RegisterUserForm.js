@@ -52,12 +52,13 @@ const SignUpForm = (props) => {
 
   const onSubmitForm = (event) => {
     event.preventDefault();
+    // TODO Store Route in config file.
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: username, email: email, password: firstPassword })
     };
-    fetch('http://firmwaredroid.cloudlab.zhaw.ch/api/v1/auth/signup/', requestOptions)
+    fetch('https://firmwaredroid.cloudlab.zhaw.ch/api/v1/auth/signup/', requestOptions)
       .then(response => response.json())
       .then((data) => {
         props.setSignupStatus(data);

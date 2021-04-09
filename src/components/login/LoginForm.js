@@ -1,26 +1,60 @@
 import Form from "react-bootstrap/esm/Form";
 import React from "react";
 import Button from "react-bootstrap/esm/Button";
-
+import { Redirect } from "react-router-dom";
 
 
 const LoginForm = ({}) => {
+  const [password, setPassword] = React.useState("");
+  const [saveSession, setSaveSession] = React.useState("");
+  const [email, setEmail] = React.useState("");
+
+  const onSubmitLoginForm = (event) => {
+    event.preventDefault();
+    console.log("Submit Login ", email, password, saveSession);
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password, saveSession: saveSession})
+    };
+    fetch('https://firmwaredroid.cloudlab.zhaw.ch/api/v1/auth/login/', requestOptions)
+      .then(response => response.json())
+      .then((data) => {
+        console.log(data);
+        return  <Redirect to="/admin/" />
+      })
+      .catch(error => {
+        console.error('There was an error!', error);
+      });
+  };
+
+  const onChangePassword = (event) => {
+    setPassword(event.target.value)
+  };
+
+  const onChangeEmail = (event) => {
+    setEmail(event.target.value);
+  };
+
+  const onChangeSaveSession = (event) => {
+    setSaveSession(event.target.checked);
+  };
 
 
   return (
-    <Form>
+    <Form onSubmit={onSubmitLoginForm}>
       <Form.Group controlId="formBasicEmail">
         <Form.Label>Email address</Form.Label>
-        <Form.Control type="email" placeholder="Enter email" />
+        <Form.Control type="email" placeholder="Enter email" onChange={onChangeEmail}/>
       </Form.Group>
 
       <Form.Group controlId="formBasicPassword">
         <Form.Label>Password</Form.Label>
-        <Form.Control type="password" placeholder="Password" />
+        <Form.Control type="password" placeholder="Password" onChange={onChangePassword}/>
       </Form.Group>
 
       <Form.Group controlId="formBasicCheckbox">
-        <Form.Check type="checkbox" label="Save session" />
+        <Form.Check type="checkbox" label="Save session" onChange={onChangeSaveSession}/>
       </Form.Group>
       <Button variant="outline-success" type="submit">
         Sign in
