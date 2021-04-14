@@ -25,6 +25,7 @@ function LogoutPage({setAuthenticated}) {
       if(response.ok){
         const theme = localStorage.getItem("theme");
         localStorage.clear();
+        localStorage.setItem("isAuthenticated", "false");
         localStorage.setItem("theme", theme);
         setAuthenticated(false);
         history.push("/");

@@ -29,6 +29,7 @@ const LoginForm = ({setAuthenticated}) => {
         history.push("/profile");
         localStorage.setItem("username", data.username);
         localStorage.setItem("email", email);
+        localStorage.setItem("isAuthenticated", "true");
         setAuthenticated(true)
       })
       .catch(error => {

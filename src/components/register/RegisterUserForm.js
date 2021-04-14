@@ -121,8 +121,8 @@ const SignUpForm = (props) => {
                         type="password"
                         placeholder="Password" />
           <Form.Text id="passwordHelpBlock" >
-            Your password must be 12-128 characters long, contain letters and numbers, and
-            must not contain spaces, special characters, or emoji.
+            Your password must be 12-128 characters long, contain letters, numbers, and special characters.
+            Your password must not contain spaces or emoji.
           </Form.Text>
           <Form.Control.Feedback type="valid">Looks good!</Form.Control.Feedback>
           <Form.Control.Feedback type="invalid">
