@@ -6,7 +6,8 @@ import React from "react";
 import Button from "react-bootstrap/esm/Button";
 
 
-const AdminPage = ({ theme }) => {
+const AdminPage = () => {
+  const theme = localStorage.getItem("theme");
   return (
     <Container>
       <h2>Administration</h2>

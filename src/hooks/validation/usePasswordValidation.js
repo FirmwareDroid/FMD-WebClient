@@ -13,7 +13,7 @@ import { useState, useEffect } from "react";
  *    isValidPasswordMatch: if the two password are the same.
  *    isInvalidPasswordMatch: if the two password are note the same.
  */
-const usePasswordValidation = ({firstPassword = "", secondPassword = "", requiredLength = 8, maxLength=128}) => {
+const usePasswordValidation = ({firstPassword = "", secondPassword = "", requiredLength = 12, maxLength=128}) => {
   const [validLength, setValidLength] = useState(false);
   const [hasNumber, setHasNumber] = useState(false);
   const [upperCase, setUpperCase] = useState(false);

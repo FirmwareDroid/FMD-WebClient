@@ -22,7 +22,23 @@ const styles = {
   }
 };
 
-const TopNavbar = ({ theme, toggleTheme }) => {
+const TopNavbar = ({ theme, toggleTheme, isAuthenticated }) => {
+  let navBarTopRight = <p>error</p>;
+  const isLoggedIn = isAuthenticated === true;
+
+  if(isLoggedIn){
+    navBarTopRight = <Nav className="pullRight">
+      <ThemeToggle toggleTheme={toggleTheme} theme={theme}/>
+      <Nav.Link href="/logout">Logout</Nav.Link>
+    </Nav>
+  }else{
+    navBarTopRight = <Nav className="pullRight">
+      <ThemeToggle toggleTheme={toggleTheme} theme={theme}/>
+      <Nav.Link href="/login">Sign in</Nav.Link>
+      <Nav.Link href="/register">Sign up</Nav.Link>
+    </Nav>
+  }
+
   return (
     <Container fluid bg={theme} style={styles.grid}>
       <Row style={styles.row}>
@@ -34,11 +50,7 @@ const TopNavbar = ({ theme, toggleTheme }) => {
                   <Nav.Link href="/upload">Upload</Nav.Link>
                   <Nav.Link href="/about">About</Nav.Link>
                 </Nav>
-                <Nav className="pullRight">
-                  <ThemeToggle toggleTheme={toggleTheme} theme={theme}/>
-                  <Nav.Link href="/login">Sign in</Nav.Link>
-                  <Nav.Link href="/register">Sign up</Nav.Link>
-                </Nav>
+              {navBarTopRight}
             </Navbar>
         </Col>
       </Row>

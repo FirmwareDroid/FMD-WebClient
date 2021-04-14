@@ -80,6 +80,7 @@ const SignUpForm = (props) => {
               isInvalid={isInvalidUsername}
               required
               onChange={onChangeUsername}
+              onPaste={onChangeUsername}
               type="text"
               placeholder="Enter username" />
             <Form.Text id="passwordHelpBlock" >
@@ -100,6 +101,7 @@ const SignUpForm = (props) => {
               isInvalid={isInvalidEmail}
               required
               onChange={onChangeEmail}
+              onPaste={onChangeEmail}
               type="email"
               placeholder="Enter email" />
             <Form.Control.Feedback type="invalid">
@@ -115,10 +117,11 @@ const SignUpForm = (props) => {
                         isValid={isValidPassword}
                         isInvalid={isInvalidPassword}
                         onChange={onChangeFirstPassword}
+                        onPaste={onChangeFirstPassword}
                         type="password"
                         placeholder="Password" />
           <Form.Text id="passwordHelpBlock" >
-            Your password must be 8-128 characters long, contain letters and numbers, and
+            Your password must be 12-128 characters long, contain letters and numbers, and
             must not contain spaces, special characters, or emoji.
           </Form.Text>
           <Form.Control.Feedback type="valid">Looks good!</Form.Control.Feedback>
@@ -133,6 +136,7 @@ const SignUpForm = (props) => {
                         isValid={isValidPasswordMatch}
                         isInvalid={isInvalidPasswordMatch}
                         onChange={onChangeSecondPassword}
+                        onPaste={onChangeSecondPassword}
                         type="password"
                         placeholder="Retype your password" />
           <Form.Control.Feedback type="valid">Looks good!</Form.Control.Feedback>

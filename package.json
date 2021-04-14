@@ -24,6 +24,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "postbuild": "cp -R ./build/* ../FirmwareDroid/firmware-droid-client/build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

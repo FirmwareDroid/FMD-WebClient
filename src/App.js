@@ -12,16 +12,18 @@ import SearchPage from "./pages/SearchPage";
 import ScanReportPage from "./pages/ScanReportPage";
 import LoginPage from "./pages/LoginPage";
 import TopNavbar from "./components/navigation/Navbar/TopNavbar";
-import Container from "react-bootstrap/esm/Container";
 import RegisterPage from "./pages/RegisterPage";
 import UploadPage from "./pages/UploadPage";
+import LogoutPage from "./pages/LogoutPage";
 // Themes
 import { ThemeProvider } from 'styled-components';
 import { lightTheme, darkTheme } from './assets/theming/theme';
 import { GlobalStyles } from './assets/theming/global';
 import { useDarkMode } from './hooks/theming/useDarkMode';
-// Cookies
-import CookiesProvider from "react-cookie/es6/CookiesProvider";
+import { useAuthentication } from './hooks/login/useAuthentication'
+
+import Container from "react-bootstrap/esm/Container";
+
 
 
 const styles = {
@@ -34,67 +36,73 @@ const styles = {
 
 function App() {
   const [theme, toggleTheme, componentMounted] = useDarkMode();
+  const [isAuthenticated, setAuthenticated] = useAuthentication();
   const themeMode = theme === 'light' ? lightTheme : darkTheme;
+
 
   if (!componentMounted) {
     return <div />
   }
 
   return (
-    <CookiesProvider>
-      <ThemeProvider theme={themeMode}>
-        <>
-          <GlobalStyles />
-          <TopNavbar theme={theme} toggleTheme={toggleTheme} />
-          <Container fluid style={styles.grid}>
-            <Router>
-              <Switch>
-                <Route path="/about">
-                  <AboutPage />
-                </Route>
+    <ThemeProvider theme={themeMode}>
+      <>
+        <GlobalStyles />
+        <TopNavbar theme={theme}
+                   toggleTheme={toggleTheme}
+                   isAuthenticated={isAuthenticated}/>
+        <Container fluid style={styles.grid}>
+          <Router>
+            <Switch>
+              <Route path="/about">
+                <AboutPage />
+              </Route>
 
-                <Route path="/login">
-                  <LoginPage />
-                </Route>
+              <Route path="/login">
+                <LoginPage setAuthenticated={setAuthenticated}/>
+              </Route>
 
-                <Route path="/admin">
-                  <AdminPage theme={theme}/>
-                </Route>
+              <Route path="/logout">
+                <LogoutPage setAuthenticated={setAuthenticated}/>
+              </Route>
 
-                <Route path="/profile">
-                  <ProfilePage />
-                </Route>
+              <Route path="/admin">
+                <AdminPage />
+              </Route>
 
-                <Route path="/search">
-                  <SearchPage />
-                </Route>
+              <Route path="/profile">
+                <ProfilePage />
+              </Route>
 
-                <Route path="/scanreport">
-                  <ScanReportPage />
-                </Route>
+              <Route path="/search">
+                <SearchPage />
+              </Route>
 
-                <Route path="/upload">
-                  <UploadPage />
-                </Route>
+              <Route path="/scanreport">
+                <ScanReportPage />
+              </Route>
 
-                <Route path="/register">
-                  <RegisterPage />
-                </Route>
+              <Route path="/upload">
+                <UploadPage />
+              </Route>
 
-                <Route path="/">
-                  <LandingPage theme={theme}/>
-                </Route>
-              </Switch>
-            </Router>
-            <footer>
-              <small>
-                <a href="/about" className="active">Credits</a>
-              </small>
-            </footer>
-          </Container>
-        </>
-      </ThemeProvider>
-    </CookiesProvider>
+              <Route path="/register">
+                <RegisterPage />
+              </Route>
+
+              <Route path="/">
+                <LandingPage />
+              </Route>
+            </Switch>
+          </Router>
+          <footer>
+            <small>
+              <a href="/about" className="active">Credits</a>
+            </small>
+          </footer>
+        </Container>
+      </>
+    </ThemeProvider>
   );
 }
 

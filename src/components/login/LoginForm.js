@@ -1,44 +1,53 @@
 import Form from "react-bootstrap/esm/Form";
 import React from "react";
 import Button from "react-bootstrap/esm/Button";
-import { Redirect } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 
-const LoginForm = ({}) => {
+const LoginForm = ({setAuthenticated}) => {
   const [password, setPassword] = React.useState("");
   const [saveSession, setSaveSession] = React.useState("");
   const [email, setEmail] = React.useState("");
+  const history = useHistory();
+  let loginError = false;
 
-  const onSubmitLoginForm = (event) => {
+
+  const onSubmitLoginForm = ((event) => {
     event.preventDefault();
-    console.log("Submit Login ", email, password, saveSession);
+
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email, password: password, saveSession: saveSession})
     };
+
     fetch('https://firmwaredroid.cloudlab.zhaw.ch/api/v1/auth/login/', requestOptions)
-      .then(response => response.json())
+      .then((response) => {
+        return response.json()
+      })
       .then((data) => {
-        console.log(data);
-        return  <Redirect to="/admin/" />
+        history.push("/profile");
+        localStorage.setItem("username", data.username);
+        localStorage.setItem("email", email);
+        setAuthenticated(true)
       })
       .catch(error => {
         console.error('There was an error!', error);
+        loginError = true;
       });
-  };
+  });
 
-  const onChangePassword = (event) => {
+  const onChangePassword = ((event) => {
     setPassword(event.target.value)
-  };
+  });
 
-  const onChangeEmail = (event) => {
+  const onChangeEmail = ((event) => {
     setEmail(event.target.value);
-  };
+  });
 
-  const onChangeSaveSession = (event) => {
+  const onChangeSaveSession = ((event) => {
     setSaveSession(event.target.checked);
-  };
+  });
 
 
   return (

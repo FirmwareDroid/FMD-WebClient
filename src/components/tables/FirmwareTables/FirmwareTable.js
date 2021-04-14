@@ -2,7 +2,9 @@ import Table from "react-bootstrap/esm/Table";
 import { string } from 'prop-types';
 
 
-const FirmwareTable = ({ theme }) => {
+const FirmwareTable = () => {
+
+  const theme = localStorage.getItem("theme");
   return (
     <Table striped bordered hover variant={theme}>
       <thead>

@@ -15,8 +15,10 @@ const styles = {
 
 
 
-const LandingPage = ({ theme }) => {
+const LandingPage = () => {
   let jumbotronStyle = {};
+
+  const theme = localStorage.getItem("theme");
   if (theme === 'light'){
     jumbotronStyle = {
       jumbotron: {
@@ -49,7 +51,7 @@ const LandingPage = ({ theme }) => {
 
       <Container style={styles.grid}>
         <h3>Latest Firmware Scans</h3>
-        <FirmwareTable theme={theme}/>
+        <FirmwareTable/>
       </Container>
     </>
   );
