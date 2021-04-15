@@ -21,8 +21,10 @@ import { lightTheme, darkTheme } from './assets/theming/theme';
 import { GlobalStyles } from './assets/theming/global';
 import { useDarkMode } from './hooks/theming/useDarkMode';
 import { useAuthentication } from './hooks/login/useAuthentication'
+import { useFetch } from './hooks/fetch/useFetch'
 
-import Container from "react-bootstrap/esm/Container";
+import React from "react";
+import {Container, Spinner} from "react-bootstrap";
 
 
 
@@ -38,10 +40,14 @@ function App() {
   const [theme, toggleTheme, componentMounted] = useDarkMode();
   const [isAuthenticated, setAuthenticated] = useAuthentication();
   const themeMode = theme === 'light' ? lightTheme : darkTheme;
+  const clientSettingUrl = "https://firmwaredroid.cloudlab.zhaw.ch/api/v1/settings/client_setting/";
+  const [isLoading, clientSettings] = useFetch(clientSettingUrl);
 
 
-  if (!componentMounted) {
-    return <div />
+  if (!componentMounted || isLoading) {
+    return <Spinner animation="grow" role="status">
+      <span className="sr-only">Loading...</span>
+    </Spinner>
   }
 
   return (
@@ -50,6 +56,7 @@ function App() {
         <GlobalStyles />
         <TopNavbar theme={theme}
                    toggleTheme={toggleTheme}
+                   clientSettings={clientSettings}
                    isAuthenticated={isAuthenticated}/>
         <Container fluid style={styles.grid}>
           <Router>
@@ -63,7 +70,7 @@ function App() {
               </Route>
 
               <Route path="/logout">
-                <LogoutPage setAuthenticated={setAuthenticated}/>
+                <LogoutPage isAuthenticated={isAuthenticated} setAuthenticated={setAuthenticated}/>
               </Route>
 
               <Route path="/admin">

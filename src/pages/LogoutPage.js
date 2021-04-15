@@ -5,9 +5,10 @@ import React from "react";
 import { useHistory } from "react-router-dom";
 import { useCookies } from 'react-cookie';
 
-function LogoutPage({setAuthenticated}) {
+function LogoutPage({isAuthenticated, setAuthenticated}) {
   const history = useHistory();
   const [csrfCookie, setCookie] = useCookies(['csrf_access_token']);
+  const isLoggedIn = isAuthenticated === true;
 
   const requestOptions = {
     method: 'DELETE',
@@ -17,21 +18,26 @@ function LogoutPage({setAuthenticated}) {
     credentials: "same-origin"
   };
 
-  fetch('https://firmwaredroid.cloudlab.zhaw.ch/api/v1/auth/logout/', requestOptions)
-    .catch(error => {
-      console.error(error);
-    })
-    .then((response) => {
-      if(response.ok){
+  if(isLoggedIn){
+    fetch('https://firmwaredroid.cloudlab.zhaw.ch/api/v1/auth/logout/', requestOptions)
+      .catch(error => {
+        console.error(error);
+      })
+      .then((response) => {
         const theme = localStorage.getItem("theme");
         localStorage.clear();
         localStorage.setItem("isAuthenticated", "false");
         localStorage.setItem("theme", theme);
         setAuthenticated(false);
-        history.push("/");
-      }
-      return response.json()
-    });
+        if(response.ok){
+          history.push("/");
+        }
+        return response.json()
+      });
+  }else{
+    history.push("/");
+  }
+
 
   return (
     <Container>

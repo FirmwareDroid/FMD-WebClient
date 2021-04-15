@@ -22,36 +22,31 @@ const styles = {
   }
 };
 
-const TopNavbar = ({ theme, toggleTheme, isAuthenticated }) => {
-  let navBarTopRight = <p>error</p>;
+const TopNavbar = ({ theme, toggleTheme, clientSettings, isAuthenticated }) => {
   const isLoggedIn = isAuthenticated === true;
-
-  if(isLoggedIn){
-    navBarTopRight = <Nav className="pullRight">
-      <ThemeToggle toggleTheme={toggleTheme} theme={theme}/>
-      <Nav.Link href="/logout">Logout</Nav.Link>
-    </Nav>
-  }else{
-    navBarTopRight = <Nav className="pullRight">
-      <ThemeToggle toggleTheme={toggleTheme} theme={theme}/>
-      <Nav.Link href="/login">Sign in</Nav.Link>
-      <Nav.Link href="/register">Sign up</Nav.Link>
-    </Nav>
-  }
+  console.log(clientSettings);
+  const isUploadActive = clientSettings.is_firmware_upload_active === true;
+  const isSignupActive = clientSettings.is_signup_active === true;
 
   return (
     <Container fluid bg={theme} style={styles.grid}>
       <Row style={styles.row}>
         <Col style={styles.col}>
-            <Navbar bg={theme} variant={theme} sticky="top">
-                <Navbar.Brand href="/">FirmwareDroid</Navbar.Brand>
-                <Nav className="mr-auto">
-                  <Nav.Link href="/search">Search</Nav.Link>
-                  <Nav.Link href="/upload">Upload</Nav.Link>
-                  <Nav.Link href="/about">About</Nav.Link>
-                </Nav>
-              {navBarTopRight}
-            </Navbar>
+          <Navbar bg={theme} variant={theme} sticky="top">
+            <Navbar.Brand href="/">FirmwareDroid</Navbar.Brand>
+            <Nav className="mr-auto">
+              <Nav.Link href="/search">Search</Nav.Link>
+              {isLoggedIn && isUploadActive && <Nav.Link href="/upload">Upload</Nav.Link>}
+              <Nav.Link href="/about">About</Nav.Link>
+            </Nav>
+            <Nav className="pullRight">
+              <ThemeToggle toggleTheme={toggleTheme} theme={theme}/>
+              {isLoggedIn && <Nav.Link href="/logout">Logout</Nav.Link>}
+              {isLoggedIn && <Nav.Link href="/profile">Profile</Nav.Link>}
+              {!isLoggedIn && <Nav.Link href="/login">Sign in</Nav.Link>}
+              {!isLoggedIn && isSignupActive && <Nav.Link href="/register">Sign up</Nav.Link>}
+            </Nav>
+          </Navbar>
         </Col>
       </Row>
     </Container>

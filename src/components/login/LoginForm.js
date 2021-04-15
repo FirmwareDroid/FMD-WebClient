@@ -2,19 +2,21 @@ import Form from "react-bootstrap/esm/Form";
 import React from "react";
 import Button from "react-bootstrap/esm/Button";
 import { useHistory } from "react-router-dom";
+import { useState } from "react";
+import {Alert} from "react-bootstrap";
+import {useFetch} from "../../hooks/fetch/useFetch";
 
 
 const LoginForm = ({setAuthenticated}) => {
+  const [showPasswordAlert, setShowPasswordAlert] = useState(false);
   const [password, setPassword] = React.useState("");
   const [saveSession, setSaveSession] = React.useState("");
   const [email, setEmail] = React.useState("");
   const history = useHistory();
-  let loginError = false;
 
 
   const onSubmitLoginForm = ((event) => {
     event.preventDefault();
-
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -23,7 +25,11 @@ const LoginForm = ({setAuthenticated}) => {
 
     fetch('https://firmwaredroid.cloudlab.zhaw.ch/api/v1/auth/login/', requestOptions)
       .then((response) => {
-        return response.json()
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error(response.json().toString());
+        }
       })
       .then((data) => {
         history.push("/profile");
@@ -33,8 +39,8 @@ const LoginForm = ({setAuthenticated}) => {
         setAuthenticated(true)
       })
       .catch(error => {
-        console.error('There was an error!', error);
-        loginError = true;
+        console.error(error);
+        setShowPasswordAlert(true);
       });
   });
 
@@ -52,24 +58,29 @@ const LoginForm = ({setAuthenticated}) => {
 
 
   return (
-    <Form onSubmit={onSubmitLoginForm}>
-      <Form.Group controlId="formBasicEmail">
-        <Form.Label>Email address</Form.Label>
-        <Form.Control type="email" placeholder="Enter email" onChange={onChangeEmail}/>
-      </Form.Group>
+    <>
+      {showPasswordAlert && <Alert variant="danger" onClose={() => setShowPasswordAlert(false)} dismissible>
+        Seems like a wrong password or e-mail!
+      </Alert>}
+      <Form onSubmit={onSubmitLoginForm}>
+        <Form.Group controlId="formBasicEmail">
+          <Form.Label>Email address</Form.Label>
+          <Form.Control type="email" placeholder="Enter email" onChange={onChangeEmail}/>
+        </Form.Group>
 
-      <Form.Group controlId="formBasicPassword">
-        <Form.Label>Password</Form.Label>
-        <Form.Control type="password" placeholder="Password" onChange={onChangePassword}/>
-      </Form.Group>
+        <Form.Group controlId="formBasicPassword">
+          <Form.Label>Password</Form.Label>
+          <Form.Control type="password" placeholder="Password" onChange={onChangePassword}/>
+        </Form.Group>
 
-      <Form.Group controlId="formBasicCheckbox">
-        <Form.Check type="checkbox" label="Save session" onChange={onChangeSaveSession}/>
-      </Form.Group>
-      <Button variant="outline-success" type="submit">
-        Sign in
-      </Button>
-    </Form>
+        {/*<Form.Group controlId="formBasicCheckbox">*/}
+          {/*<Form.Check type="checkbox" label="Save session" onChange={onChangeSaveSession}/>*/}
+        {/*</Form.Group>*/}
+        <Button variant="outline-success" type="submit">
+          Sign in
+        </Button>
+      </Form>
+    </>
   );
 };
 

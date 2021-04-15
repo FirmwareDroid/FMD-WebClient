@@ -3,8 +3,6 @@ import FirmwareTable from "../components/tables/FirmwareTables/FirmwareTable";
 import { string } from 'prop-types';
 import SearchEngine from "../components/search/SearchEngine";
 import Jumbotron from "react-bootstrap/esm/Jumbotron";
-import {darkTheme, lightTheme} from "../assets/theming/theme";
-import Card from "react-bootstrap/esm/Card";
 
 
 const styles = {
@@ -51,7 +49,7 @@ const LandingPage = () => {
 
       <Container style={styles.grid}>
         <h3>Latest Firmware Scans</h3>
-        <FirmwareTable/>
+        <FirmwareTable />
       </Container>
     </>
   );
