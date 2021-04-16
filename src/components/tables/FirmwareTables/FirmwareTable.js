@@ -1,7 +1,8 @@
 import {useFetch} from "../../../hooks/fetch/useFetch";
 import React from "react";
 import BootstrapTable from 'react-bootstrap-table-next';
-import {Container, Spinner, Table} from "react-bootstrap";
+import {Container, Spinner} from "react-bootstrap";
+import {dateFormatter, nullCheckFormatter} from "../../../utils/formatters/TableDataFormatter";
 
 
 const FirmwareTable = () => {
@@ -10,19 +11,13 @@ const FirmwareTable = () => {
     method: 'GET',
   };
   const [isLoading, tableData] = useFetch(clientSettingUrl, requestOptions);
-
   const theme = localStorage.getItem("theme");
   const tableClasses = theme === 'light' ? 'table-light' : 'table-dark';
-
-  const nullChecker = cell => (!cell ? "-" : cell);
-  const dateFormatter = (value) => {
-    return value ? new Date(value).toLocaleString() : value
-  };
 
   const columns = [{
     dataField: 'sha256',
     text: 'Firmware SHA256',
-    formatter: nullChecker
+    formatter: nullCheckFormatter
   }, {
     dataField: 'indexed_date',
     text: 'Indexed',
@@ -30,7 +25,7 @@ const FirmwareTable = () => {
   }, {
     dataField: 'hasFileIndex',
     text: 'Uploader',
-    formatter: nullChecker
+    formatter: nullCheckFormatter
   }];
 
   let containerContent = <></>;
