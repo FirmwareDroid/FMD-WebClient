@@ -2,6 +2,7 @@ import Container from "react-bootstrap/esm/Container";
 import React from "react";
 import Button from "react-bootstrap/esm/Button";
 import {Card, Col, Row} from "react-bootstrap";
+import FirmwareImportButton from "../../components/buttons/FirmwareImportButton";
 
 
 const ServerControl = () => {
@@ -25,14 +26,20 @@ const ServerControl = () => {
             >
               <Card.Body>
                 <Row>
-                  <Col sm={3}><Button variant={"outline-success"}>Run Firmware Import</Button></Col>
+                  <Col sm={3}>
+                    <FirmwareImportButton />
+                  </Col>
                   <Col ><p>You can manually start the process of importing Android firmware. Currently there are
-                    XX files waiting to be imported.</p></Col>
+                    XX files waiting to be imported.</p>
+                  </Col>
                 </Row>
                 <Row>
-                  <Col sm={3}><Button variant={"outline-danger"}>Stop Firmware Import</Button></Col>
-                  <Col ><p>You can manually start the process of importing Android firmware. Currently there are
-                    XX files waiting to be imported.</p></Col>
+                  <Col sm={3}>
+                    <Button variant={"outline-danger"}>Stop Firmware Import</Button>
+                  </Col>
+                  <Col >
+                    <p>Yet to be implemented</p>
+                  </Col>
                 </Row>
               </Card.Body>
             </Card>
