@@ -4,13 +4,12 @@ import Button from "react-bootstrap/esm/Button";
 import { useHistory } from "react-router-dom";
 import { useState } from "react";
 import {Alert} from "react-bootstrap";
-import {useFetch} from "../../hooks/fetch/useFetch";
 
 
 const LoginForm = ({setAuthenticated}) => {
   const [showPasswordAlert, setShowPasswordAlert] = useState(false);
   const [password, setPassword] = React.useState("");
-  const [saveSession, setSaveSession] = React.useState("");
+  const [saveSession,] = React.useState("");
   const [email, setEmail] = React.useState("");
   const history = useHistory();
 
@@ -52,9 +51,9 @@ const LoginForm = ({setAuthenticated}) => {
     setEmail(event.target.value);
   });
 
-  const onChangeSaveSession = ((event) => {
-    setSaveSession(event.target.checked);
-  });
+  // const onChangeSaveSession = ((event) => {
+  //   setSaveSession(event.target.checked);
+  // });
 
 
   return (

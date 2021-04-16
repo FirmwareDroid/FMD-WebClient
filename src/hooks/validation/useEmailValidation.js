@@ -9,14 +9,14 @@ import { useState, useEffect } from "react";
  * @returns {[bool]} -
  */
 const useEmailValidation = ({email = "", requiredLength = 5, maxLength=128}) => {
-  const [isValidLength, setIsValidLength] = useState(false);
+  const [, setIsValidLength] = useState(false);
   const [isValidEmail, setIsValidEmail] = useState(false);
   const [isInvalidEmail, setIsInvalidEmail] = useState(false);
 
   useEffect(() => {
     let validLength = email.length >= requiredLength && email.length <= maxLength;
     setIsValidLength(validLength);
-    let validPattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,})+$/.test(email);
+    let validPattern = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,})+$/.test(email);
 
     if(email){
       if (validLength && validPattern){

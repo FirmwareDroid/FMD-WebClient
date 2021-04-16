@@ -41,7 +41,8 @@ function App() {
   const [isAuthenticated, setAuthenticated] = useAuthentication();
   const themeMode = theme === 'light' ? lightTheme : darkTheme;
   const clientSettingUrl = "https://firmwaredroid.cloudlab.zhaw.ch/api/v1/settings/client_setting/";
-  const [isLoading, clientSettings] = useFetch(clientSettingUrl);
+  const requestOptions = {method: 'GET'};
+  const [isLoading, clientSettings] = useFetch(clientSettingUrl, requestOptions);
 
 
   if (!componentMounted || isLoading) {

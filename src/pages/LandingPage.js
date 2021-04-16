@@ -1,6 +1,5 @@
 import Container from "react-bootstrap/esm/Container";
 import FirmwareTable from "../components/tables/FirmwareTables/FirmwareTable";
-import { string } from 'prop-types';
 import SearchEngine from "../components/search/SearchEngine";
 import Jumbotron from "react-bootstrap/esm/Jumbotron";
 
@@ -10,8 +9,6 @@ const styles = {
     marginTop: 40
   }
 };
-
-
 
 const LandingPage = () => {
   let jumbotronStyle = {};
@@ -53,10 +50,6 @@ const LandingPage = () => {
       </Container>
     </>
   );
-};
-
-LandingPage.propTypes = {
-  theme: string.isRequired,
 };
 
 export default LandingPage;

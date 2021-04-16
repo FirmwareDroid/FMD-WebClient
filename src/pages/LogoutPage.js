@@ -7,7 +7,7 @@ import { useCookies } from 'react-cookie';
 
 function LogoutPage({isAuthenticated, setAuthenticated}) {
   const history = useHistory();
-  const [csrfCookie, setCookie] = useCookies(['csrf_access_token']);
+  const [csrfCookie,] = useCookies(['csrf_access_token']);
   const isLoggedIn = isAuthenticated === true;
 
   const requestOptions = {
