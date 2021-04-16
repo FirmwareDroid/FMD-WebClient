@@ -86,7 +86,7 @@ function App() {
                 <SearchPage />
               </Route>
 
-              <Route path="/scanreport">
+              <Route path="/report">
                 <ScanReportPage />
               </Route>
 

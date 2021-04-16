@@ -9,7 +9,13 @@ export const useFetch = (url, requestOptions) => {
   async function fetchData() {
     const response = await fetch(url, requestOptions);
     let json = await response.json();
-    setData(json);
+    let obj;
+    try{
+      obj = JSON.parse(json);
+      setData(obj);
+    }catch (e) {
+      setData(json);
+    }
     setLoading(false)
   }
 

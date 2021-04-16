@@ -24,7 +24,6 @@ const styles = {
 
 const TopNavbar = ({ theme, toggleTheme, clientSettings, isAuthenticated }) => {
   const isLoggedIn = isAuthenticated === true;
-  console.log(clientSettings);
   const isUploadActive = clientSettings.is_firmware_upload_active === true;
   const isSignupActive = clientSettings.is_signup_active === true;
 
