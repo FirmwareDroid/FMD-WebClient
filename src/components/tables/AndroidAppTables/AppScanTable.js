@@ -14,7 +14,7 @@ const AppScanTable = ({dataFieldName, dataFieldLabel, appPageNumber}) => {
   const [totalSize, setTotalSize] = useState(0);
   const [paginationSize, setPaginationSize] = useState(1);
   const [sizePerPage, setSizePerPage] = useState(20);
-  const pageSizes = [10, 20, 40, 50, 100];
+  const pageSizes = [20, 50, 100];
 
   const [csrfCookie,] = useCookies(['csrf_access_token']);
   const requestOptions = {
@@ -31,6 +31,7 @@ const AppScanTable = ({dataFieldName, dataFieldLabel, appPageNumber}) => {
 
   useEffect(() => {
     if(tableData && appData.length === 0){
+      console.log("useEffect")
       setSizePerPage(sizePerPage);
       setAppData(tableData.android_app_list.slice(0, sizePerPage));
       setSizePerPage(sizePerPage);
@@ -77,14 +78,18 @@ const AppScanTable = ({dataFieldName, dataFieldLabel, appPageNumber}) => {
       };
 
       const onTableChange = (event, page) => {
-        console.log('onTableChange', 'page:', page,'event', event);
       };
 
       const paginationOptions = {
         onSizePerPageChange: (sizePerPage, page) => {
           const paginationFactor = tableData.item_per_page / sizePerPage;
           setPaginationSize(tableData.total_pages_for_query * paginationFactor);
-          const currentIndex = (page - 1) * sizePerPage;
+          let currentIndex = (page - 1) * sizePerPage;
+          let pageFactor = Math.ceil((page * sizePerPage) / 100);
+          if(currentIndex >= 100){
+            currentIndex = currentIndex - (Math.max.apply(null, pageSizes) * (pageFactor - 1))
+          }
+          console.log("currentIndex", currentIndex, currentIndex + sizePerPage)
           setAppData(tableData.android_app_list.slice(currentIndex, currentIndex + sizePerPage));
           setSizePerPage(sizePerPage);
         },
@@ -101,8 +106,15 @@ const AppScanTable = ({dataFieldName, dataFieldLabel, appPageNumber}) => {
             })
             .then((data) => {
               setTableData(data);
-              const currentIndex = (page - 1) * sizePerPage;
-              setAppData(data.android_app_list.slice(currentIndex, currentIndex + sizePerPage));
+              let currentIndex = (page - 1) * sizePerPage;
+              if(currentIndex >= 100){
+                currentIndex = currentIndex - (Math.max.apply(null, pageSizes) * (pageFactor - 1))
+              }
+              const newAppData = data.android_app_list.slice(currentIndex, (currentIndex + sizePerPage))
+              if(newAppData.length !== 0){
+                setAppData(newAppData);
+              }
+
               setSizePerPage(page.sizePerPage);
               setCurrentPage(page);
               setTotalSize(data.total_number_of_items_that_match_query);
