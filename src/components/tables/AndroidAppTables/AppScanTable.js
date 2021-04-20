@@ -31,7 +31,6 @@ const AppScanTable = ({dataFieldName, dataFieldLabel, appPageNumber}) => {
 
   useEffect(() => {
     if(tableData && appData.length === 0){
-      console.log("useEffect")
       setSizePerPage(sizePerPage);
       setAppData(tableData.android_app_list.slice(0, sizePerPage));
       setSizePerPage(sizePerPage);
@@ -74,7 +73,19 @@ const AppScanTable = ({dataFieldName, dataFieldLabel, appPageNumber}) => {
     if(tableData && appData !== undefined && Array.isArray(appData)){
       const selectRow = {
         mode: 'checkbox',
-        clickToSelect: true
+        clickToSelect: true,
+        bgColor: '#00BFFF',
+        onSelect: (row, isSelect, rowIndex, e) => {
+          console.log(row.id);
+          console.log(isSelect);
+          console.log(rowIndex);
+          console.log(e);
+        },
+        onSelectAll: (isSelect, rows, e) => {
+          console.log(isSelect);
+          console.log(rows);
+          console.log(e);
+        }
       };
 
       const onTableChange = (event, page) => {
@@ -131,10 +142,11 @@ const AppScanTable = ({dataFieldName, dataFieldLabel, appPageNumber}) => {
       };
 
       containerContent = <BootstrapTable keyField='id'
-                                         remote
+                                         remote={{ pagination: true }}
                                          bordered
                                          striped
                                          hover
+                                         search
                                          custom={true}
                                          onTableChange={onTableChange}
                                          pagination={ paginationFactory(paginationOptions)}
@@ -145,6 +157,7 @@ const AppScanTable = ({dataFieldName, dataFieldLabel, appPageNumber}) => {
                                          columns={columns} />
     }
   }
+
 
   return (
     <Container>
