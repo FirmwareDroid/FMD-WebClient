@@ -11,6 +11,8 @@ const ServerLogs = () => {
           border={theme}
           bg={theme}>
       <p>Not implemented yet</p>
+      <p>Docker-Live Log?</p>
+      <p>Maybe some error logs?</p>
     </Card>
   );
 };

@@ -32,17 +32,20 @@ const AdminPage = () => {
             <AdminDashboard />
           </Card>
         </Tab>
+
         <Tab eventKey="serverActions"
              title="Server Controls"
              className={tabClassTheme}>
           <ServerControl />
         </Tab>
+
         <Tab eventKey="users"
              title="User Controls"
              className={tabClassTheme}
              >
           <UserManagement />
         </Tab>
+
         <Tab eventKey="settings"
              className={tabClassTheme}
              title="Server Settings">
@@ -52,11 +55,13 @@ const AdminPage = () => {
             <ServerSettings />
           </Card>
         </Tab>
+
         <Tab eventKey="logs"
              className={tabClassTheme}
              title="Server Logs">
           <ServerLogs />
         </Tab>
+
       </Tabs>
     </Container>
   );

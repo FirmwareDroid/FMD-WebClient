@@ -23,35 +23,5 @@ export const useFetch = (url, requestOptions) => {
     fetchData()
   }, []);
 
-  return [isLoading, data];
+  return [isLoading, data, setData];
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

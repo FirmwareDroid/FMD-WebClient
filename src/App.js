@@ -25,6 +25,7 @@ import { useFetch } from './hooks/fetch/useFetch'
 
 import React from "react";
 import {Container, Spinner} from "react-bootstrap";
+import ScannerPage from "./pages/ScannerPage";
 
 
 
@@ -55,11 +56,13 @@ function App() {
     <ThemeProvider theme={themeMode}>
       <>
         <GlobalStyles />
-        <TopNavbar theme={theme}
-                   toggleTheme={toggleTheme}
-                   clientSettings={clientSettings}
-                   isAuthenticated={isAuthenticated}/>
-        <Container fluid style={styles.grid}>
+        <header>
+          <TopNavbar theme={theme}
+                     toggleTheme={toggleTheme}
+                     clientSettings={clientSettings}
+                     isAuthenticated={isAuthenticated}/>
+        </header>
+        <Container fluid>
           <Router>
             <Switch>
               <Route path="/about">
@@ -74,8 +77,12 @@ function App() {
                 <LogoutPage isAuthenticated={isAuthenticated} setAuthenticated={setAuthenticated}/>
               </Route>
 
-              <Route path="/admin">
+              <Route exact path="/admin">
                 <AdminPage />
+              </Route>
+
+              <Route path="/admin/scanner/:scannerId">
+                <ScannerPage />
               </Route>
 
               <Route path="/profile">
@@ -103,12 +110,12 @@ function App() {
               </Route>
             </Switch>
           </Router>
-          <footer>
-            <small>
-              <a href="/about" className="active">Credits</a>
-            </small>
-          </footer>
         </Container>
+        <footer>
+          <small>
+            <a href="/about" className="active">Credits</a>
+          </small>
+        </footer>
       </>
     </ThemeProvider>
   );
