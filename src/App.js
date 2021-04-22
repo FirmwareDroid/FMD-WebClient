@@ -47,9 +47,12 @@ function App() {
 
 
   if (!componentMounted || isLoading) {
-    return <Spinner animation="grow" role="status">
-      <span className="sr-only">Loading...</span>
-    </Spinner>
+    return <Container className={"text-center"}>
+      <Spinner variant="success" animation="grow" role="status" >
+        <span className="sr-only">Loading...</span>
+      </Spinner>
+      <span>Wait for server to connect...</span>
+    </Container>
   }
 
   return (

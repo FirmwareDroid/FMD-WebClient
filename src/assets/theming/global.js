@@ -84,4 +84,39 @@ export const GlobalStyles = createGlobalStyle`
     background-color: #1C2331;
     margin-top: 20px;
   }
+  
+
+  .pagination > li > a
+  {
+    background-color: white;
+    color: #5A4181;
+  }
+  
+  .pagination > li > a:focus,
+  .pagination > li > a:hover,
+  .pagination > li > span:focus,
+  .pagination > li > span:hover
+  {
+    color: #5a5a5a;
+    background-color: #eee;
+    border-color: #ddd;
+  }
+  
+  .pagination > .active > a
+  {
+    color: white;
+    background-color: #5A4181 !Important;
+    border: solid 1px #5A4181 !Important;
+  }
+  
+  .pagination > .active > a:hover
+  {
+    background-color: #5A4181 !Important;
+    border: solid 1px #5A4181;
+  }
+  
+  .dropdown > ul{
+    background-color: #5a5a5a !Important;
+  }
+  
 `;

@@ -8,7 +8,9 @@ import paginationFactory from 'react-bootstrap-table2-paginator';
 import { useState, useEffect } from "react";
 
 
-const AppScanTable = ({dataFieldName, dataFieldLabel, appPageNumber}) => {
+const AppScanTable = ({dataFieldName, dataFieldLabel, appPageNumber, rowSelection}) => {
+  // TODO remove hard coded URL
+  const [selectedRows, setselectedRows] = rowSelection;
   const requestUrl = "https://firmwaredroid.cloudlab.zhaw.ch/api/v1/android_app/get_page/" + appPageNumber;
   const [currentPage, setCurrentPage] = useState(1);
   const [totalSize, setTotalSize] = useState(0);
@@ -27,7 +29,7 @@ const AppScanTable = ({dataFieldName, dataFieldLabel, appPageNumber}) => {
   const [isLoading, tableData, setTableData] = useFetch(requestUrl, requestOptions);
   const [appData, setAppData] = useState([]);
   const theme = localStorage.getItem("theme");
-  const tableClasses = theme === 'light' ? 'table-light' : 'table-dark';
+  const tableClasses = theme === 'light' ? 'table-light' : 'table-dark dark-dropdown-menu';
 
   useEffect(() => {
     if(tableData && appData.length === 0){
@@ -76,15 +78,28 @@ const AppScanTable = ({dataFieldName, dataFieldLabel, appPageNumber}) => {
         clickToSelect: true,
         bgColor: '#00BFFF',
         onSelect: (row, isSelect, rowIndex, e) => {
-          console.log(row.id);
-          console.log(isSelect);
-          console.log(rowIndex);
-          console.log(e);
+          if(isSelect && !selectedRows.includes(row.id)){
+            let newSelection = [...selectedRows];
+            newSelection.push(row.id);
+            setselectedRows(newSelection);
+          }else{
+            let newSelection = [...selectedRows];
+            newSelection = newSelection.filter(e => e !== row.id);
+            setselectedRows(newSelection);
+          }
         },
         onSelectAll: (isSelect, rows, e) => {
-          console.log(isSelect);
-          console.log(rows);
-          console.log(e);
+          let newSelection = [...selectedRows];
+          for(let i=0; i < rows.length; i++){
+            let row = rows[i];
+            if(isSelect && !selectedRows.includes(row.id)){
+              newSelection.push(row.id);
+              setselectedRows(newSelection);
+            }else{
+              newSelection = newSelection.filter(e => e !== row.id);
+              setselectedRows(newSelection);
+            }
+          }
         }
       };
 
@@ -146,7 +161,6 @@ const AppScanTable = ({dataFieldName, dataFieldLabel, appPageNumber}) => {
                                          bordered
                                          striped
                                          hover
-                                         search
                                          custom={true}
                                          onTableChange={onTableChange}
                                          pagination={ paginationFactory(paginationOptions)}
@@ -160,7 +174,7 @@ const AppScanTable = ({dataFieldName, dataFieldLabel, appPageNumber}) => {
 
 
   return (
-    <Container>
+    <Container fluid>
       {containerContent}
     </Container>
   );
