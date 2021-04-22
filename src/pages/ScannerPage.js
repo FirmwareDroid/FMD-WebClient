@@ -65,7 +65,7 @@ const ScannerPage = () => {
       case 4:
         scannerName = "VirusTotal";
         isScannerActive = clientSettings.active_scanners_dict[scannerName];
-        dataFieldName = "androguard_report_reference";
+        dataFieldName = "virustotal_report_reference";
         dataFieldLabel = "VirusTotal-ID";
         scanUrl += scannerName + "/";
         break;
@@ -156,44 +156,46 @@ const ScannerPage = () => {
       </Container>}
 
       { showErrorAlert &&
-      <Alert variant={'danger'} onClose={() => setShowErrorAlert(false)} dismissible>
-        Error! Sorry, something went wrong...
-      </Alert>
+        <Alert variant={'danger'} onClose={() => setShowErrorAlert(false)} dismissible>
+          Error! Sorry, something went wrong...
+        </Alert>
       }
 
       { showSuccessAlert &&
-      <Alert variant={"success"} onClose={() => setShowSuccessAlert(false)} dismissible>
-        Job was successfully set!
-      </Alert>
+        <Alert variant={"success"} onClose={() => setShowSuccessAlert(false)} dismissible>
+          Job was successfully set!
+        </Alert>
       }
 
       {isLoading &&
-      <Container>
-        <Spinner variant="success" animation="grow" role="status" >
-          <span className="sr-only">Loading...</span>
-        </Spinner>
-      </Container>}
+        <Container>
+          <Spinner variant="success" animation="grow" role="status" >
+            <span className="sr-only">Loading...</span>
+          </Spinner>
+        </Container>
+      }
 
       {!showError && !isLoading &&
-      <Container fluid>
-        <h2>{scannerName}</h2>
-        <Container fluid style={{padding: 10}}>
-          <Button variant={"outline-success"}
-                  style={{margin: 5}}
-                  disabled={!isScannerActive}
-                  onClick={onClickScanAll}>
-            Scan all
-          </Button>
-          <Button variant={"outline-success"}
-                  style={{margin: 5}}
-                  disabled={!isScannerActive}
-                  onClick={onClickScanSelection}>
-            Scan selection
-          </Button>
+        <Container fluid>
+          <h2>{scannerName}</h2>
+          <Container fluid style={{padding: 10}}>
+            <Button variant={"outline-success"}
+                    style={{margin: 5}}
+                    disabled={!isScannerActive}
+                    onClick={onClickScanAll}>
+              Scan all
+            </Button>
+            <Button variant={"outline-success"}
+                    style={{margin: 5}}
+                    disabled={!isScannerActive}
+                    onClick={onClickScanSelection}>
+              Scan selection
+            </Button>
+          </Container>
+          <AppScanTable dataFieldName={dataFieldName} dataFieldLabel={dataFieldLabel} appPageNumber={1}
+                        rowSelection={[selectedRows, setselectedRows]}/>
         </Container>
-        <AppScanTable dataFieldName={dataFieldName} dataFieldLabel={dataFieldLabel} appPageNumber={1}
-                      rowSelection={[selectedRows, setselectedRows]}/>
-      </Container>}
+      }
     </Container>
   );
 };

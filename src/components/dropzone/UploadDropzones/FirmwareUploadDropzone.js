@@ -18,12 +18,36 @@ const StyledContainer = styled(Container)`
 `;
 
 function FirmwareUploadDropzone() {
+  const onUploadFile = () => {
+    let request = new XMLHttpRequest();
+    request.open('POST', '/upload');
+
+    // upload progress event
+    request.upload.addEventListener('progress', function(e) {
+      // upload progress as percentage
+      let percent_completed = (e.loaded / e.total)*100;
+      console.log(percent_completed);
+    });
+
+    // request finished event
+    request.addEventListener('load', function(e) {
+      // HTTP status message (200, 404 etc)
+      console.log(request.status);
+      console.log(request.response);
+    });
+    request.send(data);
+  };
+
+
+
+
   return (
     <Dropzone  onDrop={acceptedFiles => console.log(acceptedFiles)}>
       {({getRootProps, getInputProps}) => (
         <StyledContainer onDragStart={console.log("Drag Start")}
                          onDragEnd={console.log("Drag End")}
-                         fluid {...getRootProps()}>
+                         fluid
+                         {...getRootProps()}>
           <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="currentColor"
                className="bi bi-file-arrow-up" viewBox="0 0 16 16">
             <path

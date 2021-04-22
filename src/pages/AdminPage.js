@@ -18,7 +18,6 @@ const AdminPage = () => {
     <Container fluid>
       <h2>Administration</h2>
       <Tabs className={tabsClassTheme}
-            fluid
             defaultActiveKey="serverActions"
             variant="pills"
             fill>

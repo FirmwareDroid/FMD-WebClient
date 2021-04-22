@@ -7,7 +7,7 @@ import FirmwareControls from "./scanner-controls/FirmwareControls";
 const ServerControl = () => {
   return (
     <Row>
-      <Col >
+      <Col>
         <Container fluid>
           <FirmwareControls />
           <ScannerControls />

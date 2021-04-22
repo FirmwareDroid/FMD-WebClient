@@ -59,7 +59,7 @@ function App() {
     <ThemeProvider theme={themeMode}>
       <>
         <GlobalStyles />
-        <header>
+        <header style={{"marginBottom": 30}}>
           <TopNavbar theme={theme}
                      toggleTheme={toggleTheme}
                      clientSettings={clientSettings}

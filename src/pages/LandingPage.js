@@ -30,7 +30,7 @@ const LandingPage = () => {
 
   return (
     <>
-      <Container fluid="md">
+      <Container fluid>
         <Jumbotron style={jumbotronStyle.jumbotron}>
           <h1>Welcome to FirmwareDroid!</h1>
           <p>
