@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:experimental
 FROM node:14.5 as firmwaredroid-frontend
 
 # Build frontend
