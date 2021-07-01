@@ -2,7 +2,7 @@ import Container from "react-bootstrap/esm/Container";
 import React from "react";
 import AppScanTable from "../components/tables/AndroidAppTables/AppScanTable";
 import {useParams} from "react-router-dom";
-import {Alert, Button, Col, Row, Spinner} from "react-bootstrap";
+import {Alert, Button, Spinner} from "react-bootstrap";
 import {useFetch} from "../hooks/fetch/useFetch";
 import {useCookies} from 'react-cookie';
 import {useState} from "react";
@@ -95,6 +95,13 @@ const ScannerPage = () => {
         isScannerActive = clientSettings.active_scanners_dict[scannerName];
         dataFieldName = "apkleaks_report_reference";
         dataFieldLabel = "APKLeaks-ID";
+        scanUrl += scannerName + "/";
+        break;
+      case 9:
+        scannerName = "LibRadar";
+        isScannerActive = clientSettings.active_scanners_dict[scannerName];
+        dataFieldName = "libradar_report_reference";
+        dataFieldLabel = "LibRadar-ID";
         scanUrl += scannerName + "/";
         break;
       default:
