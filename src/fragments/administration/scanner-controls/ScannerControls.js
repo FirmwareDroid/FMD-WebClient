@@ -59,6 +59,11 @@ const ScannerControls = () => {
                      cardRedirectLink={"/admin/scanner/8"}
                      cardInfoText={"APKLeaks is a tool to scan for URIs, endpoints and secrets."}
                      cardFooterLink={"https://github.com/dwisiswant0/apkleaks"}/>
+
+        <ScannerCard cardTitle={"LibRadar"}
+                     cardRedirectLink={"/admin/scanner/9"}
+                     cardInfoText={"LibRadar is a tool for detecting Android libraries."}
+                     cardFooterLink={"https://github.com/pkumza/LibRadar"}/>
       </CardGroup>
     </Container>
   );

@@ -6,7 +6,7 @@ with React.
 
 # Contribution
 
-Feel free to contribute an open pull requests.
+Feel free to contribute and open pull requests.
 
 
 
