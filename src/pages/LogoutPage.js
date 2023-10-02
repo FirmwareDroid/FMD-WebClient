@@ -2,11 +2,11 @@ import Container from "react-bootstrap/esm/Container";
 import Col from "react-bootstrap/esm/Col";
 import Row from "react-bootstrap/esm/Row";
 import React from "react";
-import { useHistory } from "react-router-dom";
+//import { useHistory } from "react-router-dom";
 import { useCookies } from 'react-cookie';
 
 function LogoutPage({isAuthenticated, setAuthenticated}) {
-  const history = useHistory();
+  //const history = useHistory();
   const [csrfCookie,] = useCookies(['csrf_access_token']);
   const isLoggedIn = isAuthenticated === true;
 
@@ -30,12 +30,12 @@ function LogoutPage({isAuthenticated, setAuthenticated}) {
         localStorage.setItem("theme", theme);
         setAuthenticated(false);
         if(response.ok){
-          history.push("/");
+          //history.push("/");
         }
         return response.json()
       });
   }else{
-    history.push("/");
+    //history.push("/");
   }
 
 

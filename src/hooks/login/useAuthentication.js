@@ -1,15 +1,23 @@
 import { useEffect, useState } from 'react';
+import Cookies from 'js-cookie'
+import {useQuery} from "@apollo/client";
+import {CURRENT_USER} from "../../GqlQueries";
 
-export const useAuthentication = (isLoggedIn=false) => {
+export const useAuthentication = () => {
   const [isAuthenticated, setAuthenticated] = useState(false);
-
-  useEffect(() => {
-    if(localStorage.getItem("isAuthenticated") === "true"){
+  useQuery(CURRENT_USER, {
+    onCompleted: (data) => {
       setAuthenticated(true)
-    }else{
-      setAuthenticated(isLoggedIn)
-    }
-  }, [isLoggedIn]);
+    },
+  })
+
+  // useEffect(() => {
+  //   if(data){
+  //     setAuthenticated(true)
+  //   }else{
+  //     setAuthenticated(false)
+  //   }
+  // }, []);
 
   return [isAuthenticated, setAuthenticated]
 };

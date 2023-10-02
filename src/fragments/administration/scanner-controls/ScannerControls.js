@@ -4,6 +4,7 @@ import ScannerCard from "../../../components/cards/scanner-controls/ScannerCard"
 
 
 const ScannerControls = () => {
+  // TODO move hard-coded strings
   return (
     <Container fluid style={{"marginTop": 20}}>
       <h4>App Scanners</h4>

@@ -14,7 +14,8 @@ const FirmwareControls = () => {
   const [csrfCookie,] = useCookies(['csrf_access_token']);
 
   const onClickFirmwareImport = (event) => {
-    const requestUrl = "https://firmwaredroid.cloudlab.zhaw.ch/api/v1/firmware/start_importer/";
+    // TODO Add option to set true / false
+    const requestUrl = "https://firmwaredroid.cloudlab.zhaw.ch/api/v1/firmware/start_importer/false";
     const requestOptions = {
       method: 'POST',
       headers: {

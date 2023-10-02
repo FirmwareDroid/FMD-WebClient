@@ -10,12 +10,14 @@ export const GlobalStyles = createGlobalStyle`
   body {
     min-height: 100vh;
     height: 100%;
+    width: 100%;
     background: ${({theme}) => theme.body};
     color: ${({theme}) => theme.text};
     font-family: BlinkMacSystemFont, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     transition: all 0.25s linear;
     overflow: auto;
     margin-bottom: 2%;
+    padding: 0;
   }
 
   footer {
@@ -80,9 +82,9 @@ export const GlobalStyles = createGlobalStyle`
   }
   
   .dark-card {
-    box-shadow: 0 4px 8px 0 rgba(0, 255, 0, 0.2), 0 3px 10px 0 rgba(0, 255, 0, 0.19);
+    //box-shadow: 0 4px 8px 0 rgba(0, 255, 0, 0.2), 0 3px 10px 0 rgba(0, 255, 0, 0.19);
     background-color: #1C2331;
-    margin-top: 20px;
+    margin-top: 5%;
   }
   
 
@@ -118,5 +120,8 @@ export const GlobalStyles = createGlobalStyle`
   .dropdown > ul{
     background-color: #5a5a5a !Important;
   }
-  
+
+  .navigation{
+    padding-left: 2%;
+  }
 `;

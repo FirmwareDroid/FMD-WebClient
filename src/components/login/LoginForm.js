@@ -1,7 +1,7 @@
 import Form from "react-bootstrap/esm/Form";
 import React from "react";
 import Button from "react-bootstrap/esm/Button";
-import { useHistory } from "react-router-dom";
+//import { useHistory } from "react-router-dom";
 import { useState } from "react";
 import {Alert} from "react-bootstrap";
 
@@ -11,7 +11,7 @@ const LoginForm = ({setAuthenticated}) => {
   const [password, setPassword] = React.useState("");
   const [saveSession,] = React.useState("");
   const [email, setEmail] = React.useState("");
-  const history = useHistory();
+  //const history = useHistory();
 
 
   const onSubmitLoginForm = ((event) => {
@@ -31,7 +31,7 @@ const LoginForm = ({setAuthenticated}) => {
         }
       })
       .then((data) => {
-        history.push("/profile");
+        //history.push("/profile");
         localStorage.setItem("username", data.username);
         localStorage.setItem("email", email);
         localStorage.setItem("isAuthenticated", "true");

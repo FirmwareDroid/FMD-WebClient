@@ -1,10 +1,7 @@
 import React from 'react';
 import Nav from "react-bootstrap/esm/Nav";
 import Navbar from "react-bootstrap/esm/Navbar";
-import ThemeToggle from "../../toggle/ThemeToggle/ThemeToggle";
-import Container from "react-bootstrap/esm/Container";
-import Row from "react-bootstrap/esm/Row";
-import Col from "react-bootstrap/esm/Col";
+import {useAuthentication} from "../../../hooks/login/useAuthentication";
 
 
 const styles = {
@@ -22,33 +19,27 @@ const styles = {
   }
 };
 
-const TopNavbar = ({ theme, toggleTheme, clientSettings, isAuthenticated }) => {
-  const isLoggedIn = isAuthenticated === true;
-  const isUploadActive = clientSettings.is_firmware_upload_active === true;
-  const isSignupActive = clientSettings.is_signup_active === true;
+const TopNavbar = ({ theme }) => {
+  const [isAuthenticated, setAuthenticated] = useAuthentication();
 
   return (
-    <Container fluid bg={theme} style={styles.grid}>
-      <Row style={styles.row}>
-        <Col style={styles.col}>
-          <Navbar bg={theme} variant={theme} sticky="top">
-            <Navbar.Brand href="/">FirmwareDroid</Navbar.Brand>
-            <Nav className="mr-auto">
-              <Nav.Link href="/search">Search</Nav.Link>
-              {isLoggedIn && isUploadActive && <Nav.Link href="/upload">Upload</Nav.Link>}
-              <Nav.Link href="/about">About</Nav.Link>
-            </Nav>
-            <Nav className="pullRight">
-              <ThemeToggle toggleTheme={toggleTheme} theme={theme}/>
-              {isLoggedIn && <Nav.Link href="/logout">Logout</Nav.Link>}
-              {isLoggedIn && <Nav.Link href="/profile">Profile</Nav.Link>}
-              {!isLoggedIn && <Nav.Link href="/login">Sign in</Nav.Link>}
-              {!isLoggedIn && isSignupActive && <Nav.Link href="/register">Sign up</Nav.Link>}
-            </Nav>
-          </Navbar>
-        </Col>
-      </Row>
-    </Container>
+      <Navbar className="me-auto navigation" bg={theme} variant={theme} sticky="top">
+        <Navbar.Brand href="/">FirmwareDroid</Navbar.Brand>
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Nav as="ul" bg={theme} variant={theme} sticky="top">
+          <Nav.Item as="li">
+            <Nav.Link className={window.location.pathname === '/about' ? 'active' : ''} href="/about">About</Nav.Link>
+          </Nav.Item>
+          <Nav.Item as="li">{isAuthenticated === false &&
+                <Nav.Link className={window.location.pathname === '/login' ? 'active' : ''} href="/login">Login
+                </Nav.Link>}
+          </Nav.Item>
+          <Nav.Item as="li">{isAuthenticated === true &&
+              <Nav.Link className={window.location.pathname === '/logout' ? 'active' : ''} href="/logout">Logout
+              </Nav.Link>}
+          </Nav.Item>
+        </Nav>
+      </Navbar>
   );
 };
 

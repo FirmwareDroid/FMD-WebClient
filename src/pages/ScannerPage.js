@@ -30,6 +30,7 @@ const ScannerPage = () => {
   let scannerName = undefined;
   let dataFieldName = undefined;
   let dataFieldLabel = undefined;
+  let scanParams = "";
   let scanUrl = "https://firmwaredroid.cloudlab.zhaw.ch/api/v1/";
   // TODO Get rid of this ugly switch statement - make things more dynamic and scalable
   if(!isLoading){
@@ -74,6 +75,7 @@ const ScannerPage = () => {
         isScannerActive = clientSettings.active_scanners_dict[scannerName];
         dataFieldName = "quark_engine_report_reference";
         dataFieldLabel = "QuarkEngine-ID";
+        scanParams = "/true";
         scanUrl += "quark_engine" + "/";
         break;
       case 6:
@@ -110,7 +112,7 @@ const ScannerPage = () => {
   }
 
   const onClickScanAll = (event) => {
-    scanUrl = scanUrl.toLocaleLowerCase() + "1";
+    scanUrl = scanUrl.toLocaleLowerCase() + "1" + scanParams;
     requestOptions.method = "POST";
     requestOptions.body = {
       "object_id_list": []
@@ -131,7 +133,7 @@ const ScannerPage = () => {
   };
 
   const onClickScanSelection = (event) => {
-    let fetchUrl = scanUrl.toLocaleLowerCase() + "0";
+    let fetchUrl = scanUrl.toLocaleLowerCase() + "9999" + scanParams;
     const options = {
       method: 'POST',
       headers: {

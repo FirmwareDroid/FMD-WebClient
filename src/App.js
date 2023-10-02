@@ -1,127 +1,109 @@
-// Routing
+import React from "react";
 import {
-  BrowserRouter as Router,
-  Switch,
+  BrowserRouter,
+  Routes,
   Route,
 } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import AboutPage from "./pages/AboutPage";
 import AdminPage from "./pages/AdminPage";
-import ProfilePage from "./pages/ProfilePage";
-import SearchPage from "./pages/SearchPage";
-import ScanReportPage from "./pages/ScanReportPage";
 import LoginPage from "./pages/LoginPage";
 import TopNavbar from "./components/navigation/Navbar/TopNavbar";
-import RegisterPage from "./pages/RegisterPage";
-import UploadPage from "./pages/UploadPage";
 import LogoutPage from "./pages/LogoutPage";
-// Themes
 import { ThemeProvider } from 'styled-components';
 import { lightTheme, darkTheme } from './assets/theming/theme';
 import { GlobalStyles } from './assets/theming/global';
 import { useDarkMode } from './hooks/theming/useDarkMode';
 import { useAuthentication } from './hooks/login/useAuthentication'
-import { useFetch } from './hooks/fetch/useFetch'
-
-import React from "react";
 import {Container, Spinner} from "react-bootstrap";
-import ScannerPage from "./pages/ScannerPage";
+import { useQuery } from "@apollo/client";
+import {HEALTH_QUERY} from "./GqlQueries"
 
-
-
-const styles = {
-  grid: {
-    paddingTop: 40,
-    height: '100vh'
-  }
-};
 
 
 function App() {
   const [theme, toggleTheme, componentMounted] = useDarkMode();
-  const [isAuthenticated, setAuthenticated] = useAuthentication();
   const themeMode = theme === 'light' ? lightTheme : darkTheme;
-  const clientSettingUrl = "https://firmwaredroid.cloudlab.zhaw.ch/api/v1/settings/client_setting/";
-  const requestOptions = {method: 'GET'};
-  const [isLoading, clientSettings] = useFetch(clientSettingUrl, requestOptions);
+  const [isAuthenticated, setAuthenticated] = useAuthentication();
+  const { loading, error, data, } = useQuery(HEALTH_QUERY);
 
-
-  if (!componentMounted || isLoading) {
-    return <Container className={"text-center"}>
+  let renderResponse;
+  if (!componentMounted || loading) {
+    renderResponse = <Container className={"text-center"}>
       <Spinner variant="success" animation="grow" role="status" >
         <span className="sr-only">Loading...</span>
       </Spinner>
-      <span>Wait for server to connect...</span>
+      <span>Loading...</span>
     </Container>
+  }else if(error){
+    return `Error! ${error.message}`;
+  }
+  else{
+     renderResponse = (
+        <Container fluid className="p-0">
+          <ThemeProvider theme={themeMode}>
+            <GlobalStyles />
+              <header>
+                <TopNavbar theme={theme}/>
+              </header>
+            <Container>
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/">
+                    {/*<LandingPage />*/}
+                  </Route>
+
+                  <Route path="/login" element={isAuthenticated === true && <LoginPage setAuthenticated={setAuthenticated}/>}>
+                  </Route>
+
+                  <Route path="/about" element={<AboutPage />}>
+                  </Route>
+
+                  {/*<Route element=/!*<LogoutPage isAuthenticated={isAuthenticated} setAuthenticated={setAuthenticated}/>*!/*/}
+                  {/*       path="/logout">*/}
+                  {/*</Route>*/}
+
+                  <Route exact path="/admin">
+                    {/*<AdminPage />*/}
+                  </Route>
+
+                </Routes>
+              </BrowserRouter>
+            </Container>
+          </ThemeProvider>
+        </Container>
+    );
   }
 
-  return (
-    <ThemeProvider theme={themeMode}>
-      <>
-        <GlobalStyles />
-        <header style={{"marginBottom": 30}}>
-          <TopNavbar theme={theme}
-                     toggleTheme={toggleTheme}
-                     clientSettings={clientSettings}
-                     isAuthenticated={isAuthenticated}/>
-        </header>
-        <Container fluid>
-          <Router>
-            <Switch>
-              <Route path="/about">
-                <AboutPage />
-              </Route>
+  // <ThemeProvider theme={themeMode}>
+  //   <h1>Loaded success</h1>
+  //   <>
+  //     <GlobalStyles />
+  //     <header style={{"marginBottom": 30}}>
+  //       <TopNavbar theme={theme}
+  //                  toggleTheme={toggleTheme}
+  //                  clientSettings={clientSettings}
+  //                  isAuthenticated={isAuthenticated}/>
+  //     </header>
+  //     <Container fluid>
 
-              <Route path="/login">
-                <LoginPage setAuthenticated={setAuthenticated}/>
-              </Route>
+  //     </Container>
+  //     <footer>
+  //       <small>
+  //         <a href="/about" className="active">Credits</a>
+  //       </small>
+  //     </footer>
+  //   </>
+  // </ThemeProvider>
 
-              <Route path="/logout">
-                <LogoutPage isAuthenticated={isAuthenticated} setAuthenticated={setAuthenticated}/>
-              </Route>
-
-              <Route exact path="/admin">
-                <AdminPage />
-              </Route>
-
-              <Route path="/admin/scanner/:scannerId">
-                <ScannerPage />
-              </Route>
-
-              <Route path="/profile">
-                <ProfilePage />
-              </Route>
-
-              <Route path="/search">
-                <SearchPage />
-              </Route>
-
-              <Route path="/report">
-                <ScanReportPage />
-              </Route>
-
-              <Route path="/upload">
-                <UploadPage />
-              </Route>
-
-              <Route path="/register">
-                <RegisterPage />
-              </Route>
-
-              <Route path="/">
-                <LandingPage />
-              </Route>
-            </Switch>
-          </Router>
-        </Container>
-        <footer>
-          <small>
-            <a href="/about" className="active">Credits</a>
-          </small>
-        </footer>
-      </>
-    </ThemeProvider>
-  );
+  // if(errorHealth === undefined || errorClientSettings === undefined){
+  //   renderResponse = (
+  //       <h1>Sorry, something went wrong! Seems like our API is down.</h1>
+  //   )
+  // }else{
+  //
+  // }
+  return renderResponse
 }
 
 export default App;

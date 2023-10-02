@@ -3,30 +3,34 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^5.11.4",
-    "@testing-library/react": "^11.1.0",
-    "@testing-library/user-event": "^12.1.10",
-    "bootstrap": "^4.6.0",
-    "bootstrap-icons": "^1.4.0",
-    "node-sass": "^6.0.1",
-    "react": "^17.0.1",
-    "react-bootstrap": "^1.5.2",
+    "@apollo/client": "^3.8.4",
+    "bootstrap": "^5.3.2",
+    "bootstrap-icons": "^1.11.1",
+    "graphql": "^16.8.1",
+    "js-cookie": "^3.0.5",
+    "list": "^2.0.19",
+    "node-sass": "^9.0.0",
+    "react": "^18.2.0",
+    "react-bootstrap": "^2.9.0",
     "react-bootstrap-table-next": "^4.0.3",
     "react-bootstrap-table2-paginator": "^2.1.2",
-    "react-cookie": "^4.0.3",
-    "react-dom": "^17.0.1",
-    "react-dropzone": "^11.3.1",
-    "react-router-dom": "^5.2.0",
-    "react-scripts": "4.0.3",
-    "styled-components": "^5.2.1",
-    "web-vitals": "^1.0.1"
+    "react-cookie": "^6.1.1",
+    "react-dom": "^18.2.0",
+    "react-dropzone": "^14.2.3",
+    "react-icons": "^4.11.0",
+    "react-router-dom": "^6.16.0",
+    "react-scripts": "^5.0.1",
+    "styled-components": "^6.0.8",
+    "yarn": "^1.22.19"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "deploy_test": "cp -R ./build/* ../FirmwareDroid/firmware-droid-client/build",
+    "build_docker_image": "docker build ./ -f ./Dockerfile -t firmwaredroid-frontend --platform=\"linux/amd64\"",
+    "dev_deploy": "react-scripts build && rm -R -f ../FirmwareDroid/firmware-droid-client/build/ && cp -v -r ./build ../FirmwareDroid/firmware-droid-client/build/",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "serve": "serve -s build"
   },
   "eslintConfig": {
     "extends": [
@@ -45,6 +49,21 @@
       "last 1 firefox version",
       "last 1 safari version"
     ],
-    "proxy": "https://firmwaredroid.cloudlab.zhaw.ch"
+    "proxy": [
+      "https://firmwaredroid.cloudlab.zhaw.ch"
+    ]
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.23.0",
+    "@babel/core": "^7.23.0",
+    "@babel/node": "^7.22.19",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@babel/plugin-proposal-unicode-property-regex": "^7.18.6",
+    "@babel/preset-env": "^7.22.20",
+    "@babel/preset-react": "^7.22.15",
+    "@babel/runtime": "^7.23.1",
+    "@testing-library/jest-dom": "^6.1.3",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^14.5.1"
   }
 }
