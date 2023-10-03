@@ -5,14 +5,14 @@ import Row from "react-bootstrap/esm/Row";
 import React from "react";
 
 
-function LoginPage({setAuthenticated}) {
+function LoginPage() {
 
   return (
-    <Container>
+    <Container className="p-3">
       <Row>
         <Col md={{ span: 6, offset: 3 }}>
           <h3>Sign in</h3>
-          <LoginForm setAuthenticated={setAuthenticated}/>
+          <LoginForm />
         </Col>
       </Row>
     </Container>

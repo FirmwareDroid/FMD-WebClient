@@ -2,13 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './assets/scss/App.scss';
 import App from './App';
-import {CookiesProvider} from "react-cookie";
-import { ApolloProvider, ApolloClient, InMemoryCache, HttpLink, ApolloLink, from} from "@apollo/client";
+import { CookiesProvider } from "react-cookie";
+import { ApolloProvider, ApolloClient, InMemoryCache, HttpLink, from} from "@apollo/client";
 import { GRAPHQL_URL } from "./EnvConfig";
 import { CSRF_URL } from "./EnvConfig";
-import {RetryLink} from "@apollo/client/link/retry";
-import {useFetch} from "./hooks/fetch/useFetch";
-import {setContext} from "@apollo/client/link/context";
+import { RetryLink } from "@apollo/client/link/retry";
+import { Provider } from 'react-redux'
+import store from "./redux/store.js";
+
 
 const customFetch = async (uri, options) => {
     const tokenResponsee = await fetch(CSRF_URL).then((response) => {
@@ -40,11 +41,13 @@ const gqlClient = new ApolloClient({
 
 ReactDOM.render(
   <React.StrictMode>
-    <CookiesProvider>
-        <ApolloProvider client={gqlClient}>
-                <App />
-        </ApolloProvider>
-    </CookiesProvider>
+      <Provider store={store}>
+        <CookiesProvider>
+            <ApolloProvider client={gqlClient}>
+                    <App />
+            </ApolloProvider>
+        </CookiesProvider>
+      </Provider>
   </React.StrictMode>,
   document.getElementById('root')
 );

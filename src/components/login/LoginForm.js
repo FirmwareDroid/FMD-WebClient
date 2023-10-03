@@ -1,46 +1,35 @@
 import Form from "react-bootstrap/esm/Form";
 import React from "react";
 import Button from "react-bootstrap/esm/Button";
-//import { useHistory } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import { useState } from "react";
-import {Alert} from "react-bootstrap";
+import { Alert, Container, Spinner } from "react-bootstrap";
+import { useLazyQuery } from "@apollo/client";
+import { TOKEN_AUTH } from "../../graphql/queries";
+import {useAuthentication} from "../../hooks/login/useAuthentication";
 
-
-const LoginForm = ({setAuthenticated}) => {
+const LoginForm = () => {
+  let renderResponse;
+  const navigate = useNavigate();
   const [showPasswordAlert, setShowPasswordAlert] = useState(false);
   const [password, setPassword] = React.useState("");
-  const [saveSession,] = React.useState("");
-  const [email, setEmail] = React.useState("");
-  //const history = useHistory();
+  const [username, setUsername] = React.useState("");
+  const [isAuthenticated, setAuthenticated] = useAuthentication();
 
+  let [login, {loading, data, error}] = useLazyQuery(TOKEN_AUTH, {
+    onCompleted: (data) => {
+      setAuthenticated(true)
+      navigate("/", {replace: true});
+      window.location.reload();
+    },
+    onError: (error) => {
+      setShowPasswordAlert(true);
+    }
+  });
 
   const onSubmitLoginForm = ((event) => {
     event.preventDefault();
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email, password: password, saveSession: saveSession})
-    };
-
-    fetch('https://firmwaredroid.cloudlab.zhaw.ch/api/v1/auth/login/', requestOptions)
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error(response.json().toString());
-        }
-      })
-      .then((data) => {
-        //history.push("/profile");
-        localStorage.setItem("username", data.username);
-        localStorage.setItem("email", email);
-        localStorage.setItem("isAuthenticated", "true");
-        setAuthenticated(true)
-      })
-      .catch(error => {
-        console.error(error);
-        setShowPasswordAlert(true);
-      });
+    login({variables : {username : username, password: password}});
   });
 
   const onChangePassword = ((event) => {
@@ -48,39 +37,40 @@ const LoginForm = ({setAuthenticated}) => {
   });
 
   const onChangeEmail = ((event) => {
-    setEmail(event.target.value);
+    setUsername(event.target.value);
   });
 
-  // const onChangeSaveSession = ((event) => {
-  //   setSaveSession(event.target.checked);
-  // });
+  if(loading) {
+    renderResponse = <Container className={"text-center"}>
+      <Spinner variant="success" animation="grow" role="status">
+      </Spinner>
+      <span>Login...</span>
+    </Container>
+  }else{
+    renderResponse = (
+        <>
+          {showPasswordAlert && <Alert variant="danger" onClose={() => setShowPasswordAlert(false)} dismissible>
+            Seems like a wrong password or username!
+          </Alert>}
+          <Form onSubmit={onSubmitLoginForm}>
+            <Form.Group controlId="formUsername">
+              <Form.Label>Username</Form.Label>
+              <Form.Control type="text" placeholder="Username" onChange={onChangeEmail}/>
+            </Form.Group>
 
+            <Form.Group controlId="formPassword">
+              <Form.Label>Password</Form.Label>
+              <Form.Control type="password" placeholder="Password" onChange={onChangePassword}/>
+            </Form.Group>
 
-  return (
-    <>
-      {showPasswordAlert && <Alert variant="danger" onClose={() => setShowPasswordAlert(false)} dismissible>
-        Seems like a wrong password or e-mail!
-      </Alert>}
-      <Form onSubmit={onSubmitLoginForm}>
-        <Form.Group controlId="formBasicEmail">
-          <Form.Label>Email address</Form.Label>
-          <Form.Control type="email" placeholder="Enter email" onChange={onChangeEmail}/>
-        </Form.Group>
-
-        <Form.Group controlId="formBasicPassword">
-          <Form.Label>Password</Form.Label>
-          <Form.Control type="password" placeholder="Password" onChange={onChangePassword}/>
-        </Form.Group>
-
-        {/*<Form.Group controlId="formBasicCheckbox">*/}
-          {/*<Form.Check type="checkbox" label="Save session" onChange={onChangeSaveSession}/>*/}
-        {/*</Form.Group>*/}
-        <Button variant="outline-success" type="submit">
-          Sign in
-        </Button>
-      </Form>
-    </>
-  );
+            <Button variant="outline-success" type="submit" className="m-3">
+              Sign in
+            </Button>
+          </Form>
+        </>
+    );
+  }
+  return renderResponse
 };
 
 

@@ -1,23 +1,19 @@
-import { useEffect, useState } from 'react';
-import Cookies from 'js-cookie'
-import {useQuery} from "@apollo/client";
-import {CURRENT_USER} from "../../GqlQueries";
+import { useState } from 'react';
+import { useQuery } from "@apollo/client";
+import { CURRENT_USER } from "../../graphql/queries";
+
 
 export const useAuthentication = () => {
   const [isAuthenticated, setAuthenticated] = useState(false);
+
   useQuery(CURRENT_USER, {
     onCompleted: (data) => {
       setAuthenticated(true)
     },
-  })
-
-  // useEffect(() => {
-  //   if(data){
-  //     setAuthenticated(true)
-  //   }else{
-  //     setAuthenticated(false)
-  //   }
-  // }, []);
+    onError: () => {
+      setAuthenticated(false)
+    }
+  });
 
   return [isAuthenticated, setAuthenticated]
 };

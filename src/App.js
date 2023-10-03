@@ -17,21 +17,17 @@ import { useDarkMode } from './hooks/theming/useDarkMode';
 import { useAuthentication } from './hooks/login/useAuthentication'
 import {Container, Spinner} from "react-bootstrap";
 import { useQuery } from "@apollo/client";
-import {HEALTH_QUERY} from "./GqlQueries"
-
-
+import {HEALTH_QUERY} from "./graphql/queries"
 
 function App() {
   const [theme, toggleTheme, componentMounted] = useDarkMode();
   const themeMode = theme === 'light' ? lightTheme : darkTheme;
-  const [isAuthenticated, setAuthenticated] = useAuthentication();
   const { loading, error, data, } = useQuery(HEALTH_QUERY);
 
   let renderResponse;
   if (!componentMounted || loading) {
     renderResponse = <Container className={"text-center"}>
       <Spinner variant="success" animation="grow" role="status" >
-        <span className="sr-only">Loading...</span>
       </Spinner>
       <span>Loading...</span>
     </Container>
@@ -53,15 +49,14 @@ function App() {
                     {/*<LandingPage />*/}
                   </Route>
 
-                  <Route path="/login" element={isAuthenticated === true && <LoginPage setAuthenticated={setAuthenticated}/>}>
+                  <Route path="/login" element={<LoginPage />}>
                   </Route>
 
                   <Route path="/about" element={<AboutPage />}>
                   </Route>
 
-                  {/*<Route element=/!*<LogoutPage isAuthenticated={isAuthenticated} setAuthenticated={setAuthenticated}/>*!/*/}
-                  {/*       path="/logout">*/}
-                  {/*</Route>*/}
+                  <Route path="/logout" element={<LogoutPage />}>
+                  </Route>
 
                   <Route exact path="/admin">
                     {/*<AdminPage />*/}
@@ -74,35 +69,6 @@ function App() {
         </Container>
     );
   }
-
-  // <ThemeProvider theme={themeMode}>
-  //   <h1>Loaded success</h1>
-  //   <>
-  //     <GlobalStyles />
-  //     <header style={{"marginBottom": 30}}>
-  //       <TopNavbar theme={theme}
-  //                  toggleTheme={toggleTheme}
-  //                  clientSettings={clientSettings}
-  //                  isAuthenticated={isAuthenticated}/>
-  //     </header>
-  //     <Container fluid>
-
-  //     </Container>
-  //     <footer>
-  //       <small>
-  //         <a href="/about" className="active">Credits</a>
-  //       </small>
-  //     </footer>
-  //   </>
-  // </ThemeProvider>
-
-  // if(errorHealth === undefined || errorClientSettings === undefined){
-  //   renderResponse = (
-  //       <h1>Sorry, something went wrong! Seems like our API is down.</h1>
-  //   )
-  // }else{
-  //
-  // }
   return renderResponse
 }
 

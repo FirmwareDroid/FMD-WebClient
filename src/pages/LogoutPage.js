@@ -1,54 +1,72 @@
 import Container from "react-bootstrap/esm/Container";
-import Col from "react-bootstrap/esm/Col";
-import Row from "react-bootstrap/esm/Row";
 import React from "react";
-//import { useHistory } from "react-router-dom";
-import { useCookies } from 'react-cookie';
+import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import {useMutation} from "@apollo/client";
+import {DELETE_TOKEN_COOKIE} from "../graphql/mutations";
+import {Alert, Spinner} from "react-bootstrap";
+import {useAuthentication} from "../hooks/login/useAuthentication";
+import Button from "react-bootstrap/Button";
+import Form from "react-bootstrap/esm/Form";
 
-function LogoutPage({isAuthenticated, setAuthenticated}) {
-  //const history = useHistory();
-  const [csrfCookie,] = useCookies(['csrf_access_token']);
-  const isLoggedIn = isAuthenticated === true;
-
-  const requestOptions = {
-    method: 'DELETE',
-    headers: {
-      "X-CSRF-TOKEN": csrfCookie.csrf_access_token
+function LogoutPage() {
+  let renderResponse;
+  const navigate = useNavigate();
+  const [isAuthenticated, setAuthenticated] = useAuthentication();
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  let [logout, {loading, data, error}] = useMutation(DELETE_TOKEN_COOKIE, {
+    onCompleted: (data) => {
+      if(data.deleteTokenCookie.deleted === true){
+        setShowErrorAlert(false)
+        setAuthenticated(false)
+        navigate("/", { replace: true });
+        window.location.reload();
+      }else{
+        setShowErrorAlert(true)
+      }
     },
-    credentials: "same-origin"
-  };
+    onError: (error) => {
+      setShowErrorAlert(true)
+    }
+  });
 
-  if(isLoggedIn){
-    fetch('https://firmwaredroid.cloudlab.zhaw.ch/api/v1/auth/logout/', requestOptions)
-      .catch(error => {
-        console.error(error);
-      })
-      .then((response) => {
-        const theme = localStorage.getItem("theme");
-        localStorage.clear();
-        localStorage.setItem("isAuthenticated", "false");
-        localStorage.setItem("theme", theme);
-        setAuthenticated(false);
-        if(response.ok){
-          //history.push("/");
-        }
-        return response.json()
-      });
-  }else{
-    //history.push("/");
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    logout();
   }
 
-
-  return (
-    <Container>
-      <Row>
-        <Col md={{ span: 6, offset: 3 }}>
-          <h3>Logout error!</h3>
-          <p>There was a problem during logout! Please try again.</p>
-        </Col>
-      </Row>
+  if(loading) {
+    renderResponse = <Container className={"text-center"}>
+      <Spinner variant="success" animation="grow" role="status">
+      </Spinner>
+      <span>Login...</span>
     </Container>
-  );
+  }else if (error){
+    renderResponse = (
+        <>
+          {setShowErrorAlert &&
+              <Alert variant="danger" onClose={() => setShowErrorAlert(false)} dismissible>
+            Whoops...something went wrong! Please, try again.
+          </Alert>}
+        </>
+    );
+  }else{
+    renderResponse = (
+        <>
+          <Container className="text-center p-3">
+            <h3>Sign out</h3>
+            <p>Do you really want to sign out?</p>
+            <Form onSubmit={handleSubmit}>
+              <Button variant="outline-success" type="submit" className="m-3">
+                Yes, sign me out.
+              </Button>
+            </Form>
+          </Container>
+        </>
+    );
+  }
+
+  return renderResponse
 }
 
 export default LogoutPage;

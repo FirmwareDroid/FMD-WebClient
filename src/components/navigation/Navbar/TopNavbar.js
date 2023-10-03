@@ -4,24 +4,8 @@ import Navbar from "react-bootstrap/esm/Navbar";
 import {useAuthentication} from "../../../hooks/login/useAuthentication";
 
 
-const styles = {
-  grid: {
-    paddingLeft: 0,
-    paddingRight: 0
-  },
-  row: {
-    marginLeft: 0,
-    marginRight: 0
-  },
-  col: {
-    paddingLeft: 0,
-    paddingRight: 0
-  }
-};
-
 const TopNavbar = ({ theme }) => {
   const [isAuthenticated, setAuthenticated] = useAuthentication();
-
   return (
       <Navbar className="me-auto navigation" bg={theme} variant={theme} sticky="top">
         <Navbar.Brand href="/">FirmwareDroid</Navbar.Brand>
@@ -30,12 +14,12 @@ const TopNavbar = ({ theme }) => {
           <Nav.Item as="li">
             <Nav.Link className={window.location.pathname === '/about' ? 'active' : ''} href="/about">About</Nav.Link>
           </Nav.Item>
-          <Nav.Item as="li">{isAuthenticated === false &&
-                <Nav.Link className={window.location.pathname === '/login' ? 'active' : ''} href="/login">Login
+          <Nav.Item as="li">{!isAuthenticated &&
+                <Nav.Link className={window.location.pathname === '/login' ? 'active' : ''} href="/login">Sign in
                 </Nav.Link>}
           </Nav.Item>
-          <Nav.Item as="li">{isAuthenticated === true &&
-              <Nav.Link className={window.location.pathname === '/logout' ? 'active' : ''} href="/logout">Logout
+          <Nav.Item as="li">{isAuthenticated &&
+              <Nav.Link className={window.location.pathname === '/logout' ? 'active' : ''} href="/logout">Sign out
               </Nav.Link>}
           </Nav.Item>
         </Nav>

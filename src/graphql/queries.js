@@ -34,3 +34,14 @@ export const CURRENT_USER = gql`
       }
   }
 `;
+
+export const TOKEN_AUTH = gql`
+    query TokenAuth($password: String!, $username: String!) {
+      tokenAuth(password: $password, username: $username) {
+        token
+      }
+    }
+`;
+
+
+
