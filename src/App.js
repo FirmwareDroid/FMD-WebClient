@@ -18,6 +18,7 @@ import { useAuthentication } from './hooks/login/useAuthentication'
 import {Container, Spinner} from "react-bootstrap";
 import { useQuery } from "@apollo/client";
 import {HEALTH_QUERY} from "./graphql/queries"
+import EmulatorPage from "./pages/EmulatorPage";
 
 function App() {
   const [theme, toggleTheme, componentMounted] = useDarkMode();
@@ -56,6 +57,9 @@ function App() {
                   </Route>
 
                   <Route path="/logout" element={<LogoutPage />}>
+                  </Route>
+
+                  <Route exact path="/emulator" element={<EmulatorPage />}>
                   </Route>
 
                   <Route exact path="/admin">
