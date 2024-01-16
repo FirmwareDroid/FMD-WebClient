@@ -124,4 +124,11 @@ export const GlobalStyles = createGlobalStyle`
   .navigation{
     padding-left: 2%;
   }
+  
+  .full-height{
+    height: 100%;
+  }
+  
+  
+  
 `;

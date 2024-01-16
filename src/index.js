@@ -9,6 +9,7 @@ import { CSRF_URL } from "./EnvConfig";
 import { RetryLink } from "@apollo/client/link/retry";
 import { Provider } from 'react-redux'
 import store from "./redux/store.js";
+import { TerminalContextProvider } from "react-terminal";
 
 
 const customFetch = async (uri, options) => {

@@ -1,4 +1,4 @@
-export const DOMAIN_NAME = "firmwaredroid.cloudlab.zhaw.ch"
+export const DOMAIN_NAME = "fmd.localhost"
 export const APP_URL = "https://" + DOMAIN_NAME
 export const GRAPHQL_URL = APP_URL + "/graphql/"
 
