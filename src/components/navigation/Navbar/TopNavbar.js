@@ -1,11 +1,11 @@
 import React from 'react';
 import Nav from "react-bootstrap/esm/Nav";
 import Navbar from "react-bootstrap/esm/Navbar";
-import {useAuthentication} from "../../../hooks/login/useAuthentication";
+import { useAuthentication } from "../../../hooks/login/useAuthentication";
 
 
 const TopNavbar = ({ theme }) => {
-  const [isAuthenticated, setAuthenticated] = useAuthentication();
+  const {isAuthenticated, setAuthenticated} = useAuthentication();
   return (
       <Navbar className="me-auto navigation" bg={theme} variant={theme} sticky="top">
         <Navbar.Brand href="/">FirmwareDroid</Navbar.Brand>

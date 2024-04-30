@@ -12,7 +12,7 @@ import Form from "react-bootstrap/esm/Form";
 function LogoutPage() {
   let renderResponse;
   const navigate = useNavigate();
-  const [isAuthenticated, setAuthenticated] = useAuthentication();
+  const {isAuthenticated, setAuthenticated} = useAuthentication();
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   let [logout, {loading, data, error}] = useMutation(DELETE_TOKEN_COOKIE, {
     onCompleted: (data) => {

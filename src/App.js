@@ -1,12 +1,10 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {
   BrowserRouter,
   Routes,
   Route,
 } from "react-router-dom";
-import LandingPage from "./pages/LandingPage";
 import AboutPage from "./pages/AboutPage";
-import AdminPage from "./pages/AdminPage";
 import LoginPage from "./pages/LoginPage";
 import TopNavbar from "./components/navigation/Navbar/TopNavbar";
 import LogoutPage from "./pages/LogoutPage";
@@ -14,16 +12,25 @@ import { ThemeProvider } from 'styled-components';
 import { lightTheme, darkTheme } from './assets/theming/theme';
 import { GlobalStyles } from './assets/theming/global';
 import { useDarkMode } from './hooks/theming/useDarkMode';
-import { useAuthentication } from './hooks/login/useAuthentication'
 import {Container, Spinner} from "react-bootstrap";
 import { useQuery } from "@apollo/client";
 import {HEALTH_QUERY} from "./graphql/queries"
 import EmulatorPage from "./pages/EmulatorPage";
+import withAuthentication from "./components/routes/PrivateRoute";
+import {useAuthentication} from "./hooks/login/useAuthentication";
+
 
 function App() {
+  const { isAuthenticated, setAuthenticated } = useAuthentication();
+  const [isUserAuthenticated, setIsUserAuthenticated] = useState(isAuthenticated);
   const [theme, toggleTheme, componentMounted] = useDarkMode();
   const themeMode = theme === 'light' ? lightTheme : darkTheme;
   const { loading, error, data, } = useQuery(HEALTH_QUERY);
+  const AuthenticatedEmulatorPage = withAuthentication(EmulatorPage);
+
+  useEffect(() => {
+    setIsUserAuthenticated(isAuthenticated);
+  }, [isAuthenticated]);
 
   let renderResponse;
   if (!componentMounted || loading) {
@@ -46,10 +53,6 @@ function App() {
             <Container>
               <BrowserRouter>
                 <Routes>
-                  <Route path="/">
-                    {/*<LandingPage />*/}
-                  </Route>
-
                   <Route path="/login" element={<LoginPage />}>
                   </Route>
 
@@ -59,14 +62,9 @@ function App() {
                   <Route path="/logout" element={<LogoutPage />}>
                   </Route>
 
-                  <Route exact path="/emulator" element={<EmulatorPage />}>
-                  </Route>
-
-                  <Route exact path="/admin">
-                    {/*<AdminPage />*/}
-                  </Route>
-
+                  <Route path="/emulator" element={<AuthenticatedEmulatorPage />} />
                 </Routes>
+
               </BrowserRouter>
             </Container>
           </ThemeProvider>
