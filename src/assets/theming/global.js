@@ -129,6 +129,16 @@ export const GlobalStyles = createGlobalStyle`
     height: 100%;
   }
   
-  
+  .center-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+
+  .border-box {
+    border: 1px solid #ccc;
+    padding: 0;
+  }
   
 `;

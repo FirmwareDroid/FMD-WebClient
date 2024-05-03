@@ -14,6 +14,7 @@ function EmulatorPage() {
         {name: 'WebRTC', value: 'webrtc'},
         {name: 'PNG', value: 'png'},
     ]
+    const [emulatorViewCounter, setEmulatorViewCounter] = useState(2);
     const [emulatorViews, setEmulatorViews] = useState([
         {
             emulatorConnectionState: {emuState: ""},
@@ -25,7 +26,7 @@ function EmulatorPage() {
             gpsLocation: {gps: {latitude: 47.4974, longitude: 8.72932}},
             volumeState: {volume: 0, muted: true},
             radioEmulatorViewValue: 'png',
-            emulatorUri: emulatorUrisFromStorage[0] || "https://fmd.localhost:4443/0",
+            emulatorUri: emulatorUrisFromStorage[0] || "https://fmd.localhost:4443/",
             radiosEmulatorView: radiosEmulatorView,
         },
         {
@@ -55,12 +56,14 @@ function EmulatorPage() {
             radiosEmulatorView: radiosEmulatorView,
         }
     ]);
+    const [selectedEmulatorViewIndex, setSelectedEmulatorView] = useState(null);
+
 
 
     const updateEmulatorView = (index, key, value) => {
         setEmulatorViews(prevEmulatorViews => prevEmulatorViews.map((emulatorView, i) => {
             if (i === index) {
-                return { ...emulatorView, [key]: value };
+                return {...emulatorView, [key]: value};
             } else {
                 return emulatorView;
             }
@@ -78,10 +81,11 @@ function EmulatorPage() {
             gpsLocation: {gps: {latitude: 0.0, longitude: 0.0}},
             volumeState: {volume: 0, muted: true},
             radioEmulatorViewValue: 'png',
-            emulatorUri: "https://fmd.localhost:4443/0",
+            emulatorUri: "https://fmd-aosp.init-lab" + emulatorViewCounter,
             radiosEmulatorView: radiosEmulatorView,
         };
         setEmulatorViews(prevEmulatorViews => [...prevEmulatorViews, newEmulatorView]);
+        setEmulatorViewCounter(emulatorViewCounter + 1);
     };
 
 
@@ -90,14 +94,51 @@ function EmulatorPage() {
                 <h5>Emulator (experimental) </h5>
                 <Row className="mt-3 mb-3">
                     <Col xs={12} sm={6} md={4}>
-                        <Button
-                            variant={"outline-light"}
-                            onClick={addEmulatorView}>Add Emulator View
-                        </Button>
+                        {selectedEmulatorViewIndex === null ? (
+                            <Button
+                                variant={"outline-light"}
+                                onClick={addEmulatorView}>Add Emulator View
+                            </Button>
+                        ): (
+                            <Button className="mt-3 mb-3"
+                                    variant={"outline-light"}
+                                    onClick={() => setSelectedEmulatorView(null)}>Multiple Emulator Views
+                            </Button>
+                        )}
                     </Col>
                 </Row>
                 <Row>
-                        {emulatorViews.map((emulatorView, index) => (
+                    {selectedEmulatorViewIndex !== null ? (
+                        // If the page is in the large view, render only one EmulatorView component with a larger size
+                        <Col className="mt-3 mb-3" xs={12}>
+                            <EmulatorView
+                                index={selectedEmulatorViewIndex}
+                                emulatorConnectionState={emulatorViews[selectedEmulatorViewIndex].emulatorConnectionState}
+                                setEmulatorConnectionState={(value) => updateEmulatorView(selectedEmulatorViewIndex, 'emulatorConnectionState', value)}
+                                hasEmulatorAudio={emulatorViews[selectedEmulatorViewIndex].hasEmulatorAudio}
+                                setHasEmulatorAudio={(value) => updateEmulatorView(selectedEmulatorViewIndex, 'hasEmulatorAudio', value)}
+                                longitudeValue={emulatorViews[selectedEmulatorViewIndex].longitudeValue}
+                                setLongitudeValue={(value) => updateEmulatorView(selectedEmulatorViewIndex, 'longitudeValue', value)}
+                                latitudeValue={emulatorViews[selectedEmulatorViewIndex].latitudeValue}
+                                setLatitudeValue={(value) => updateEmulatorView(selectedEmulatorViewIndex, 'latitudeValue', value)}
+                                hasEmulatorError={emulatorViews[selectedEmulatorViewIndex].hasEmulatorError}
+                                setHasEmulatorError={(value) => updateEmulatorView(selectedEmulatorViewIndex, 'hasEmulatorError', value)}
+                                emulatorErrorMessage={emulatorViews[selectedEmulatorViewIndex].emulatorErrorMessage}
+                                setEmulatorErrorMessage={(value) => updateEmulatorView(selectedEmulatorViewIndex, 'emulatorErrorMessage', value)}
+                                gpsLocation={emulatorViews[selectedEmulatorViewIndex].gpsLocation}
+                                setGpsLocation={(value) => updateEmulatorView(selectedEmulatorViewIndex, 'gpsLocation', value)}
+                                volumeState={emulatorViews[selectedEmulatorViewIndex].volumeState}
+                                setVolumeState={(value) => updateEmulatorView(selectedEmulatorViewIndex, 'volumeState', value)}
+                                radioEmulatorViewValue={emulatorViews[selectedEmulatorViewIndex].radioEmulatorViewValue}
+                                setRadioEmulatorViewValue={(value) => updateEmulatorView(selectedEmulatorViewIndex, 'radioEmulatorViewValue', value)}
+                                emulatorUri={emulatorViews[selectedEmulatorViewIndex].emulatorUri}
+                                setEmulatorUri={(value) => updateEmulatorView(selectedEmulatorViewIndex, 'emulatorUri', value)}
+                                radiosEmulatorView={emulatorViews[selectedEmulatorViewIndex].radiosEmulatorView}
+                                onSelect={() => setSelectedEmulatorView(selectedEmulatorViewIndex)}
+                                selectedEmulatorViewIndex={selectedEmulatorViewIndex}
+                            />
+                        </Col>
+                    ) : (emulatorViews.map((emulatorView, index) => (
                             <Col className="mt-3 mb-3" xs={12} sm={6} md={4} key={index}>
                                 <EmulatorView
                                     index={index}
@@ -122,9 +163,12 @@ function EmulatorPage() {
                                     emulatorUri={emulatorView.emulatorUri}
                                     setEmulatorUri={(value) => updateEmulatorView(index, 'emulatorUri', value)}
                                     radiosEmulatorView={emulatorView.radiosEmulatorView}
+                                    onSelect={() => setSelectedEmulatorView(index)}
+                                    selectedEmulatorViewIndex={null}
                                 />
                             </Col>
-                        ))}
+                        ))
+                    )}
                 </Row>
             </Container>
         </>

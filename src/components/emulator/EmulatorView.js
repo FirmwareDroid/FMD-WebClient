@@ -3,7 +3,7 @@ import {CiLocationOn} from "react-icons/ci";
 import React, {useContext, useState} from "react";
 import {Emulator} from "android-emulator-webrtc/emulator";
 
-function EmulatorView({     index,
+function EmulatorView({   index,
                           emulatorConnectionState,
                           setEmulatorConnectionState,
                           hasEmulatorAudio,
@@ -24,9 +24,13 @@ function EmulatorView({     index,
                           setRadioEmulatorViewValue,
                           emulatorUri,
                           setEmulatorUri,
-                          radiosEmulatorView}) {
+                          radiosEmulatorView,
+                          selectedEmulatorViewIndex,
+                          isLargeView,
+                          onSelect}) {
     const [showEmulator, setShowEmulator] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const isSelected = index === selectedEmulatorViewIndex;
 
     const handleEmulatorUriChange = (e) => {
         const newUri = String(e.target.value);
@@ -57,31 +61,39 @@ function EmulatorView({     index,
     }
 
     const handleConnectClick = () => {
-        setShowEmulator(true);
-        setIsLoading(true);
+        if (showEmulator) {
+            setShowEmulator(false);
+            setIsLoading(false);
+        }else {
+            setShowEmulator(true);
+            setIsLoading(true);
+        }
     };
 
 
     return (<>
             <Container>
                 <Row>
-                    <Col>
+                    <Col className="border-box">
                         {hasEmulatorError &&
                             <p>Oopps...some connection problem occurred!</p>
                         }
                         {isLoading && showEmulator &&
-                            <Button
-                                variant={"outline-light"}
-                                disabled>
-                                <Spinner
-                                    as="span"
-                                    animation="grow"
-                                    size="sm"
-                                    role="status"
-                                    aria-hidden="true"
-                                />
-                                Connecting...
-                            </Button>
+                            <div className="center-content">
+                                <Button
+                                    variant={"outline-light"}
+                                    onClick={handleConnectClick}
+                                    >
+                                    <Spinner
+                                        as="span"
+                                        animation="grow"
+                                        size="sm"
+                                        role="status"
+                                        aria-hidden="true"
+                                    />
+                                    Connecting...
+                                </Button>
+                            </div>
                         }
                         {showEmulator && !hasEmulatorError &&
                             <Emulator
@@ -98,10 +110,12 @@ function EmulatorView({     index,
                             />
                         }
                         {!showEmulator &&
-                            <Button
-                                variant={"outline-light"}
-                                onClick={handleConnectClick}>Connect
-                            </Button>
+                            <div className="center-content">
+                                <Button
+                                    variant={"outline-light"}
+                                    onClick={handleConnectClick}>Connect
+                                </Button>
+                            </div>
                         }
                     </Col>
                     <Col>
@@ -183,6 +197,13 @@ function EmulatorView({     index,
                                 disabled={false}
                             />
                         </Form>
+                        {!isSelected &&
+                            <Button className="mt-3 mb-3"
+                                    variant={"outline-light"}
+                                    size="sm"
+                                    onClick={() => onSelect(index)}>View
+                            </Button>
+                        }
                     </Col>
                 </Row>
             </Container>

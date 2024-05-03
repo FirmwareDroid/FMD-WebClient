@@ -52,15 +52,15 @@ const LoginForm = () => {
           {showPasswordAlert && <Alert variant="danger" onClose={() => setShowPasswordAlert(false)} dismissible>
             Seems like a wrong password or username!
           </Alert>}
-          <Form onSubmit={onSubmitLoginForm}>
+          <Form onSubmit={onSubmitLoginForm} action="/login">
             <Form.Group controlId="formUsername">
               <Form.Label>Username</Form.Label>
-              <Form.Control type="text" placeholder="Username" onChange={onChangeEmail}/>
+              <Form.Control type="text" placeholder="Username" onChange={onChangeEmail} name="username"/>
             </Form.Group>
 
             <Form.Group controlId="formPassword">
               <Form.Label>Password</Form.Label>
-              <Form.Control type="password" placeholder="Password" onChange={onChangePassword}/>
+              <Form.Control type="password" placeholder="Password" onChange={onChangePassword} name="password"/>
             </Form.Group>
 
             <Button variant="outline-success" type="submit" className="m-3">
