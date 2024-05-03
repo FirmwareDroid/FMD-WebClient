@@ -1,72 +1,46 @@
-import Container from "react-bootstrap/esm/Container";
-import React from "react";
+// src/pages/LogoutPage.js
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useState } from "react";
-import {useMutation} from "@apollo/client";
-import {DELETE_TOKEN_COOKIE} from "../graphql/mutations";
-import {Alert, Spinner} from "react-bootstrap";
-import {useAuthentication} from "../hooks/login/useAuthentication";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/esm/Form";
+import { useAuthentication } from '../hooks/login/useAuthentication';
+import { useMutation } from "@apollo/client";
+import { DELETE_TOKEN_COOKIE } from "../graphql/mutations";
+import { Container, Spinner, Alert } from "react-bootstrap";
 
-function LogoutPage() {
-  let renderResponse;
+const LogoutPage = () => {
   const navigate = useNavigate();
-  const {isAuthenticated, setAuthenticated} = useAuthentication();
-  const [showErrorAlert, setShowErrorAlert] = useState(false);
-  let [logout, {loading, data, error}] = useMutation(DELETE_TOKEN_COOKIE, {
+  const { setAuthenticated } = useAuthentication();
+  const [logout, { loading, error }] = useMutation(DELETE_TOKEN_COOKIE, {
     onCompleted: (data) => {
-      if(data.deleteTokenCookie.deleted === true){
-        setShowErrorAlert(false)
-        setAuthenticated(false)
+      if (data.deleteTokenCookie.deleted === true) {
+        setAuthenticated(false);
         navigate("/", { replace: true });
         window.location.reload();
-      }else{
-        setShowErrorAlert(true)
       }
     },
-    onError: (error) => {
-      setShowErrorAlert(true)
-    }
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  useEffect(() => {
     logout();
-  }
+  }, [logout]);
 
-  if(loading) {
-    renderResponse = <Container className={"text-center"}>
-      <Spinner variant="success" animation="grow" role="status">
-      </Spinner>
-      <span>Login...</span>
-    </Container>
-  }else if (error){
-    renderResponse = (
-        <>
-          {setShowErrorAlert &&
-              <Alert variant="danger" onClose={() => setShowErrorAlert(false)} dismissible>
-            Whoops...something went wrong! Please, try again.
-          </Alert>}
-        </>
-    );
-  }else{
-    renderResponse = (
-        <>
-          <Container className="text-center p-3">
-            <h3>Sign out</h3>
-            <p>Do you really want to sign out?</p>
-            <Form onSubmit={handleSubmit}>
-              <Button variant="outline-success" type="submit" className="m-3">
-                Yes, sign me out.
-              </Button>
-            </Form>
-          </Container>
-        </>
+  if (loading) {
+    return (
+      <Container className={"text-center"}>
+        <Spinner variant="success" animation="grow" role="status" />
+        <span>Logging out...</span>
+      </Container>
     );
   }
 
-  return renderResponse
-}
+  if (error) {
+    return (
+      <Alert variant="danger" dismissible>
+        Whoops...something went wrong! Please, try again.
+      </Alert>
+    );
+  }
+
+  return null;
+};
 
 export default LogoutPage;

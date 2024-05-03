@@ -1,18 +1,16 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuthentication } from "../../hooks/login/useAuthentication";
+import { useAuthentication } from '../../hooks/login/useAuthentication';
 
-const withAuthentication = ( WrappedComponent ) => {
+const withAuthentication = (WrappedComponent, RedirectComponent) => {
   return (props) => {
-    const navigate = useNavigate();
-    const { isAuthenticated, setAuthenticated } = useAuthentication();
+    const { isAuthenticated } = useAuthentication();
+
     if (!isAuthenticated) {
-      navigate('/login');
-      return null;
+      return <RedirectComponent {...props} />;
     }
 
     return <WrappedComponent {...props} />;
   };
-}
+};
 
 export default withAuthentication;
