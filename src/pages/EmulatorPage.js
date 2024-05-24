@@ -107,17 +107,10 @@ function EmulatorPage() {
                                     variant={"outline-light"}
                                     onClick={addEmulatorView}>Add Emulator View
                                 </Button>
-                                {emulatorViews.length > 1 ? (
-                                    <Button
-                                        variant={"outline-light"}
-                                        onClick={connectAllEmulators}>Connect All
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        variant={"outline-light"}
-                                        onClick={connectAllEmulators}>Connect All
-                                    </Button>
-                                )}
+                                <Button
+                                    variant={"outline-light"}
+                                    onClick={connectAllEmulators}>Connect All
+                                </Button>
                             </>
                         ): (
                             <a className="mt-3 mb-3"
