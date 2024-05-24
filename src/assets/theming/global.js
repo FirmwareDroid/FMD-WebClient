@@ -140,5 +140,8 @@ export const GlobalStyles = createGlobalStyle`
     border: 1px solid #ccc;
     padding: 0;
   }
-  
+
+  .noUserSelect {
+    user-select: none;
+  }
 `;

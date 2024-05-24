@@ -39,7 +39,7 @@ function EmulatorPage() {
             gpsLocation: {gps: {latitude: 47.4974, longitude: 8.72932}},
             volumeState: {volume: 0, muted: true},
             radioEmulatorViewValue: 'png',
-            emulatorUri: emulatorUrisFromStorage[1] || "https://fmd-aosp.init-lab/0",
+            emulatorUri: emulatorUrisFromStorage[1] || "https://fmd-aosp.init-lab.ch:4443/0",
             radiosEmulatorView: radiosEmulatorView,
         },
         {
@@ -52,7 +52,7 @@ function EmulatorPage() {
             gpsLocation: {gps: {latitude: 47.4974, longitude: 8.72932}},
             volumeState: {volume: 0, muted: true},
             radioEmulatorViewValue: 'png',
-            emulatorUri: emulatorUrisFromStorage[1] || "https://fmd-aosp.init-lab/1",
+            emulatorUri: emulatorUrisFromStorage[1] || "https://fmd-aosp.init-lab.ch:4443/1",
             radiosEmulatorView: radiosEmulatorView,
         }
     ]);
@@ -81,11 +81,17 @@ function EmulatorPage() {
             gpsLocation: {gps: {latitude: 0.0, longitude: 0.0}},
             volumeState: {volume: 0, muted: true},
             radioEmulatorViewValue: 'png',
-            emulatorUri: "https://fmd-aosp.init-lab" + emulatorViewCounter,
+            emulatorUri: "https://fmd-aosp.init-lab.ch:4443/" + emulatorViewCounter,
             radiosEmulatorView: radiosEmulatorView,
         };
         setEmulatorViews(prevEmulatorViews => [...prevEmulatorViews, newEmulatorView]);
         setEmulatorViewCounter(emulatorViewCounter + 1);
+    };
+
+    const connectAllEmulators = () => {
+        emulatorViews.forEach((emulatorView, index) => {
+            updateEmulatorView(index, 'emulatorConnectionState', {emuState: "connecting"});
+        });
     };
 
 
@@ -95,22 +101,35 @@ function EmulatorPage() {
                 <Row className="mt-3 mb-3">
                     <Col xs={12} sm={6} md={4}>
                         {selectedEmulatorViewIndex === null ? (
-                            <Button
-                                variant={"outline-light"}
-                                onClick={addEmulatorView}>Add Emulator View
-                            </Button>
-                        ): (
-                            <Button className="mt-3 mb-3"
+                            <>
+                                <Button
+                                    className={"mr-3"}
                                     variant={"outline-light"}
-                                    onClick={() => setSelectedEmulatorView(null)}>Multiple Emulator Views
-                            </Button>
+                                    onClick={addEmulatorView}>Add Emulator View
+                                </Button>
+                                {emulatorViews.length > 1 ? (
+                                    <Button
+                                        variant={"outline-light"}
+                                        onClick={connectAllEmulators}>Connect All
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        variant={"outline-light"}
+                                        onClick={connectAllEmulators}>Connect All
+                                    </Button>
+                                )}
+                            </>
+                        ): (
+                            <a className="mt-3 mb-3"
+                               href="#"
+                               onClick={() => setSelectedEmulatorView(null)}>Multiple Emulator Views
+                            </a>
                         )}
                     </Col>
                 </Row>
                 <Row>
                     {selectedEmulatorViewIndex !== null ? (
-                        // If the page is in the large view, render only one EmulatorView component with a larger size
-                        <Col className="mt-3 mb-3" xs={12}>
+                        <Col className="mt-3 mb-3" xs={10}>
                             <EmulatorView
                                 index={selectedEmulatorViewIndex}
                                 emulatorConnectionState={emulatorViews[selectedEmulatorViewIndex].emulatorConnectionState}
