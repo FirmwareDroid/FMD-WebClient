@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@apollo/client": "^3.8.4",
+    "@apollo/client": "^3.13.8",
     "@babel/plugin-syntax-jsx": "^7.22.5",
     "@reduxjs/toolkit": "^1.9.6",
     "android-emulator-webrtc": "^1.0.18",
