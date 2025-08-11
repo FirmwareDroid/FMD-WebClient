@@ -15,20 +15,18 @@ const LandingPage = () => {
     const AuthenticatedLogoutPagePage = withAuthentication(LogoutPage, LoginPage);
 
     return (
-        <>
-            <Container fluid>
-                <Container>
-                    <BrowserRouter>
-                        <Routes>
-                            <Route path="/login" element={<AuthenticatedLoginPage/>} />
-                            <Route path="/about" element={<AboutPage/>} />
-                            <Route path="/logout" element={<AuthenticatedLogoutPagePage/>} />
-                            <Route path="/emulator" element={<AuthenticatedEmulatorPage/>} />
-                        </Routes>
-                    </BrowserRouter>
-                </Container>
+        <Container fluid>
+            <Container>
+                <BrowserRouter>
+                    <Routes>
+                        <Route path="/login" element={<AuthenticatedLoginPage/>} />
+                        <Route path="/about" element={<AboutPage/>} />
+                        <Route path="/logout" element={<AuthenticatedLogoutPagePage/>} />
+                        <Route path="/emulator" element={<AuthenticatedEmulatorPage/>} />
+                    </Routes>
+                </BrowserRouter>
             </Container>
-        </>
+        </Container>
     );
 };
 

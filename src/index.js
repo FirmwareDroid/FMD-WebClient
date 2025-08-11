@@ -1,11 +1,10 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import './assets/scss/App.scss';
 import App from './App';
 import { CookiesProvider } from "react-cookie";
 import { ApolloProvider, ApolloClient, InMemoryCache, HttpLink, from} from "@apollo/client";
-import { GRAPHQL_URL } from "./EnvConfig";
-import { CSRF_URL } from "./EnvConfig";
+import { GRAPHQL_URL, CSRF_URL } from "./EnvConfig";
 import { RetryLink } from "@apollo/client/link/retry";
 import { Provider } from 'react-redux'
 import store from "./redux/store.js";
@@ -39,15 +38,16 @@ const gqlClient = new ApolloClient({
     cache: new InMemoryCache()
 });
 
-ReactDOM.render(
-  <React.StrictMode>
-      <Provider store={store}>
-        <CookiesProvider>
-            <ApolloProvider client={gqlClient}>
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(
+    <React.StrictMode>
+        <Provider store={store}>
+            <CookiesProvider>
+                <ApolloProvider client={gqlClient}>
                     <App />
-            </ApolloProvider>
-        </CookiesProvider>
-      </Provider>
-  </React.StrictMode>,
-  document.getElementById('root')
+                </ApolloProvider>
+            </CookiesProvider>
+        </Provider>
+    </React.StrictMode>,
 );
