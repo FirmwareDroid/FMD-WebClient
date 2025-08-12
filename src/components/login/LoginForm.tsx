@@ -1,18 +1,18 @@
 import Form from "react-bootstrap/esm/Form";
-import React, { useState } from "react";
+import React, { useState, type ChangeEvent, type FormEvent } from "react";
 import Button from "react-bootstrap/esm/Button";
 import { useNavigate } from 'react-router-dom';
 import { Alert, Container, Spinner } from "react-bootstrap";
 import { useLazyQuery } from "@apollo/client";
 import { TOKEN_AUTH } from "../../graphql/queries";
-import {useAuthentication} from "../../hooks/login/useAuthentication";
+import { useAuthentication } from "../../hooks/login/useAuthentication";
 
 const LoginForm = () => {
   let renderResponse;
   const navigate = useNavigate();
   const [showPasswordAlert, setShowPasswordAlert] = useState(false);
-  const [password, setPassword] = React.useState("");
-  const [username, setUsername] = React.useState("");
+  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
   const {isAuthenticated, setAuthenticated} = useAuthentication();
 
   let [login, {loading, data, error}] = useLazyQuery(TOKEN_AUTH, {
@@ -26,16 +26,16 @@ const LoginForm = () => {
     }
   });
 
-  const onSubmitLoginForm = ((event) => {
+  const onSubmitLoginForm = ((event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     login({variables : {username : username, password: password}});
   });
 
-  const onChangePassword = ((event) => {
+  const onChangePassword = ((event: ChangeEvent<HTMLInputElement>) => {
     setPassword(event.target.value)
   });
 
-  const onChangeEmail = ((event) => {
+  const onChangeEmail = ((event: ChangeEvent<HTMLInputElement>) => {
     setUsername(event.target.value);
   });
 

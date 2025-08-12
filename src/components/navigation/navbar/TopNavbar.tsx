@@ -1,16 +1,17 @@
-// src/components/navigation/Navbar/TopNavbar.js
 import React from 'react';
-import Nav from "react-bootstrap/esm/Nav";
-import Navbar from "react-bootstrap/esm/Navbar";
+import Nav from "react-bootstrap/Nav";
+import Navbar from "react-bootstrap/Navbar";
 import { useAuthentication } from "../../../hooks/login/useAuthentication";
 
-const TopNavbar = ({ theme }) => {
+type TopNavbarProps = { theme: 'light' | 'dark' };
+
+const TopNavbar: React.FC<TopNavbarProps> = ({ theme }) => {
   const { isAuthenticated } = useAuthentication();
   return (
       <Navbar className="me-auto navigation" bg={theme} variant={theme} sticky="top">
         <Navbar.Brand href="/">FirmwareDroid</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Nav as="ul" bg={theme} variant={theme} sticky="top">
+        <Nav as="ul">
             <Nav.Item as="li">
                 <Nav.Link className={window.location.pathname === '/about' ? 'active' : ''} href="/about">About</Nav.Link>
             </Nav.Item>

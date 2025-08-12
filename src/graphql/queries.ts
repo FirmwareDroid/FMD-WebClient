@@ -6,18 +6,6 @@ export const HEALTH_QUERY = gql`
   }
 `;
 
-export const APPLICATION_SETTINGS_QUERY = gql`
-  {
-    webclient_setting_list {
-        activeScannersDict
-        createDate
-        id
-        isFirmwareUploadActive
-        isSignupActive
-     }
-  }
-`;
-
 export const CURRENT_USER = gql`
   {
     me {
