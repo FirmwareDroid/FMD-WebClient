@@ -1,0 +1,2337 @@
+type Query {
+  build_prop_file_id_list(objectIdList: [String], fieldFilter: BuildPropFileFilter): [BuildPropFileType]
+  firmware_importer_setting_list: [FirmwareImporterSettingType]
+  aecs_job_list(objectIdList: [String], fieldFilter: AecsJobFilter): [AecsJobType]
+  isApiUp: Boolean
+  rq_queue_name_list: [String]
+  app_certificate_list(objectIdList: [String], fieldFilter: AppCertificateFilter): [AppCertificateType]
+  tlsh_hash_list(objectIdList: [String], fieldFilter: TlshHashFilter): [TlshHashType]
+  ssdeep_cluster_analysis_list(objectIdList: [String], fieldFilter: SsDeepClusterAnalysisFilter): [SsDeepClusterAnalysisType]
+  quark_engine_report_list(objectId: [String], fieldFilter: QuarkEngineReportFilter): [QuarkEngineReportType]
+  super_report_list(objectId: [String], fieldFilter: SuperReportFilter): [SuperReportType]
+  apk_scanner_report_list(objectIdList: [String], fieldFilter: ApkScannerReportFilter): [ApkScannerReportType]
+  apkleaks_statistics_report_list(objectId: [String], fieldFilter: ApkleaksStatisticsReportFilter): [ApkleaksStatisticsReportType]
+  apkleaks_report_list(objectId: [String], fieldFilter: ApkleaksReportFilter): [ApkleaksReportType]
+  exodus_statistics_report_list(objectId: [String], fieldFilter: ExodusStatisticsReportFilter): [ExodusStatisticsReportType]
+  quark_engine_statistics_report_list(objectId: [String], fieldFilter: QuarkEngineStatisticsReportFilter): [QuarkEngineStatisticsReportType]
+  super_statistics_report_list(objectId: [String], fieldFilter: SuperStatisticsReportFilter): [SuperStatisticsReportType]
+  image_file_list(objectIdList: [String], fieldFilter: ImageFileFilter): [ImageFileType]
+  json_file_list(objectIdList: [String], fieldFilter: JsonFileFilter): [JsonFileType]
+  firmware_file_list(objectIdList: [String], fieldFilter: FirmwareFileFilter): [FirmwareFileType]
+  virustotal_report_list(objectIdList: [String], fieldFilter: VirusTotalReportFilter): [VirustotalReportType]
+  statistics_report_list(objectIdList: [String], fieldFilter: StatisticsReportFilter): [StatisticsReportType]
+  qark_report_list(objectIdList: [String], fieldFilter: QarkReportFilter): [QarkReportType]
+  exodus_report_list(objectIdList: [String], fieldFilter: ExodusReportFilter): [ExodusReportType]
+  apkid_report_list(objectIdList: [String], fieldFilter: ApkidReportFilter): [ApkidReportType]
+  androguard_report_list(objectIdList: [String], fieldFilter: AndroGuardReportFilter): [AndroGuardReportType]
+  androwarn_report_list(objectIdList: [String], fieldFilter: AndrowarnReportFilter): [AndrowarnReportType]
+  android_app_list(objectIdList: [String], fieldFilter: AndroidAppFilter): [AndroidAppType]
+  android_app_id_list(objectIdList: [String], fieldFilter: AndroidAppFilter): [String]
+  android_firmware_list(objectIdList: [String], fieldFilter: AndroidFirmwareFilter): [AndroidFirmwareType]
+  android_firmware_id_list(fieldFilter: AndroidFirmwareFilter): [String]
+  users: [UserType]
+  me: UserType
+  store_settings_list(fieldFilter: StoreSettingFilter): [StoreSettingsType]
+  webclient_setting_list: [WebclientSettingType]
+  _debug: DjangoDebug
+
+  """Obtain JSON Web Token mutation"""
+  tokenAuth(username: String!, password: String!): ObtainJSONWebToken
+  verifyToken(token: String): Verify
+  refreshToken(token: String): Refresh
+}
+
+type BuildPropFileType implements Node {
+  """"""
+  firmwareFileIdReference: FirmwareFileType!
+
+  """"""
+  firmwareIdReference: AndroidFirmwareType
+
+  """The ID of the object"""
+  id: ID!
+
+  """"""
+  properties: JSONString!
+  pk: String
+  propertyValues(keys: [String]!): JSONString
+  propertyKeys: [String]
+}
+
+"""An object with an ID"""
+interface Node {
+  """The ID of the object"""
+  id: ID!
+}
+
+type FirmwareFileType implements Node {
+  """"""
+  absoluteStorePath: String!
+
+  """"""
+  androidAppReference: AndroidAppType
+
+  """"""
+  fileSizeBytes: Int
+
+  """"""
+  firmwareIdReference: AndroidFirmwareType
+
+  """The ID of the object"""
+  id: ID!
+
+  """"""
+  indexedDate: DateTime
+
+  """"""
+  isDirectory: Boolean!
+
+  """"""
+  isOnDisk: Boolean
+
+  """"""
+  isSymlink: Boolean
+
+  """"""
+  md5: String
+
+  """"""
+  metaDict: JSONString
+
+  """"""
+  name: String!
+
+  """"""
+  parentDir: String!
+
+  """"""
+  partitionName: String
+
+  """"""
+  relativePath: String!
+
+  """"""
+  tlshReference: TlshHashType
+}
+
+type AndroidAppType implements Node {
+  """"""
+  absoluteStorePath: String
+
+  """"""
+  androguardReportReference: AndroGuardReportType
+
+  """"""
+  androidManifestDict: JSONString
+
+  """"""
+  androwarnReportReference: AndrowarnReportType
+
+  """"""
+  apkidReportReference: ApkidReportType
+
+  """"""
+  apkleaksReportReference: ApkleaksReportType
+
+  """"""
+  exodusReportReference: ExodusReportType
+
+  """"""
+  fileSizeBytes: Int!
+
+  """"""
+  filename: String!
+
+  """"""
+  firmwareFileReference: FirmwareFileType
+
+  """"""
+  firmwareIdReference: AndroidFirmwareType
+
+  """The ID of the object"""
+  id: ID!
+
+  """"""
+  indexedDate: DateTime
+
+  """"""
+  md5: String!
+
+  """"""
+  originalFilename: String
+
+  """"""
+  packagename: String
+
+  """"""
+  partitionName: String
+
+  """"""
+  qarkReportReference: QarkReportType
+
+  """"""
+  quarkEngineReportReference: QuarkEngineReportType
+
+  """"""
+  relativeFirmwarePath: String!
+
+  """"""
+  relativeStorePath: String
+
+  """"""
+  sha1: String!
+
+  """"""
+  sha256: String!
+
+  """"""
+  superReportReference: SuperReportType
+
+  """"""
+  virustotalReportReference: VirustotalReportType
+  pk: String
+  appTwinsReferenceList(before: String, after: String, first: Int, last: Int, absoluteStorePath: String, androidManifestDict: JSONString, fileSizeBytes: Int, filename: String, id: ID, indexedDate: DateTime, md5: String, originalFilename: String, packagename: String, partitionName: String, relativeFirmwarePath: String, relativeStorePath: String, sha1: String, sha256: String, androguardReportReference: ID, androwarnReportReference: ID, apkidReportReference: ID, apkleaksReportReference: ID, apkscanReportReference: ID, exodusReportReference: ID, firmwareFileReference: ID, firmwareIdReference: ID, flowdroidReportReference: ID, mobsfscanReportReference: ID, qarkReportReference: ID, quarkEngineReportReference: ID, superReportReference: ID, trueseeingReportReference: ID, virustotalReportReference: ID): AndroidAppTypeConnection
+  optFirmwareFileReferenceList(before: String, after: String, first: Int, last: Int, absoluteStorePath: String, fileSizeBytes: Int, id: ID, indexedDate: DateTime, isDirectory: Boolean, isOnDisk: Boolean, isSymlink: Boolean, md5: String, metaDict: JSONString, name: String, parentDir: String, partitionName: String, relativePath: String, androidAppReference: ID, firmwareIdReference: ID, sdhashReference: ID, ssdeepReference: ID, tlshReference: ID): FirmwareFileTypeConnection
+  certificateIdList(before: String, after: String, first: Int, last: Int, crlDistributionPointsList: String, deltaCrlDistributionPointsList: String, hashAlgo: String, id: ID, isCa: Boolean, isSelfIssued: Boolean, isSelfSignedStr: String, isValidDomainIp: Boolean, issuer: String, issuerDict: JSONString, issuerSerial: String, keyIdentifier: String, keyIdentifierValue: String, maxPathLengthInt: Int, notValidAfter: DateTime, notValidBefore: DateTime, ocspUrlsList: String, publicKeyAlgorithm: String, publicKeyBitSize: String, publicKeyByteSize: String, publicKeyCurve: String, publicKeyExponent: Int, publicKeyHashAlgoDsa: String, publicKeyModulusN: String, publicKeySha1: String, publicKeySha256: String, serialNumber: String, sha1: String, sha256: String, signature: String, signatureAlgo: String, subject: String, subjectDict: JSONString, validDomainsList: String, validIpsList: String, androidAppIdReference: ID): AppCertificateTypeConnection
+}
+
+type AndroGuardReportType implements Node {
+  """"""
+  Cls: String
+
+  """"""
+  activities: [String]
+
+  """"""
+  androidAppIdReference: AndroidAppType!
+
+  """"""
+  androidVersionCode: String
+
+  """"""
+  androidVersionName: String
+
+  """"""
+  appName: String
+
+  """"""
+  dexNames: [String]
+
+  """"""
+  effectiveTargetVersion: String
+
+  """"""
+  fileNameList: [String]
+
+  """The ID of the object"""
+  id: ID!
+
+  """"""
+  intentFiltersDict: JSONString
+
+  """"""
+  isAndroidtv: Boolean
+
+  """"""
+  isLeanback: Boolean
+
+  """"""
+  isMultidex: Boolean
+
+  """"""
+  isSignedV1: Boolean
+
+  """"""
+  isSignedV2: Boolean
+
+  """"""
+  isSignedV3: Boolean
+
+  """"""
+  isValidApk: Boolean
+
+  """"""
+  isWearable: Boolean
+
+  """"""
+  mainActivity: String
+
+  """"""
+  mainActivityList: [String]
+
+  """"""
+  manifestFeatures: [String]
+
+  """"""
+  manifestLibraries: [String]
+
+  """"""
+  manifestXml: String
+
+  """"""
+  maxSdkVersion: String
+
+  """"""
+  minSdkVersion: String
+
+  """"""
+  packagename: String!
+
+  """"""
+  permissionDetails: JSONString
+
+  """"""
+  permissions: [String]
+
+  """"""
+  permissionsDeclared: [String]
+
+  """"""
+  permissionsDeclaredDetails: JSONString
+
+  """"""
+  permissionsImplied: [String]
+
+  """"""
+  permissionsRequestedThirdParty: [String]
+
+  """"""
+  providers: [String]
+
+  """"""
+  receivers: [String]
+
+  """"""
+  reportDate: DateTime!
+
+  """"""
+  scannerName: String!
+
+  """"""
+  scannerVersion: String!
+
+  """"""
+  services: [String]
+
+  """"""
+  signatureNames: [String]
+
+  """"""
+  targetSdkVersion: String
+}
+
+"""
+Allows use of a JSON String for input / output from the GraphQL schema.
+
+Use of this type is *not recommended* as you lose the benefits of having a defined, static
+schema (one of the key benefits of GraphQL).
+"""
+scalar JSONString
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+type AndrowarnReportType {
+  """"""
+  PIMDataLeakage: [String]
+
+  """"""
+  Cls: String
+
+  """"""
+  androidAppIdReference: AndroidAppType!
+
+  """"""
+  audioVideoEavesdropping: [String]
+
+  """"""
+  codeExecution: [String]
+
+  """"""
+  connectionInterfacesExfiltration: [String]
+
+  """"""
+  deviceSettingsHarvesting: [String]
+
+  """_id"""
+  id: ID
+
+  """"""
+  locationLookup: [String]
+
+  """"""
+  reportDate: DateTime!
+
+  """"""
+  reportFileJson: FileFieldType!
+
+  """"""
+  scannerName: String!
+
+  """"""
+  scannerVersion: String!
+
+  """"""
+  suspiciousConnectionEstablishment: [String]
+
+  """"""
+  telephonyIdentifiersLeakage: [String]
+
+  """"""
+  telephonyServicesAbuse: [String]
+}
+
+type FileFieldType {
+  contentType: String
+  md5: String
+  chunkSize: Int
+  length: Int
+  data: String
+}
+
+type ApkidReportType {
+  """"""
+  Cls: String
+
+  """"""
+  androidAppIdReference: AndroidAppType!
+
+  """"""
+  files: [JSONString]
+
+  """_id"""
+  id: ID
+
+  """"""
+  reportDate: DateTime!
+
+  """"""
+  reportFileJson: FileFieldType!
+
+  """"""
+  rulesSha256: String
+
+  """"""
+  scannerName: String!
+
+  """"""
+  scannerVersion: String!
+}
+
+type ApkleaksReportType {
+  """"""
+  Cls: String
+
+  """"""
+  androidAppIdReference: AndroidAppType!
+
+  """_id"""
+  id: ID
+
+  """"""
+  reportDate: DateTime!
+
+  """"""
+  results: JSONString!
+
+  """"""
+  scannerName: String!
+
+  """"""
+  scannerVersion: String!
+}
+
+type ExodusReportType {
+  """"""
+  Cls: String
+
+  """"""
+  androidAppIdReference: AndroidAppType!
+
+  """_id"""
+  id: ID
+
+  """"""
+  reportDate: DateTime!
+
+  """"""
+  results: JSONString!
+
+  """"""
+  scannerName: String!
+
+  """"""
+  scannerVersion: String!
+}
+
+type AndroidFirmwareType implements Node {
+  """"""
+  absoluteStorePath: String!
+
+  """"""
+  aecsBuildFilePath: String
+
+  """"""
+  fileSizeBytes: Int!
+
+  """"""
+  filename: String!
+
+  """"""
+  hasFileIndex: Boolean
+
+  """"""
+  hasFuzzyHashIndex: Boolean
+
+  """The ID of the object"""
+  id: ID!
+
+  """"""
+  indexedDate: DateTime
+
+  """"""
+  md5: String!
+
+  """"""
+  originalFilename: String!
+
+  """"""
+  osVendor: String!
+
+  """"""
+  partitionInfoDict: JSONString
+
+  """"""
+  relativeStorePath: String!
+
+  """"""
+  sha1: String!
+
+  """"""
+  sha256: String!
+
+  """"""
+  tag: String
+
+  """"""
+  versionDetected: Int
+  pk: String
+  androidAppIdList(before: String, after: String, first: Int, last: Int, absoluteStorePath: String, androidManifestDict: JSONString, fileSizeBytes: Int, filename: String, id: ID, indexedDate: DateTime, md5: String, originalFilename: String, packagename: String, partitionName: String, relativeFirmwarePath: String, relativeStorePath: String, sha1: String, sha256: String, androguardReportReference: ID, androwarnReportReference: ID, apkidReportReference: ID, apkleaksReportReference: ID, apkscanReportReference: ID, exodusReportReference: ID, firmwareFileReference: ID, firmwareIdReference: ID, flowdroidReportReference: ID, mobsfscanReportReference: ID, qarkReportReference: ID, quarkEngineReportReference: ID, superReportReference: ID, trueseeingReportReference: ID, virustotalReportReference: ID): AndroidAppTypeConnection
+  firmwareFileIdList(before: String, after: String, first: Int, last: Int, absoluteStorePath: String, fileSizeBytes: Int, id: ID, indexedDate: DateTime, isDirectory: Boolean, isOnDisk: Boolean, isSymlink: Boolean, md5: String, metaDict: JSONString, name: String, parentDir: String, partitionName: String, relativePath: String, androidAppReference: ID, firmwareIdReference: ID, sdhashReference: ID, ssdeepReference: ID, tlshReference: ID): FirmwareFileTypeConnection
+  buildPropFileIdList(before: String, after: String, first: Int, last: Int, id: ID, properties: JSONString, firmwareFileIdReference: ID, firmwareIdReference: ID): BuildPropFileTypeConnection
+}
+
+type AndroidAppTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [AndroidAppTypeEdge]!
+}
+
+"""
+The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
+"""
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+}
+
+"""A Relay edge containing a `AndroidAppType` and its cursor."""
+type AndroidAppTypeEdge {
+  """The item at the end of the edge"""
+  node: AndroidAppType
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+type FirmwareFileTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [FirmwareFileTypeEdge]!
+}
+
+"""A Relay edge containing a `FirmwareFileType` and its cursor."""
+type FirmwareFileTypeEdge {
+  """The item at the end of the edge"""
+  node: FirmwareFileType
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+type BuildPropFileTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [BuildPropFileTypeEdge]!
+}
+
+"""A Relay edge containing a `BuildPropFileType` and its cursor."""
+type BuildPropFileTypeEdge {
+  """The item at the end of the edge"""
+  node: BuildPropFileType
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+type QarkReportType {
+  """"""
+  Cls: String
+
+  """"""
+  androidAppIdReference: AndroidAppType!
+
+  """_id"""
+  id: ID
+
+  """"""
+  reportDate: DateTime!
+
+  """"""
+  reportFileJson: FileFieldType!
+
+  """"""
+  scannerName: String!
+
+  """"""
+  scannerVersion: String!
+}
+
+type QuarkEngineReportType {
+  """"""
+  Cls: String
+
+  """"""
+  androidAppIdReference: AndroidAppType!
+
+  """_id"""
+  id: ID
+
+  """"""
+  reportDate: DateTime!
+
+  """"""
+  results: JSONString!
+
+  """"""
+  scannerName: String!
+
+  """"""
+  scannerVersion: String!
+}
+
+type SuperReportType {
+  """"""
+  Cls: String
+
+  """"""
+  androidAppIdReference: AndroidAppType!
+
+  """_id"""
+  id: ID
+
+  """"""
+  reportDate: DateTime!
+
+  """"""
+  results: JSONString!
+
+  """"""
+  scannerName: String!
+
+  """"""
+  scannerVersion: String!
+}
+
+type VirustotalReportType {
+  """"""
+  Cls: String
+
+  """"""
+  analysisId: String
+
+  """"""
+  androidAppIdReference: AndroidAppType!
+
+  """"""
+  fileInfo: JSONString
+
+  """_id"""
+  id: ID
+
+  """"""
+  reportDate: DateTime!
+
+  """"""
+  scannerName: String!
+
+  """"""
+  scannerVersion: String!
+
+  """"""
+  virusTotalAnalysis: String
+}
+
+type AppCertificateTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [AppCertificateTypeEdge]!
+}
+
+"""A Relay edge containing a `AppCertificateType` and its cursor."""
+type AppCertificateTypeEdge {
+  """The item at the end of the edge"""
+  node: AppCertificateType
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+type AppCertificateType implements Node {
+  """"""
+  androidAppIdReference: AndroidAppType!
+
+  """"""
+  crlDistributionPointsList: [String]
+
+  """"""
+  deltaCrlDistributionPointsList: [String]
+
+  """"""
+  hashAlgo: String
+
+  """The ID of the object"""
+  id: ID!
+
+  """"""
+  isCa: Boolean
+
+  """"""
+  isSelfIssued: Boolean
+
+  """"""
+  isSelfSignedStr: String
+
+  """"""
+  isValidDomainIp: Boolean
+
+  """"""
+  issuer: String!
+
+  """"""
+  issuerDict: JSONString
+
+  """"""
+  issuerSerial: String
+
+  """"""
+  keyIdentifier: String
+
+  """"""
+  keyIdentifierValue: String
+
+  """"""
+  maxPathLengthInt: Int
+
+  """"""
+  notValidAfter: DateTime!
+
+  """"""
+  notValidBefore: DateTime!
+
+  """"""
+  ocspUrlsList: [String]
+
+  """"""
+  publicKeyAlgorithm: String
+
+  """"""
+  publicKeyBitSize: String
+
+  """"""
+  publicKeyByteSize: String
+
+  """"""
+  publicKeyCurve: String
+
+  """"""
+  publicKeyExponent: Int
+
+  """"""
+  publicKeyHashAlgoDsa: String
+
+  """"""
+  publicKeyModulusN: String
+
+  """"""
+  publicKeySha1: String
+
+  """"""
+  publicKeySha256: String
+
+  """"""
+  serialNumber: String
+
+  """"""
+  sha1: String!
+
+  """"""
+  sha256: String!
+
+  """"""
+  signature: String
+
+  """"""
+  signatureAlgo: String
+
+  """"""
+  subject: String!
+
+  """"""
+  subjectDict: JSONString
+
+  """"""
+  validDomainsList: [String]
+
+  """"""
+  validIpsList: [String]
+}
+
+type TlshHashType {
+  """"""
+  digest: String!
+
+  """"""
+  filename: String
+
+  """"""
+  firmwareFileReference: FirmwareFileType!
+
+  """"""
+  firmwareIdReference: AndroidFirmwareType
+
+  """_id"""
+  id: ID
+}
+
+input BuildPropFileFilter {
+  """Filter by firmware_id_reference"""
+  firmware_id_reference: String
+
+  """Filter by firmware_file_id_reference"""
+  firmware_file_id_reference: String
+
+  """Filter by build_prop_file"""
+  build_prop_file: String
+
+  """Filter by properties"""
+  properties: String
+
+  """Filter by id"""
+  id: String
+}
+
+type FirmwareImporterSettingType {
+  """"""
+  createDate: DateTime
+
+  """_id"""
+  id: ID
+
+  """"""
+  numberOfImporterThreads: Int!
+}
+
+type AecsJobType implements Node {
+  """"""
+  arch: String
+  firmwareIdList(before: String, after: String, first: Int, last: Int, absoluteStorePath: String, aecsBuildFilePath: String, fileSizeBytes: Int, filename: String, hasFileIndex: Boolean, hasFuzzyHashIndex: Boolean, id: ID, indexedDate: DateTime, md5: String, originalFilename: String, osVendor: String, partitionInfoDict: JSONString, relativeStorePath: String, sha1: String, sha256: String, tag: String, versionDetected: Int): AndroidFirmwareTypeConnection
+
+  """The ID of the object"""
+  id: ID!
+  pk: String
+}
+
+type AndroidFirmwareTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [AndroidFirmwareTypeEdge]!
+}
+
+"""A Relay edge containing a `AndroidFirmwareType` and its cursor."""
+type AndroidFirmwareTypeEdge {
+  """The item at the end of the edge"""
+  node: AndroidFirmwareType
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input AecsJobFilter {
+  """Filter by firmware_id_list"""
+  firmware_id_list: [String]
+
+  """Filter by arch"""
+  arch: String
+
+  """Filter by id"""
+  id: String
+}
+
+input AppCertificateFilter {
+  """Filter by android_app_id_reference"""
+  android_app_id_reference: String
+
+  """Filter by sha1"""
+  sha1: String
+
+  """Filter by sha256"""
+  sha256: String
+
+  """Filter by issuer"""
+  issuer: String
+
+  """Filter by subject"""
+  subject: String
+
+  """Filter by issuer_dict"""
+  issuer_dict: String
+
+  """Filter by subject_dict"""
+  subject_dict: String
+
+  """Filter by public_key_modulus_n"""
+  public_key_modulus_n: String
+
+  """Filter by public_key_exponent"""
+  public_key_exponent: String
+
+  """Filter by public_key_sha256"""
+  public_key_sha256: String
+
+  """Filter by public_key_sha1"""
+  public_key_sha1: String
+
+  """Filter by public_key_byte_size"""
+  public_key_byte_size: String
+
+  """Filter by public_key_bit_size"""
+  public_key_bit_size: String
+
+  """Filter by public_key_algorithm"""
+  public_key_algorithm: String
+
+  """Filter by public_key_hash_algo_dsa"""
+  public_key_hash_algo_dsa: String
+
+  """Filter by public_key_curve"""
+  public_key_curve: String
+
+  """Filter by key_identifier_value"""
+  key_identifier_value: String
+
+  """Filter by signature"""
+  signature: String
+
+  """Filter by signature_algo"""
+  signature_algo: String
+
+  """Filter by hash_algo"""
+  hash_algo: String
+
+  """Filter by not_valid_after"""
+  not_valid_after: String
+
+  """Filter by not_valid_before"""
+  not_valid_before: String
+
+  """Filter by crl_distribution_points_list"""
+  crl_distribution_points_list: [String]
+
+  """Filter by delta_crl_distribution_points_list"""
+  delta_crl_distribution_points_list: [String]
+
+  """Filter by ocsp_urls_list"""
+  ocsp_urls_list: [String]
+
+  """Filter by valid_domains_list"""
+  valid_domains_list: [String]
+
+  """Filter by valid_ips_list"""
+  valid_ips_list: [String]
+
+  """Filter by is_ca"""
+  is_ca: String
+
+  """Filter by max_path_length_int"""
+  max_path_length_int: String
+
+  """Filter by is_self_issued"""
+  is_self_issued: String
+
+  """Filter by is_self_signed_str"""
+  is_self_signed_str: String
+
+  """Filter by is_valid_domain_ip"""
+  is_valid_domain_ip: String
+
+  """Filter by issuer_serial"""
+  issuer_serial: String
+
+  """Filter by key_identifier"""
+  key_identifier: String
+
+  """Filter by serial_number"""
+  serial_number: String
+
+  """Filter by generic_file_list"""
+  generic_file_list: [String]
+
+  """Filter by id"""
+  id: String
+}
+
+input TlshHashFilter {
+  """Filter by firmware_id_reference"""
+  firmware_id_reference: String
+
+  """Filter by firmware_file_reference"""
+  firmware_file_reference: String
+
+  """Filter by filename"""
+  filename: String
+
+  """Filter by digest"""
+  digest: String
+
+  """Filter by id"""
+  id: String
+}
+
+type SsDeepClusterAnalysisType {
+  """"""
+  clusterList: [String]
+
+  """"""
+  clusterListFile: FileFieldType!
+
+  """"""
+  gexfFile: FileFieldType!
+
+  """_id"""
+  id: ID
+
+  """"""
+  matchesDict: JSONString
+
+  """"""
+  matchesDictFile: FileFieldType!
+
+  """"""
+  scoresDict: JSONString
+
+  """"""
+  scoresDictFile: FileFieldType!
+
+  """"""
+  ssdeepHashCount: Int!
+
+  """"""
+  ssdeepHashReferenceFile: JsonFileType!
+}
+
+type JsonFileType {
+  """"""
+  file: FileFieldType!
+
+  """_id"""
+  id: ID
+
+  """"""
+  reportDate: DateTime!
+}
+
+input SsDeepClusterAnalysisFilter {
+  """Filter by ssdeep_hash_reference_file"""
+  ssdeep_hash_reference_file: String
+
+  """Filter by ssdeep_hash_count"""
+  ssdeep_hash_count: String
+
+  """Filter by gexf_file"""
+  gexf_file: String
+
+  """Filter by matches_dict_file"""
+  matches_dict_file: String
+
+  """Filter by scores_dict_file"""
+  scores_dict_file: String
+
+  """Filter by cluster_list_file"""
+  cluster_list_file: String
+
+  """Filter by matches_dict"""
+  matches_dict: String
+
+  """Filter by scores_dict"""
+  scores_dict: String
+
+  """Filter by cluster_list"""
+  cluster_list: [String]
+
+  """Filter by id"""
+  id: String
+}
+
+input QuarkEngineReportFilter {
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by android_app_id_reference"""
+  android_app_id_reference: String
+
+  """Filter by scanner_version"""
+  scanner_version: String
+
+  """Filter by scanner_name"""
+  scanner_name: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by results"""
+  results: String
+}
+
+input SuperReportFilter {
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by android_app_id_reference"""
+  android_app_id_reference: String
+
+  """Filter by scanner_version"""
+  scanner_version: String
+
+  """Filter by scanner_name"""
+  scanner_name: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by results"""
+  results: String
+}
+
+type ApkScannerReportType {
+  """"""
+  Cls: String
+
+  """"""
+  androidAppIdReference: AndroidAppType!
+
+  """_id"""
+  id: ID
+
+  """"""
+  reportDate: DateTime!
+
+  """"""
+  scannerName: String!
+
+  """"""
+  scannerVersion: String!
+}
+
+input ApkScannerReportFilter {
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by android_app_id_reference"""
+  android_app_id_reference: String
+
+  """Filter by scanner_version"""
+  scanner_version: String
+
+  """Filter by scanner_name"""
+  scanner_name: String
+
+  """Filter by id"""
+  id: String
+}
+
+type ApkleaksStatisticsReportType {
+  """"""
+  Cls: String
+
+  """"""
+  androidAppCount: Int!
+
+  """"""
+  androidAppReferenceFile: JsonFileType
+
+  """"""
+  googleApiKeysReferences: JsonFileType
+
+  """_id"""
+  id: ID
+
+  """"""
+  leaksCountDict: JSONString
+
+  """"""
+  leaksReferenceDict: JsonFileType
+
+  """"""
+  reportCount: Int!
+
+  """"""
+  reportDate: DateTime!
+
+  """"""
+  reportName: String!
+}
+
+input ApkleaksStatisticsReportFilter {
+  """Filter by report_name"""
+  report_name: String
+
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by report_count"""
+  report_count: String
+
+  """Filter by android_app_reference_file"""
+  android_app_reference_file: String
+
+  """Filter by android_app_count"""
+  android_app_count: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by leaks_reference_dict"""
+  leaks_reference_dict: String
+
+  """Filter by leaks_count_dict"""
+  leaks_count_dict: String
+
+  """Filter by google_api_keys_references"""
+  google_api_keys_references: String
+}
+
+input ApkleaksReportFilter {
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by android_app_id_reference"""
+  android_app_id_reference: String
+
+  """Filter by scanner_version"""
+  scanner_version: String
+
+  """Filter by scanner_name"""
+  scanner_name: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by results"""
+  results: String
+}
+
+type ExodusStatisticsReportType {
+  """"""
+  Cls: String
+
+  """"""
+  androidAppCount: Int!
+
+  """"""
+  androidAppReferenceFile: JsonFileType
+
+  """_id"""
+  id: ID
+
+  """"""
+  numberOfAppsWithNoTrackers: Int
+
+  """"""
+  numberOfAppsWithTrackers: Int
+
+  """"""
+  reportCount: Int!
+
+  """"""
+  reportDate: DateTime!
+
+  """"""
+  reportName: String!
+
+  """"""
+  trackerCountDict: JSONString
+}
+
+input ExodusStatisticsReportFilter {
+  """Filter by report_name"""
+  report_name: String
+
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by report_count"""
+  report_count: String
+
+  """Filter by android_app_reference_file"""
+  android_app_reference_file: String
+
+  """Filter by android_app_count"""
+  android_app_count: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by tracker_count_dict"""
+  tracker_count_dict: String
+
+  """Filter by number_of_apps_with_no_trackers"""
+  number_of_apps_with_no_trackers: String
+
+  """Filter by number_of_apps_with_trackers"""
+  number_of_apps_with_trackers: String
+}
+
+type QuarkEngineStatisticsReportType {
+  """"""
+  Cls: String
+
+  """"""
+  androidAppCount: Int!
+
+  """"""
+  androidAppReferenceFile: JsonFileType
+
+  """_id"""
+  id: ID
+
+  """"""
+  reportCount: Int!
+
+  """"""
+  reportDate: DateTime!
+
+  """"""
+  reportName: String!
+
+  """"""
+  threatLevelCountDict: JSONString
+
+  """"""
+  threatLevelReferenceDict: JsonFileType
+}
+
+input QuarkEngineStatisticsReportFilter {
+  """Filter by report_name"""
+  report_name: String
+
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by report_count"""
+  report_count: String
+
+  """Filter by android_app_reference_file"""
+  android_app_reference_file: String
+
+  """Filter by android_app_count"""
+  android_app_count: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by threat_level_reference_dict"""
+  threat_level_reference_dict: String
+
+  """Filter by threat_level_count_dict"""
+  threat_level_count_dict: String
+}
+
+type SuperStatisticsReportType {
+  """"""
+  Cls: String
+
+  """"""
+  androidAppCount: Int!
+
+  """"""
+  androidAppReferenceFile: JsonFileType
+
+  """_id"""
+  id: ID
+
+  """"""
+  reportCount: Int!
+
+  """"""
+  reportDate: DateTime!
+
+  """"""
+  reportName: String!
+
+  """"""
+  vulnerabilitiesByCategoryCountDict: JSONString
+
+  """"""
+  vulnerabilitiesCountDict: JSONString
+
+  """"""
+  vulnerabilitiesHighCritReferencesFile: JsonFileType
+
+  """"""
+  vulnerabilitiesHighCritUniqueAppCount: Int
+}
+
+input SuperStatisticsReportFilter {
+  """Filter by report_name"""
+  report_name: String
+
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by report_count"""
+  report_count: String
+
+  """Filter by android_app_reference_file"""
+  android_app_reference_file: String
+
+  """Filter by android_app_count"""
+  android_app_count: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by vulnerabilities_count_dict"""
+  vulnerabilities_count_dict: String
+
+  """Filter by vulnerabilities_by_category_count_dict"""
+  vulnerabilities_by_category_count_dict: String
+
+  """Filter by vulnerabilities_high_crit_references_file"""
+  vulnerabilities_high_crit_references_file: String
+
+  """Filter by vulnerabilities_high_crit_unique_app_count"""
+  vulnerabilities_high_crit_unique_app_count: Int
+}
+
+type ImageFileType {
+  """"""
+  file: FileFieldType!
+
+  """"""
+  fileType: String!
+
+  """"""
+  filename: String!
+
+  """_id"""
+  id: ID
+
+  """"""
+  saveDate: DateTime!
+}
+
+input ImageFileFilter {
+  """Filter by save_date"""
+  save_date: String
+
+  """Filter by file"""
+  file: String
+
+  """Filter by filename"""
+  filename: String
+
+  """Filter by file_type"""
+  file_type: String
+
+  """Filter by id"""
+  id: String
+}
+
+input JsonFileFilter {
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by file"""
+  file: String
+
+  """Filter by id"""
+  id: String
+}
+
+input FirmwareFileFilter {
+  """Filter by indexed_date"""
+  indexed_date: String
+
+  """Filter by firmware_id_reference"""
+  firmware_id_reference: String
+
+  """Filter by ssdeep_reference"""
+  ssdeep_reference: String
+
+  """Filter by tlsh_reference"""
+  tlsh_reference: String
+
+  """Filter by sdhash_reference"""
+  sdhash_reference: String
+
+  """Filter by android_app_reference"""
+  android_app_reference: String
+
+  """Filter by name"""
+  name: String
+
+  """Filter by parent_dir"""
+  parent_dir: String
+
+  """Filter by relative_path"""
+  relative_path: String
+
+  """Filter by absolute_store_path"""
+  absolute_store_path: String
+
+  """Filter by is_directory"""
+  is_directory: String
+
+  """Filter by is_symlink"""
+  is_symlink: Boolean
+
+  """Filter by is_on_disk"""
+  is_on_disk: String
+
+  """Filter by md5"""
+  md5: String
+
+  """Filter by partition_name"""
+  partition_name: String
+
+  """Filter by file_size_bytes"""
+  file_size_bytes: String
+
+  """Filter by meta_dict"""
+  meta_dict: JSONString
+
+  """Filter by id"""
+  id: String
+}
+
+input VirusTotalReportFilter {
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by android_app_id_reference"""
+  android_app_id_reference: String
+
+  """Filter by scanner_version"""
+  scanner_version: String
+
+  """Filter by scanner_name"""
+  scanner_name: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by file_info"""
+  file_info: String
+
+  """Filter by analysis_id"""
+  analysis_id: String
+
+  """Filter by virus_total_analysis"""
+  virus_total_analysis: String
+}
+
+type StatisticsReportType {
+  """"""
+  Cls: String
+
+  """"""
+  androidAppCount: Int!
+
+  """"""
+  androidAppReferenceFile: JsonFileType
+
+  """_id"""
+  id: ID
+
+  """"""
+  reportCount: Int!
+
+  """"""
+  reportDate: DateTime!
+
+  """"""
+  reportName: String!
+}
+
+input StatisticsReportFilter {
+  """Filter by report_name"""
+  report_name: String
+
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by report_count"""
+  report_count: String
+
+  """Filter by android_app_reference_file"""
+  android_app_reference_file: String
+
+  """Filter by android_app_count"""
+  android_app_count: String
+
+  """Filter by id"""
+  id: String
+}
+
+input QarkReportFilter {
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by android_app_id_reference"""
+  android_app_id_reference: String
+
+  """Filter by scanner_version"""
+  scanner_version: String
+
+  """Filter by scanner_name"""
+  scanner_name: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by issue_list"""
+  issue_list: [String]
+
+  """Filter by report_file_json"""
+  report_file_json: String
+}
+
+input ExodusReportFilter {
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by android_app_id_reference"""
+  android_app_id_reference: String
+
+  """Filter by scanner_version"""
+  scanner_version: String
+
+  """Filter by scanner_name"""
+  scanner_name: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by results"""
+  results: String
+}
+
+input ApkidReportFilter {
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by android_app_id_reference"""
+  android_app_id_reference: String
+
+  """Filter by scanner_version"""
+  scanner_version: String
+
+  """Filter by scanner_name"""
+  scanner_name: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by report_file_json"""
+  report_file_json: String
+
+  """Filter by rules_sha256"""
+  rules_sha256: String
+
+  """Filter by files"""
+  files: [JSONString]
+}
+
+input AndroGuardReportFilter {
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by android_app_id_reference"""
+  android_app_id_reference: String
+
+  """Filter by scanner_version"""
+  scanner_version: String
+
+  """Filter by scanner_name"""
+  scanner_name: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by packagename"""
+  packagename: String
+
+  """Filter by app_name"""
+  app_name: String
+
+  """Filter by is_multidex"""
+  is_multidex: String
+
+  """Filter by is_valid_APK"""
+  is_valid_APK: String
+
+  """Filter by is_signed_v1"""
+  is_signed_v1: String
+
+  """Filter by is_signed_v2"""
+  is_signed_v2: String
+
+  """Filter by is_signed_v3"""
+  is_signed_v3: String
+
+  """Filter by is_androidtv"""
+  is_androidtv: String
+
+  """Filter by is_leanback"""
+  is_leanback: String
+
+  """Filter by is_wearable"""
+  is_wearable: String
+
+  """Filter by file_name_list"""
+  file_name_list: [String]
+
+  """Filter by android_version_code"""
+  android_version_code: String
+
+  """Filter by android_version_name"""
+  android_version_name: String
+
+  """Filter by min_sdk_version"""
+  min_sdk_version: String
+
+  """Filter by max_sdk_version"""
+  max_sdk_version: String
+
+  """Filter by target_sdk_version"""
+  target_sdk_version: String
+
+  """Filter by effective_target_version"""
+  effective_target_version: String
+
+  """Filter by manifest_xml"""
+  manifest_xml: String
+
+  """Filter by permissions"""
+  permissions: [String]
+
+  """Filter by permission_details"""
+  permission_details: String
+
+  """Filter by permissions_implied"""
+  permissions_implied: [String]
+
+  """Filter by permissions_declared"""
+  permissions_declared: [String]
+
+  """Filter by permissions_declared_details"""
+  permissions_declared_details: String
+
+  """Filter by permissions_requested_third_party"""
+  permissions_requested_third_party: [String]
+
+  """Filter by activities"""
+  activities: [String]
+
+  """Filter by main_activity"""
+  main_activity: String
+
+  """Filter by main_activity_list"""
+  main_activity_list: [String]
+
+  """Filter by manifest_libraries"""
+  manifest_libraries: [String]
+
+  """Filter by manifest_features"""
+  manifest_features: [String]
+
+  """Filter by signature_names"""
+  signature_names: [String]
+
+  """Filter by dex_names"""
+  dex_names: [String]
+
+  """Filter by intent_filters_dict"""
+  intent_filters_dict: String
+
+  """Filter by class_analysis_id_list"""
+  class_analysis_id_list: [String]
+
+  """Filter by string_analysis_id_list"""
+  string_analysis_id_list: [String]
+
+  """Filter by providers"""
+  providers: [String]
+
+  """Filter by services"""
+  services: [String]
+
+  """Filter by receivers"""
+  receivers: [String]
+}
+
+input AndrowarnReportFilter {
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by android_app_id_reference"""
+  android_app_id_reference: String
+
+  """Filter by scanner_version"""
+  scanner_version: String
+
+  """Filter by scanner_name"""
+  scanner_name: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by report_file_json"""
+  report_file_json: String
+
+  """Filter by telephony_identifiers_leakage"""
+  telephony_identifiers_leakage: [String]
+
+  """Filter by device_settings_harvesting"""
+  device_settings_harvesting: [String]
+
+  """Filter by location_lookup"""
+  location_lookup: [String]
+
+  """Filter by connection_interfaces_exfiltration"""
+  connection_interfaces_exfiltration: [String]
+
+  """Filter by telephony_services_abuse"""
+  telephony_services_abuse: [String]
+
+  """Filter by audio_video_eavesdropping"""
+  audio_video_eavesdropping: [String]
+
+  """Filter by suspicious_connection_establishment"""
+  suspicious_connection_establishment: [String]
+
+  """Filter by PIM_data_leakage"""
+  PIM_data_leakage: [String]
+
+  """Filter by code_execution"""
+  code_execution: [String]
+}
+
+input AndroidAppFilter {
+  """Filter by firmware_id_reference"""
+  firmware_id_reference: String
+
+  """Filter by indexed_date"""
+  indexed_date: String
+
+  """Filter by md5"""
+  md5: String
+
+  """Filter by sha256"""
+  sha256: String
+
+  """Filter by sha1"""
+  sha1: String
+
+  """Filter by filename"""
+  filename: String
+
+  """Filter by original_filename"""
+  original_filename: String
+
+  """Filter by packagename"""
+  packagename: String
+
+  """Filter by relative_firmware_path"""
+  relative_firmware_path: String
+
+  """Filter by file_size_bytes"""
+  file_size_bytes: String
+
+  """Filter by absolute_store_path"""
+  absolute_store_path: String
+
+  """Filter by relative_store_path"""
+  relative_store_path: String
+
+  """Filter by androguard_report_reference"""
+  androguard_report_reference: String
+
+  """Filter by virustotal_report_reference"""
+  virustotal_report_reference: String
+
+  """Filter by androwarn_report_reference"""
+  androwarn_report_reference: String
+
+  """Filter by qark_report_reference"""
+  qark_report_reference: String
+
+  """Filter by apkid_report_reference"""
+  apkid_report_reference: String
+
+  """Filter by exodus_report_reference"""
+  exodus_report_reference: String
+
+  """Filter by quark_engine_report_reference"""
+  quark_engine_report_reference: String
+
+  """Filter by super_report_reference"""
+  super_report_reference: String
+
+  """Filter by apkleaks_report_reference"""
+  apkleaks_report_reference: String
+
+  """Filter by mobsfscan_report_reference"""
+  mobsfscan_report_reference: String
+
+  """Filter by apkscan_report_reference"""
+  apkscan_report_reference: String
+
+  """Filter by flowdroid_report_reference"""
+  flowdroid_report_reference: String
+
+  """Filter by trueseeing_report_reference"""
+  trueseeing_report_reference: String
+
+  """Filter by firmware_file_reference"""
+  firmware_file_reference: String
+
+  """Filter by opt_firmware_file_reference_list"""
+  opt_firmware_file_reference_list: [String]
+
+  """Filter by app_twins_reference_list"""
+  app_twins_reference_list: [String]
+
+  """Filter by certificate_id_list"""
+  certificate_id_list: [String]
+
+  """Filter by generic_file_list"""
+  generic_file_list: [String]
+
+  """Filter by android_manifest_dict"""
+  android_manifest_dict: JSONString
+
+  """Filter by partition_name"""
+  partition_name: String
+
+  """Filter by id"""
+  id: String
+}
+
+input AndroidFirmwareFilter {
+  """Filter by indexed_date"""
+  indexed_date: String
+
+  """Filter by file_size_bytes"""
+  file_size_bytes: String
+
+  """Filter by tag"""
+  tag: String
+
+  """Filter by relative_store_path"""
+  relative_store_path: String
+
+  """Filter by absolute_store_path"""
+  absolute_store_path: String
+
+  """Filter by original_filename"""
+  original_filename: String
+
+  """Filter by filename"""
+  filename: String
+
+  """Filter by md5"""
+  md5: String
+
+  """Filter by sha256"""
+  sha256: String
+
+  """Filter by sha1"""
+  sha1: String
+
+  """Filter by build_prop_file_id_list"""
+  build_prop_file_id_list: [String]
+
+  """Filter by android_app_id_list"""
+  android_app_id_list: [String]
+
+  """Filter by has_file_index"""
+  has_file_index: Boolean
+
+  """Filter by has_fuzzy_hash_index"""
+  has_fuzzy_hash_index: Boolean
+
+  """Filter by aecs_build_file_path"""
+  aecs_build_file_path: String
+
+  """Filter by firmware_file_id_list"""
+  firmware_file_id_list: [String]
+
+  """Filter by version_detected"""
+  version_detected: Int
+
+  """Filter by os_vendor"""
+  os_vendor: String
+
+  """Filter by partition_info_dict"""
+  partition_info_dict: JSONString
+
+  """Filter by id"""
+  id: String
+}
+
+type UserType {
+  id: ID!
+  lastLogin: DateTime
+
+  """
+  Designates that this user has all permissions without explicitly assigning them.
+  """
+  isSuperuser: Boolean!
+
+  """Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."""
+  username: String!
+  firstName: String!
+  lastName: String!
+  email: String!
+
+  """Designates whether the user can log into this admin site."""
+  isStaff: Boolean!
+
+  """
+  Designates whether this user should be treated as active. Unselect this instead of deleting accounts.
+  """
+  isActive: Boolean!
+  dateJoined: DateTime!
+}
+
+type StoreSettingsType {
+  """"""
+  createDate: DateTime
+
+  """_id"""
+  id: ID
+
+  """"""
+  isActive: Boolean!
+
+  """"""
+  storageRoot: String!
+
+  """"""
+  storeOptionsDict: JSONString!
+
+  """"""
+  uuid: String!
+}
+
+input StoreSettingFilter {
+  """Filter by create_date"""
+  create_date: String
+
+  """Filter by server_setting_reference"""
+  server_setting_reference: String
+
+  """Filter by store_options_dict"""
+  store_options_dict: String
+
+  """Filter by is_active"""
+  is_active: Boolean
+
+  """Filter by uuid"""
+  uuid: String
+
+  """Filter by storage_root"""
+  storage_root: String
+
+  """Filter by id"""
+  id: String
+}
+
+type WebclientSettingType {
+  """"""
+  activeScannersDict: JSONString!
+
+  """"""
+  createDate: DateTime
+
+  """_id"""
+  id: ID
+
+  """"""
+  isFirmwareUploadActive: Boolean!
+
+  """"""
+  isSignupActive: Boolean!
+}
+
+"""Debugging information for the current query."""
+type DjangoDebug {
+  """Executed SQL queries for this API query."""
+  sql: [DjangoDebugSQL]
+
+  """Raise exceptions for this API query."""
+  exceptions: [DjangoDebugException]
+}
+
+"""Represents a single database query made to a Django managed DB."""
+type DjangoDebugSQL {
+  """The type of database being used (e.g. postrgesql, mysql, sqlite)."""
+  vendor: String!
+
+  """The Django database alias (e.g. 'default')."""
+  alias: String!
+
+  """The actual SQL sent to this database."""
+  sql: String
+
+  """Duration of this database query in seconds."""
+  duration: Float!
+
+  """The raw SQL of this query, without params."""
+  rawSql: String!
+
+  """JSON encoded database query parameters."""
+  params: String!
+
+  """Start time of this database query."""
+  startTime: Float!
+
+  """Stop time of this database query."""
+  stopTime: Float!
+
+  """Whether this database query took more than 10 seconds."""
+  isSlow: Boolean!
+
+  """Whether this database query was a SELECT."""
+  isSelect: Boolean!
+
+  """Postgres transaction ID if available."""
+  transId: String
+
+  """Postgres transaction status if available."""
+  transStatus: String
+
+  """Postgres isolation level if available."""
+  isoLevel: String
+
+  """Postgres connection encoding if available."""
+  encoding: String
+}
+
+"""Represents a single exception raised."""
+type DjangoDebugException {
+  """The class of the exception"""
+  excType: String!
+
+  """The message of the exception"""
+  message: String!
+
+  """The stack trace"""
+  stack: String!
+}
+
+"""Obtain JSON Web Token mutation"""
+type ObtainJSONWebToken {
+  payload: GenericScalar!
+  refreshExpiresIn: Int!
+  token: String!
+}
+
+"""
+The `GenericScalar` scalar type represents a generic
+GraphQL scalar value that could be:
+String, Boolean, Int, Float, List or Object.
+"""
+scalar GenericScalar
+
+type Verify {
+  payload: GenericScalar!
+}
+
+type Refresh {
+  payload: GenericScalar!
+  refreshExpiresIn: Int!
+  token: String!
+}
+
+type Mutation {
+  updateFirmwareImporterSetting(
+    """The number of threads to use for the firmware importer."""
+    numberOfImporterThreads: Int! = 5
+    queueName: String! = "default-python"
+  ): UpdateFirmwareImportSetting
+  createVirustotalScanJob(objectIdList: [String!]!, queueName: String! = "default-python", vtApiKey: String!): CreateVirusTotalScanJob
+  exportFirmwareFile(filenameRegex: String!, firmwareIdList: [String!]!, queueName: String! = "high-python", storeSettingId: String!): ExportFirmwareFileByRegexMutation
+  deleteAndroidFirmware(firmwareIdList: [String!]!, queueName: String! = "default-python"): DeleteAndroidFirmwareMutation
+
+  """
+  Starts the firmware extractor module. The extractor module is used to import firmware from the "firmware_import"
+  directory to the database. Only one instance of the extractor module is allowed to run.
+  """
+  createFirmwareExtractorJob(createFuzzyHashes: Boolean!, queueName: String! = "high-python", storageIndex: Int! = 0): CreateFirmwareExtractorJob
+
+  """
+  Starts the fuzzy hasher module. The fuzzy hasher module is used to create fuzzy hashes for all firmware files in
+  the given firmware list.
+  """
+  createFuzzyHashesJob(firmwareIdList: [String!], queueName: String! = "high-python", storageIndex: Int! = 0): CreateFuzzyHashesJob
+
+  """
+  First, copies the firmware into the importer queue. Second, deletes the firmware from the database and runs
+  the importer.
+  """
+  createFirmwareReImportJob(createFuzzyHashes: Boolean = false, firmwareIdList: [String!]!, queueName: String! = "high-python"): CreateFirmwareReImportJob
+
+  """
+  Create or update the aecs-job. There can only be one aecs-job in the database. In case a new
+  job is created the old will be overwritten by the new. The aecs-job is used to store a
+  list of firmware ids for further processing by the aecs-service.
+  """
+  updateOrCreateAecsJob(acesJobId: String, arch: String, firmwareIdList: [String], queueName: String = "default-python"): UpdateOrCreateAECSJob
+
+  """Deletes the aecs-job from the database."""
+  deleteAecsJob(acesJobIdList: [String!]!): DeleteAecsJob
+
+  """
+  Starts the service to create app build files ("Android.mk" or "Android.bp") for specific firmware. These build
+  files can be used in the Android Open Source Project to create custom firmware that includes the specific apk files.
+  """
+  createAecsBuildFilesJob(firmwareIdList: [String!], formatName: String!, queueName: String! = "high-python", skipFileExport: Boolean = false): CreateAECSBuildFilesJob
+
+  """
+  Create a RQ job for modules that scan apk files (static-analysis). Only module names from the class:'ModuleNames'
+  are accepted. Every module uses an own python interpreter and the module is loaded during runtime.
+  """
+  createApkScanJob(firmwareIdList: [String!] = [], kwargs: JSONString! = "\"{}\"", moduleName: String!, objectIdList: [String!] = [], queueName: String! = "default-python"): CreateApkScanJob
+  createAppImportJob(queueName: String! = "high-python", storageIndex: Int! = 0): CreateAppImportJob
+  _debug: DjangoDebug
+  deleteTokenCookie: DeleteJSONWebTokenCookie
+  deleteRefreshTokenCookie: DeleteRefreshTokenCookie
+}
+
+type UpdateFirmwareImportSetting {
+  jobId: String
+}
+
+type CreateVirusTotalScanJob {
+  jobIdList: [String]
+}
+
+type ExportFirmwareFileByRegexMutation {
+  jobId: String
+}
+
+type DeleteAndroidFirmwareMutation {
+  jobId: String
+}
+
+"""
+Starts the firmware extractor module. The extractor module is used to import firmware from the "firmware_import"
+directory to the database. Only one instance of the extractor module is allowed to run.
+"""
+type CreateFirmwareExtractorJob {
+  jobId: String
+}
+
+"""
+Starts the fuzzy hasher module. The fuzzy hasher module is used to create fuzzy hashes for all firmware files in
+the given firmware list.
+"""
+type CreateFuzzyHashesJob {
+  jobId: String
+}
+
+"""
+First, copies the firmware into the importer queue. Second, deletes the firmware from the database and runs
+the importer.
+"""
+type CreateFirmwareReImportJob {
+  jobId: String
+}
+
+"""
+Create or update the aecs-job. There can only be one aecs-job in the database. In case a new
+job is created the old will be overwritten by the new. The aecs-job is used to store a
+list of firmware ids for further processing by the aecs-service.
+"""
+type UpdateOrCreateAECSJob {
+  jobId: String
+}
+
+"""Deletes the aecs-job from the database."""
+type DeleteAecsJob {
+  isSuccess: Boolean
+}
+
+"""
+Starts the service to create app build files ("Android.mk" or "Android.bp") for specific firmware. These build
+files can be used in the Android Open Source Project to create custom firmware that includes the specific apk files.
+"""
+type CreateAECSBuildFilesJob {
+  jobIdList: [String]
+}
+
+"""
+Create a RQ job for modules that scan apk files (static-analysis). Only module names from the class:'ModuleNames'
+are accepted. Every module uses an own python interpreter and the module is loaded during runtime.
+"""
+type CreateApkScanJob {
+  jobIdList: [String]
+}
+
+type CreateAppImportJob {
+  jobId: String
+}
+
+type DeleteJSONWebTokenCookie {
+  deleted: Boolean!
+}
+
+type DeleteRefreshTokenCookie {
+  deleted: Boolean!
+}

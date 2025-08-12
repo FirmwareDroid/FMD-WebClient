@@ -25,7 +25,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "build_docker_image": "docker build ./ -f ./Dockerfile -t firmwaredroid-frontend --platform=\"linux/amd64\"",
-    "dev_deploy": "vite build && rm -R -f ../FirmwareDroid/firmware-droid-client/build/ && cp -v -r ./dist ../FirmwareDroid/firmware-droid-client/build/"
+    "dev_deploy": "vite build && rm -R -f ../FirmwareDroid/firmware-droid-client/build/ && cp -v -r ./dist ../FirmwareDroid/firmware-droid-client/build/",
+    "schema:export": "docker compose exec -T web sh -lc 'cd /var/www/source && python manage.py graphql_schema --schema api.v2.schema.FirmwareDroidRootSchema.schema --out /var/www/firmware-droid-client/schema/schema.graphql --indent 2'",
+    "codegen": "graphql-codegen",
+    "codegen:all": "yarn schema:export && yarn codegen"
   },
   "eslintConfig": {
     "extends": [
@@ -46,6 +49,9 @@
     ]
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.7",
+    "@graphql-codegen/client-preset": "^4.8.3",
+    "@graphql-typed-document-node/core": "^3.2.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",
