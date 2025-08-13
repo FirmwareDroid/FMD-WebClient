@@ -1,19 +1,19 @@
 import {useEffect, useState} from 'react';
 import { useQuery } from "@apollo/client";
-import { CURRENT_USER } from "../../graphql/queries";
+import {GET_CURRENT_USER} from "../../graphql/current-user.graphql";
 
 
 export const useAuthentication = () => {
-  const [isAuthenticated, setAuthenticated] = useState(false);
-  const { data, error } = useQuery(CURRENT_USER);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { error, data } = useQuery(GET_CURRENT_USER);
 
   useEffect(() => {
     if (data?.me?.id) {
-      setAuthenticated(true);
+      setIsAuthenticated(true);
     } else {
-      setAuthenticated(false);
+      setIsAuthenticated(false);
     }
   }, [data, error]);
 
-  return { isAuthenticated, setAuthenticated };
+  return { isAuthenticated, setAuthenticated: setIsAuthenticated };
 };

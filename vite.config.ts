@@ -6,7 +6,7 @@ export default defineConfig({
     build: {
         outDir: 'build',
     },
-    // Bootstrap's internal SCSS is still using @import and some legacy color/math helpers.
+    // Bootstrap's internal SCSS is still using deprecated @import and some legacy color/math helpers.
     // To make the build process less noisy, related warnings are silenced.
     css: {
         preprocessorOptions: {

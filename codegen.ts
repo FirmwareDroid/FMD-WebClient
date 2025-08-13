@@ -2,8 +2,8 @@ import type {CodegenConfig} from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
     schema: './schema/schema.graphql',
-    // this assumes that all your source files are in a top-level `src/` directory - you might need to adjust this to your file structure
-    documents: ['src/**/*.{ts,tsx}'],
+    // All GraphQL queries/mutations/subscriptions must be in src/graphql/ and end with .graphql.ts(x)
+    documents: ['src/graphql/**/*.graphql.{ts,tsx}'],
     generates: {
         './src/__generated__/': {
             preset: 'client',

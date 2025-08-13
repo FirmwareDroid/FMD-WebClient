@@ -5,14 +5,14 @@ import { GlobalStyles } from './assets/theming/global';
 import { useDarkMode } from './hooks/theming/useDarkMode';
 import {Container, Spinner} from "react-bootstrap";
 import { useQuery } from "@apollo/client";
-import {HEALTH_QUERY} from "./graphql/queries"
 import LandingPage from "./pages/LandingPage";
 import TopNavbar from "./components/navigation/navbar/TopNavbar";
+import {GET_API_HEALTH} from "./graphql/api-health.graphql";
 
 function App() {
   const [theme, toggleTheme, componentMounted] = useDarkMode();
   const themeMode = theme === 'light' ? lightTheme : darkTheme;
-  const { loading, error } = useQuery(HEALTH_QUERY);
+  const { loading, error, data } = useQuery(GET_API_HEALTH);
 
   if (!componentMounted || loading) {
     return (
@@ -27,15 +27,19 @@ function App() {
     return `Error! ${error.message}`;
   }
 
-  return (
-    <Container fluid className="p-0">
-      <ThemeProvider theme={themeMode}>
-        <GlobalStyles />
-        <TopNavbar theme={theme} />
-        <LandingPage />
-      </ThemeProvider>
-    </Container>
-  );
+  if (data?.isApiUp) {
+      return (
+          <Container fluid className="p-0">
+              <ThemeProvider theme={themeMode}>
+                  <GlobalStyles />
+                  <TopNavbar theme={theme} />
+                  <LandingPage />
+              </ThemeProvider>
+          </Container>
+      );
+  }
+
+  return "API is down!";
 }
 
 export default App;

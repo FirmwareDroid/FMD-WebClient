@@ -2,15 +2,15 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthentication } from '../hooks/login/useAuthentication';
 import { useMutation } from "@apollo/client";
-import { DELETE_TOKEN_COOKIE } from "../graphql/mutations";
 import { Container, Spinner, Alert } from "react-bootstrap";
+import {DELETE_TOKEN_COOKIE} from "../graphql/auth.graphql";
 
 const LogoutPage = () => {
   const navigate = useNavigate();
   const { setAuthenticated } = useAuthentication();
   const [logout, { loading, error }] = useMutation(DELETE_TOKEN_COOKIE, {
     onCompleted: (data) => {
-      if (data.deleteTokenCookie.deleted === true) {
+      if (data.deleteTokenCookie?.deleted) {
         setAuthenticated(false);
         navigate("/", { replace: true });
         window.location.reload();

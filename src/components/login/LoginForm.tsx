@@ -4,8 +4,8 @@ import Button from "react-bootstrap/esm/Button";
 import { useNavigate } from 'react-router-dom';
 import { Alert, Container, Spinner } from "react-bootstrap";
 import { useLazyQuery } from "@apollo/client";
-import { TOKEN_AUTH } from "../../graphql/queries";
 import { useAuthentication } from "../../hooks/login/useAuthentication";
+import {GET_AUTH_TOKEN} from "../../graphql/auth.graphql";
 
 const LoginForm = () => {
   let renderResponse;
@@ -15,7 +15,7 @@ const LoginForm = () => {
   const [username, setUsername] = useState("");
   const {isAuthenticated, setAuthenticated} = useAuthentication();
 
-  let [login, {loading, data, error}] = useLazyQuery(TOKEN_AUTH, {
+  let [login, {loading, data, error}] = useLazyQuery(GET_AUTH_TOKEN, {
     onCompleted: (data) => {
       setAuthenticated(true)
       navigate("/", {replace: true});
