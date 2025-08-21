@@ -17,7 +17,7 @@ export default function ProtectedLayout() {
         <div className="[--header-height:calc(--spacing(14))]">
             <SidebarProvider className="flex flex-col">
                 <SiteHeader/>
-                <div className="flex flex-1">
+                <div className="flex flex-1 overflow-x-hidden">
                     <AppSidebar/>
                     <SidebarInset>
                         <Outlet/>
