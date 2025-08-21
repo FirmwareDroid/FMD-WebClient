@@ -1,6 +1,6 @@
 import {StrictMode} from 'react'
 import {createRoot} from 'react-dom/client'
-import App from './App.tsx'
+import App from './app.tsx'
 import {ApolloProvider} from "@apollo/client";
 import {client} from "./lib/graphql/apolloClient.ts";
 import {BrowserRouter} from "react-router";

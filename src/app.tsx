@@ -1,7 +1,7 @@
 import {Navigate, Route, Routes} from "react-router";
 import LoginPage from "@/pages/login-page.tsx";
-import PublicOnlyRoute from "@/routes/PublicOnlyRoute.tsx";
-import ProtectedLayout from "@/routes/ProtectedLayout.tsx";
+import PublicOnlyRoute from "@/routes/public-only-route.tsx";
+import ProtectedLayout from "@/routes/protected-layout.tsx";
 import HomePage from "@/pages/home-page.tsx";
 import EmulatorPage from "@/pages/EmulatorPage";
 import {ImporterPage} from "@/pages/importer-page.tsx";
