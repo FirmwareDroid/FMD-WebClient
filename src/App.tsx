@@ -1,45 +1,31 @@
-import React from "react";
-import { ThemeProvider } from 'styled-components';
-import { lightTheme, darkTheme } from './assets/theming/theme';
-import { GlobalStyles } from './assets/theming/global';
-import { useDarkMode } from './hooks/theming/useDarkMode';
-import {Container, Spinner} from "react-bootstrap";
-import { useQuery } from "@apollo/client";
-import LandingPage from "./pages/LandingPage";
-import TopNavbar from "./components/navigation/navbar/TopNavbar";
-import {GET_API_HEALTH} from "./graphql/api-health.graphql";
+import {Navigate, Route, Routes} from "react-router";
+import LoginPage from "@/pages/login-page.tsx";
+import PublicOnlyRoute from "@/routes/PublicOnlyRoute.tsx";
+import ProtectedLayout from "@/routes/ProtectedLayout.tsx";
+import HomePage from "@/pages/home-page.tsx";
+import EmulatorPage from "@/pages/EmulatorPage";
+import {ImporterPage} from "@/pages/importer-page.tsx";
+import {ScannerPage} from "@/pages/scanner-page.tsx";
+import {FirmwaresPage} from "@/pages/firmwares-page.tsx";
 
 function App() {
-  const [theme, toggleTheme, componentMounted] = useDarkMode();
-  const themeMode = theme === 'light' ? lightTheme : darkTheme;
-  const { loading, error, data } = useQuery(GET_API_HEALTH);
-
-  if (!componentMounted || loading) {
     return (
-      <Container className={"text-center"}>
-        <Spinner variant="success" animation="grow" role="status" />
-        <span>Loading...</span>
-      </Container>
+        <Routes>
+            <Route element={<PublicOnlyRoute/>}>
+                <Route path="/login" element={<LoginPage/>}/>
+            </Route>
+
+            <Route element={<ProtectedLayout/>}>
+                <Route path="/" element={<HomePage/>}/>
+                <Route path="/importer" element={<ImporterPage/>}/>
+                <Route path="/scanner" element={<ScannerPage/>}/>
+                <Route path="/emulator" element={<EmulatorPage/>}/>
+                <Route path="/firmwares" element={<FirmwaresPage/>}/>
+                <Route path="*" element={<Navigate to="/" replace/>}/>
+                {/*<Route path="*" element={<NotFoundPage/>}/>*/} {/*TOOD: Add 404 page?*/}
+            </Route>
+        </Routes>
     );
-  }
-
-  if (error) {
-    return `Error! ${error.message}`;
-  }
-
-  if (data?.isApiUp) {
-      return (
-          <Container fluid className="p-0">
-              <ThemeProvider theme={themeMode}>
-                  <GlobalStyles />
-                  <TopNavbar theme={theme} />
-                  <LandingPage />
-              </ThemeProvider>
-          </Container>
-      );
-  }
-
-  return "API is down!";
 }
 
-export default App;
+export default App

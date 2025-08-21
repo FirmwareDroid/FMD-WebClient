@@ -15,15 +15,43 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  */
 type Documents = {
     "\n    query GetApiHealth {\n        isApiUp\n    }\n": typeof types.GetApiHealthDocument,
+    "\n    query GetApkObjectIdsByFirmwareObjectIds {\n        android_app_id_list\n    }\n": typeof types.GetApkObjectIdsByFirmwareObjectIdsDocument,
+    "\n    fragment AppTableRowScanner on AndroidAppType {\n        id\n    }\n": typeof types.AppTableRowScannerFragmentDoc,
+    "\n    query GetAppsByObjectIdsScanner($objectIds: [String!]!) {\n        android_app_list(objectIdList: $objectIds) {\n            ...AppTableRowScanner\n        }\n    }\n": typeof types.GetAppsByObjectIdsScannerDocument,
+    "\n    mutation CreateApkScanJob($objectIds: [String!]!, $scannerName: String!) {\n        createApkScanJob(\n            moduleName: $scannerName\n            objectIdList: $objectIds\n            queueName: \"high-python\"\n        ) {\n            jobIdList\n        }\n    }\n": typeof types.CreateApkScanJobDocument,
     "\n    query GetAuthToken($password: String!, $username: String!) {\n        tokenAuth(password: $password, username: $username) {\n            token\n        }\n    }\n": typeof types.GetAuthTokenDocument,
     "\n    mutation DeleteTokenCookie {\n        deleteTokenCookie {\n            deleted\n        }\n    }\n": typeof types.DeleteTokenCookieDocument,
-    "\n    query GetCurrentUser {\n        me {\n            email\n            firstName\n            isActive\n            isStaff\n            isSuperuser\n            lastLogin\n            lastName\n            username\n            dateJoined\n            id\n        }\n    }\n": typeof types.GetCurrentUserDocument,
+    "\n    query GetCurrentUserId {\n        me {\n            id\n        }\n    }\n": typeof types.GetCurrentUserIdDocument,
+    "\n    query GetCurrentUserEmailAndUsername {\n        me {\n            email\n            username\n        }\n    }\n": typeof types.GetCurrentUserEmailAndUsernameDocument,
+    "\n    mutation CreateFirmwareExtractorJob($storageIndex: Int!) {\n        createFirmwareExtractorJob(\n            createFuzzyHashes: false\n            queueName: \"high-python\"\n            storageIndex: $storageIndex\n        ) {\n            jobId\n        }\n    }\n": typeof types.CreateFirmwareExtractorJobDocument,
+    "\n    query GetFirmwareObjectIdList {\n        android_firmware_id_list\n    }\n": typeof types.GetFirmwareObjectIdListDocument,
+    "\n    fragment FirmwareTableRow on AndroidFirmwareType {\n        id\n        absoluteStorePath\n        aecsBuildFilePath\n#        fileSizeBytes\n        filename\n        hasFileIndex\n        hasFuzzyHashIndex\n        indexedDate\n        md5\n        originalFilename\n        osVendor\n#        partitionInfoDict\n        relativeStorePath\n        sha1\n        sha256\n        tag\n        versionDetected\n        pk\n    }\n": typeof types.FirmwareTableRowFragmentDoc,
+    "\n    query GetFirmwaresByObjectIds($objectIds: [String!]!) {\n        android_firmware_list(objectIdList: $objectIds) {\n            ...FirmwareTableRow\n        }\n    }\n": typeof types.GetFirmwaresByObjectIdsDocument,
+    "\n    fragment FirmwareTableRowImporter on AndroidFirmwareType {\n        id\n        indexedDate\n        originalFilename\n        osVendor\n        versionDetected\n    }\n": typeof types.FirmwareTableRowImporterFragmentDoc,
+    "\n    query GetFirmwaresByObjectIdsImporter($objectIds: [String!]!) {\n        android_firmware_list(objectIdList: $objectIds) {\n            ...FirmwareTableRowImporter\n        }\n    }\n": typeof types.GetFirmwaresByObjectIdsImporterDocument,
+    "\n    fragment FirmwareTableRowScanner on AndroidFirmwareType {\n        id\n        originalFilename\n    }\n": typeof types.FirmwareTableRowScannerFragmentDoc,
+    "\n    query GetFirmwaresByObjectIdsScanner($objectIds: [String!]!) {\n        android_firmware_list(objectIdList: $objectIds) {\n            ...FirmwareTableRowScanner\n        }\n    }\n": typeof types.GetFirmwaresByObjectIdsScannerDocument,
+    "\n    mutation DeleteFirmwareByObjectId($objectIds: [String!]!) {\n        deleteAndroidFirmware(firmwareIdList: $objectIds) {\n            jobId\n        }\n    }\n": typeof types.DeleteFirmwareByObjectIdDocument,
 };
 const documents: Documents = {
     "\n    query GetApiHealth {\n        isApiUp\n    }\n": types.GetApiHealthDocument,
+    "\n    query GetApkObjectIdsByFirmwareObjectIds {\n        android_app_id_list\n    }\n": types.GetApkObjectIdsByFirmwareObjectIdsDocument,
+    "\n    fragment AppTableRowScanner on AndroidAppType {\n        id\n    }\n": types.AppTableRowScannerFragmentDoc,
+    "\n    query GetAppsByObjectIdsScanner($objectIds: [String!]!) {\n        android_app_list(objectIdList: $objectIds) {\n            ...AppTableRowScanner\n        }\n    }\n": types.GetAppsByObjectIdsScannerDocument,
+    "\n    mutation CreateApkScanJob($objectIds: [String!]!, $scannerName: String!) {\n        createApkScanJob(\n            moduleName: $scannerName\n            objectIdList: $objectIds\n            queueName: \"high-python\"\n        ) {\n            jobIdList\n        }\n    }\n": types.CreateApkScanJobDocument,
     "\n    query GetAuthToken($password: String!, $username: String!) {\n        tokenAuth(password: $password, username: $username) {\n            token\n        }\n    }\n": types.GetAuthTokenDocument,
     "\n    mutation DeleteTokenCookie {\n        deleteTokenCookie {\n            deleted\n        }\n    }\n": types.DeleteTokenCookieDocument,
-    "\n    query GetCurrentUser {\n        me {\n            email\n            firstName\n            isActive\n            isStaff\n            isSuperuser\n            lastLogin\n            lastName\n            username\n            dateJoined\n            id\n        }\n    }\n": types.GetCurrentUserDocument,
+    "\n    query GetCurrentUserId {\n        me {\n            id\n        }\n    }\n": types.GetCurrentUserIdDocument,
+    "\n    query GetCurrentUserEmailAndUsername {\n        me {\n            email\n            username\n        }\n    }\n": types.GetCurrentUserEmailAndUsernameDocument,
+    "\n    mutation CreateFirmwareExtractorJob($storageIndex: Int!) {\n        createFirmwareExtractorJob(\n            createFuzzyHashes: false\n            queueName: \"high-python\"\n            storageIndex: $storageIndex\n        ) {\n            jobId\n        }\n    }\n": types.CreateFirmwareExtractorJobDocument,
+    "\n    query GetFirmwareObjectIdList {\n        android_firmware_id_list\n    }\n": types.GetFirmwareObjectIdListDocument,
+    "\n    fragment FirmwareTableRow on AndroidFirmwareType {\n        id\n        absoluteStorePath\n        aecsBuildFilePath\n#        fileSizeBytes\n        filename\n        hasFileIndex\n        hasFuzzyHashIndex\n        indexedDate\n        md5\n        originalFilename\n        osVendor\n#        partitionInfoDict\n        relativeStorePath\n        sha1\n        sha256\n        tag\n        versionDetected\n        pk\n    }\n": types.FirmwareTableRowFragmentDoc,
+    "\n    query GetFirmwaresByObjectIds($objectIds: [String!]!) {\n        android_firmware_list(objectIdList: $objectIds) {\n            ...FirmwareTableRow\n        }\n    }\n": types.GetFirmwaresByObjectIdsDocument,
+    "\n    fragment FirmwareTableRowImporter on AndroidFirmwareType {\n        id\n        indexedDate\n        originalFilename\n        osVendor\n        versionDetected\n    }\n": types.FirmwareTableRowImporterFragmentDoc,
+    "\n    query GetFirmwaresByObjectIdsImporter($objectIds: [String!]!) {\n        android_firmware_list(objectIdList: $objectIds) {\n            ...FirmwareTableRowImporter\n        }\n    }\n": types.GetFirmwaresByObjectIdsImporterDocument,
+    "\n    fragment FirmwareTableRowScanner on AndroidFirmwareType {\n        id\n        originalFilename\n    }\n": types.FirmwareTableRowScannerFragmentDoc,
+    "\n    query GetFirmwaresByObjectIdsScanner($objectIds: [String!]!) {\n        android_firmware_list(objectIdList: $objectIds) {\n            ...FirmwareTableRowScanner\n        }\n    }\n": types.GetFirmwaresByObjectIdsScannerDocument,
+    "\n    mutation DeleteFirmwareByObjectId($objectIds: [String!]!) {\n        deleteAndroidFirmware(firmwareIdList: $objectIds) {\n            jobId\n        }\n    }\n": types.DeleteFirmwareByObjectIdDocument,
 };
 
 /**
@@ -47,6 +75,22 @@ export function gql(source: "\n    query GetApiHealth {\n        isApiUp\n    }\
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function gql(source: "\n    query GetApkObjectIdsByFirmwareObjectIds {\n        android_app_id_list\n    }\n"): (typeof documents)["\n    query GetApkObjectIdsByFirmwareObjectIds {\n        android_app_id_list\n    }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    fragment AppTableRowScanner on AndroidAppType {\n        id\n    }\n"): (typeof documents)["\n    fragment AppTableRowScanner on AndroidAppType {\n        id\n    }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    query GetAppsByObjectIdsScanner($objectIds: [String!]!) {\n        android_app_list(objectIdList: $objectIds) {\n            ...AppTableRowScanner\n        }\n    }\n"): (typeof documents)["\n    query GetAppsByObjectIdsScanner($objectIds: [String!]!) {\n        android_app_list(objectIdList: $objectIds) {\n            ...AppTableRowScanner\n        }\n    }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    mutation CreateApkScanJob($objectIds: [String!]!, $scannerName: String!) {\n        createApkScanJob(\n            moduleName: $scannerName\n            objectIdList: $objectIds\n            queueName: \"high-python\"\n        ) {\n            jobIdList\n        }\n    }\n"): (typeof documents)["\n    mutation CreateApkScanJob($objectIds: [String!]!, $scannerName: String!) {\n        createApkScanJob(\n            moduleName: $scannerName\n            objectIdList: $objectIds\n            queueName: \"high-python\"\n        ) {\n            jobIdList\n        }\n    }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function gql(source: "\n    query GetAuthToken($password: String!, $username: String!) {\n        tokenAuth(password: $password, username: $username) {\n            token\n        }\n    }\n"): (typeof documents)["\n    query GetAuthToken($password: String!, $username: String!) {\n        tokenAuth(password: $password, username: $username) {\n            token\n        }\n    }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -55,7 +99,47 @@ export function gql(source: "\n    mutation DeleteTokenCookie {\n        deleteT
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n    query GetCurrentUser {\n        me {\n            email\n            firstName\n            isActive\n            isStaff\n            isSuperuser\n            lastLogin\n            lastName\n            username\n            dateJoined\n            id\n        }\n    }\n"): (typeof documents)["\n    query GetCurrentUser {\n        me {\n            email\n            firstName\n            isActive\n            isStaff\n            isSuperuser\n            lastLogin\n            lastName\n            username\n            dateJoined\n            id\n        }\n    }\n"];
+export function gql(source: "\n    query GetCurrentUserId {\n        me {\n            id\n        }\n    }\n"): (typeof documents)["\n    query GetCurrentUserId {\n        me {\n            id\n        }\n    }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    query GetCurrentUserEmailAndUsername {\n        me {\n            email\n            username\n        }\n    }\n"): (typeof documents)["\n    query GetCurrentUserEmailAndUsername {\n        me {\n            email\n            username\n        }\n    }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    mutation CreateFirmwareExtractorJob($storageIndex: Int!) {\n        createFirmwareExtractorJob(\n            createFuzzyHashes: false\n            queueName: \"high-python\"\n            storageIndex: $storageIndex\n        ) {\n            jobId\n        }\n    }\n"): (typeof documents)["\n    mutation CreateFirmwareExtractorJob($storageIndex: Int!) {\n        createFirmwareExtractorJob(\n            createFuzzyHashes: false\n            queueName: \"high-python\"\n            storageIndex: $storageIndex\n        ) {\n            jobId\n        }\n    }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    query GetFirmwareObjectIdList {\n        android_firmware_id_list\n    }\n"): (typeof documents)["\n    query GetFirmwareObjectIdList {\n        android_firmware_id_list\n    }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    fragment FirmwareTableRow on AndroidFirmwareType {\n        id\n        absoluteStorePath\n        aecsBuildFilePath\n#        fileSizeBytes\n        filename\n        hasFileIndex\n        hasFuzzyHashIndex\n        indexedDate\n        md5\n        originalFilename\n        osVendor\n#        partitionInfoDict\n        relativeStorePath\n        sha1\n        sha256\n        tag\n        versionDetected\n        pk\n    }\n"): (typeof documents)["\n    fragment FirmwareTableRow on AndroidFirmwareType {\n        id\n        absoluteStorePath\n        aecsBuildFilePath\n#        fileSizeBytes\n        filename\n        hasFileIndex\n        hasFuzzyHashIndex\n        indexedDate\n        md5\n        originalFilename\n        osVendor\n#        partitionInfoDict\n        relativeStorePath\n        sha1\n        sha256\n        tag\n        versionDetected\n        pk\n    }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    query GetFirmwaresByObjectIds($objectIds: [String!]!) {\n        android_firmware_list(objectIdList: $objectIds) {\n            ...FirmwareTableRow\n        }\n    }\n"): (typeof documents)["\n    query GetFirmwaresByObjectIds($objectIds: [String!]!) {\n        android_firmware_list(objectIdList: $objectIds) {\n            ...FirmwareTableRow\n        }\n    }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    fragment FirmwareTableRowImporter on AndroidFirmwareType {\n        id\n        indexedDate\n        originalFilename\n        osVendor\n        versionDetected\n    }\n"): (typeof documents)["\n    fragment FirmwareTableRowImporter on AndroidFirmwareType {\n        id\n        indexedDate\n        originalFilename\n        osVendor\n        versionDetected\n    }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    query GetFirmwaresByObjectIdsImporter($objectIds: [String!]!) {\n        android_firmware_list(objectIdList: $objectIds) {\n            ...FirmwareTableRowImporter\n        }\n    }\n"): (typeof documents)["\n    query GetFirmwaresByObjectIdsImporter($objectIds: [String!]!) {\n        android_firmware_list(objectIdList: $objectIds) {\n            ...FirmwareTableRowImporter\n        }\n    }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    fragment FirmwareTableRowScanner on AndroidFirmwareType {\n        id\n        originalFilename\n    }\n"): (typeof documents)["\n    fragment FirmwareTableRowScanner on AndroidFirmwareType {\n        id\n        originalFilename\n    }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    query GetFirmwaresByObjectIdsScanner($objectIds: [String!]!) {\n        android_firmware_list(objectIdList: $objectIds) {\n            ...FirmwareTableRowScanner\n        }\n    }\n"): (typeof documents)["\n    query GetFirmwaresByObjectIdsScanner($objectIds: [String!]!) {\n        android_firmware_list(objectIdList: $objectIds) {\n            ...FirmwareTableRowScanner\n        }\n    }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    mutation DeleteFirmwareByObjectId($objectIds: [String!]!) {\n        deleteAndroidFirmware(firmwareIdList: $objectIds) {\n            jobId\n        }\n    }\n"): (typeof documents)["\n    mutation DeleteFirmwareByObjectId($objectIds: [String!]!) {\n        deleteAndroidFirmware(firmwareIdList: $objectIds) {\n            jobId\n        }\n    }\n"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};

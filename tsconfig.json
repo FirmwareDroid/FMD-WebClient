@@ -1,47 +1,14 @@
 {
-  // Visit https://aka.ms/tsconfig to read more about this file
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json"},
+    { "path": "./tsconfig.node.json"}
+  ],
+  /* These compiler options are required by Shadcn UI */
   "compilerOptions": {
-    // File Layout
-    // "rootDir": "./src",
-    // "outDir": "./dist",
-
-    // Environment Settings
-    // See also https://aka.ms/tsconfig/module
-    "module": "esnext",
-    "moduleResolution": "Bundler",
-    "target": "es2022",
-    "types": ["vite/client"],
-    "lib": ["es2022", "dom", "dom.iterable"],
-
-    // Stricter Typechecking Options
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-
-    // Style Options
-    // "noImplicitReturns": true,
-    // "noImplicitOverride": true,
-    // "noUnusedLocals": true,
-    // "noUnusedParameters": true,
-    // "noFallthroughCasesInSwitch": true,
-    // "noPropertyAccessFromIndexSignature": true,
-
-    // Recommended Options
-    "strict": true,
-    "jsx": "react-jsx",
-    // "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
-    "skipLibCheck": true,
-
-    // Migration from JS (remove if fully migrated to JS)
-    "allowJs": true,
-    "checkJs": false,
-
-    // Quality of life
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true
-  },
-  "include": ["src", "src/env.d.ts"],
-  "exclude": ["node_modules", "build"]
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
 }

@@ -2031,6 +2031,31 @@ export type GetApiHealthQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetApiHealthQuery = { __typename?: 'Query', isApiUp?: boolean | null };
 
+export type GetApkObjectIdsByFirmwareObjectIdsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetApkObjectIdsByFirmwareObjectIdsQuery = { __typename?: 'Query', android_app_id_list?: Array<string | null> | null };
+
+export type AppTableRowScannerFragment = { __typename?: 'AndroidAppType', id: string } & { ' $fragmentName'?: 'AppTableRowScannerFragment' };
+
+export type GetAppsByObjectIdsScannerQueryVariables = Exact<{
+  objectIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type GetAppsByObjectIdsScannerQuery = { __typename?: 'Query', android_app_list?: Array<(
+    { __typename?: 'AndroidAppType' }
+    & { ' $fragmentRefs'?: { 'AppTableRowScannerFragment': AppTableRowScannerFragment } }
+  ) | null> | null };
+
+export type CreateApkScanJobMutationVariables = Exact<{
+  objectIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  scannerName: Scalars['String']['input'];
+}>;
+
+
+export type CreateApkScanJobMutation = { __typename?: 'Mutation', createApkScanJob?: { __typename?: 'CreateApkScanJob', jobIdList?: Array<string | null> | null } | null };
+
 export type GetAuthTokenQueryVariables = Exact<{
   password: Scalars['String']['input'];
   username: Scalars['String']['input'];
@@ -2044,13 +2069,86 @@ export type DeleteTokenCookieMutationVariables = Exact<{ [key: string]: never; }
 
 export type DeleteTokenCookieMutation = { __typename?: 'Mutation', deleteTokenCookie?: { __typename?: 'DeleteJSONWebTokenCookie', deleted: boolean } | null };
 
-export type GetCurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetCurrentUserIdQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetCurrentUserQuery = { __typename?: 'Query', me?: { __typename?: 'UserType', email: string, firstName: string, isActive: boolean, isStaff: boolean, isSuperuser: boolean, lastLogin?: any | null, lastName: string, username: string, dateJoined: any, id: string } | null };
+export type GetCurrentUserIdQuery = { __typename?: 'Query', me?: { __typename?: 'UserType', id: string } | null };
+
+export type GetCurrentUserEmailAndUsernameQueryVariables = Exact<{ [key: string]: never; }>;
 
 
+export type GetCurrentUserEmailAndUsernameQuery = { __typename?: 'Query', me?: { __typename?: 'UserType', email: string, username: string } | null };
+
+export type CreateFirmwareExtractorJobMutationVariables = Exact<{
+  storageIndex: Scalars['Int']['input'];
+}>;
+
+
+export type CreateFirmwareExtractorJobMutation = { __typename?: 'Mutation', createFirmwareExtractorJob?: { __typename?: 'CreateFirmwareExtractorJob', jobId?: string | null } | null };
+
+export type GetFirmwareObjectIdListQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetFirmwareObjectIdListQuery = { __typename?: 'Query', android_firmware_id_list?: Array<string | null> | null };
+
+export type FirmwareTableRowFragment = { __typename?: 'AndroidFirmwareType', id: string, absoluteStorePath: string, aecsBuildFilePath?: string | null, filename: string, hasFileIndex?: boolean | null, hasFuzzyHashIndex?: boolean | null, indexedDate?: any | null, md5: string, originalFilename: string, osVendor: string, relativeStorePath: string, sha1: string, sha256: string, tag?: string | null, versionDetected?: number | null, pk?: string | null } & { ' $fragmentName'?: 'FirmwareTableRowFragment' };
+
+export type GetFirmwaresByObjectIdsQueryVariables = Exact<{
+  objectIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type GetFirmwaresByObjectIdsQuery = { __typename?: 'Query', android_firmware_list?: Array<(
+    { __typename?: 'AndroidFirmwareType' }
+    & { ' $fragmentRefs'?: { 'FirmwareTableRowFragment': FirmwareTableRowFragment } }
+  ) | null> | null };
+
+export type FirmwareTableRowImporterFragment = { __typename?: 'AndroidFirmwareType', id: string, indexedDate?: any | null, originalFilename: string, osVendor: string, versionDetected?: number | null } & { ' $fragmentName'?: 'FirmwareTableRowImporterFragment' };
+
+export type GetFirmwaresByObjectIdsImporterQueryVariables = Exact<{
+  objectIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type GetFirmwaresByObjectIdsImporterQuery = { __typename?: 'Query', android_firmware_list?: Array<(
+    { __typename?: 'AndroidFirmwareType' }
+    & { ' $fragmentRefs'?: { 'FirmwareTableRowImporterFragment': FirmwareTableRowImporterFragment } }
+  ) | null> | null };
+
+export type FirmwareTableRowScannerFragment = { __typename?: 'AndroidFirmwareType', id: string, originalFilename: string } & { ' $fragmentName'?: 'FirmwareTableRowScannerFragment' };
+
+export type GetFirmwaresByObjectIdsScannerQueryVariables = Exact<{
+  objectIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type GetFirmwaresByObjectIdsScannerQuery = { __typename?: 'Query', android_firmware_list?: Array<(
+    { __typename?: 'AndroidFirmwareType' }
+    & { ' $fragmentRefs'?: { 'FirmwareTableRowScannerFragment': FirmwareTableRowScannerFragment } }
+  ) | null> | null };
+
+export type DeleteFirmwareByObjectIdMutationVariables = Exact<{
+  objectIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type DeleteFirmwareByObjectIdMutation = { __typename?: 'Mutation', deleteAndroidFirmware?: { __typename?: 'DeleteAndroidFirmwareMutation', jobId?: string | null } | null };
+
+export const AppTableRowScannerFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AppTableRowScanner"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AndroidAppType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]} as unknown as DocumentNode<AppTableRowScannerFragment, unknown>;
+export const FirmwareTableRowFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"FirmwareTableRow"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AndroidFirmwareType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"absoluteStorePath"}},{"kind":"Field","name":{"kind":"Name","value":"aecsBuildFilePath"}},{"kind":"Field","name":{"kind":"Name","value":"filename"}},{"kind":"Field","name":{"kind":"Name","value":"hasFileIndex"}},{"kind":"Field","name":{"kind":"Name","value":"hasFuzzyHashIndex"}},{"kind":"Field","name":{"kind":"Name","value":"indexedDate"}},{"kind":"Field","name":{"kind":"Name","value":"md5"}},{"kind":"Field","name":{"kind":"Name","value":"originalFilename"}},{"kind":"Field","name":{"kind":"Name","value":"osVendor"}},{"kind":"Field","name":{"kind":"Name","value":"relativeStorePath"}},{"kind":"Field","name":{"kind":"Name","value":"sha1"}},{"kind":"Field","name":{"kind":"Name","value":"sha256"}},{"kind":"Field","name":{"kind":"Name","value":"tag"}},{"kind":"Field","name":{"kind":"Name","value":"versionDetected"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}}]}}]} as unknown as DocumentNode<FirmwareTableRowFragment, unknown>;
+export const FirmwareTableRowImporterFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"FirmwareTableRowImporter"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AndroidFirmwareType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"indexedDate"}},{"kind":"Field","name":{"kind":"Name","value":"originalFilename"}},{"kind":"Field","name":{"kind":"Name","value":"osVendor"}},{"kind":"Field","name":{"kind":"Name","value":"versionDetected"}}]}}]} as unknown as DocumentNode<FirmwareTableRowImporterFragment, unknown>;
+export const FirmwareTableRowScannerFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"FirmwareTableRowScanner"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AndroidFirmwareType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"originalFilename"}}]}}]} as unknown as DocumentNode<FirmwareTableRowScannerFragment, unknown>;
 export const GetApiHealthDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetApiHealth"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"isApiUp"}}]}}]} as unknown as DocumentNode<GetApiHealthQuery, GetApiHealthQueryVariables>;
+export const GetApkObjectIdsByFirmwareObjectIdsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetApkObjectIdsByFirmwareObjectIds"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"android_app_id_list"}}]}}]} as unknown as DocumentNode<GetApkObjectIdsByFirmwareObjectIdsQuery, GetApkObjectIdsByFirmwareObjectIdsQueryVariables>;
+export const GetAppsByObjectIdsScannerDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAppsByObjectIdsScanner"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"objectIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"android_app_list"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"objectIdList"},"value":{"kind":"Variable","name":{"kind":"Name","value":"objectIds"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AppTableRowScanner"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AppTableRowScanner"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AndroidAppType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]} as unknown as DocumentNode<GetAppsByObjectIdsScannerQuery, GetAppsByObjectIdsScannerQueryVariables>;
+export const CreateApkScanJobDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateApkScanJob"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"objectIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"scannerName"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createApkScanJob"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"moduleName"},"value":{"kind":"Variable","name":{"kind":"Name","value":"scannerName"}}},{"kind":"Argument","name":{"kind":"Name","value":"objectIdList"},"value":{"kind":"Variable","name":{"kind":"Name","value":"objectIds"}}},{"kind":"Argument","name":{"kind":"Name","value":"queueName"},"value":{"kind":"StringValue","value":"high-python","block":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"jobIdList"}}]}}]}}]} as unknown as DocumentNode<CreateApkScanJobMutation, CreateApkScanJobMutationVariables>;
 export const GetAuthTokenDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAuthToken"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"password"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"username"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"tokenAuth"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"password"},"value":{"kind":"Variable","name":{"kind":"Name","value":"password"}}},{"kind":"Argument","name":{"kind":"Name","value":"username"},"value":{"kind":"Variable","name":{"kind":"Name","value":"username"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"}}]}}]}}]} as unknown as DocumentNode<GetAuthTokenQuery, GetAuthTokenQueryVariables>;
 export const DeleteTokenCookieDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteTokenCookie"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteTokenCookie"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleted"}}]}}]}}]} as unknown as DocumentNode<DeleteTokenCookieMutation, DeleteTokenCookieMutationVariables>;
-export const GetCurrentUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetCurrentUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"isActive"}},{"kind":"Field","name":{"kind":"Name","value":"isStaff"}},{"kind":"Field","name":{"kind":"Name","value":"isSuperuser"}},{"kind":"Field","name":{"kind":"Name","value":"lastLogin"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"username"}},{"kind":"Field","name":{"kind":"Name","value":"dateJoined"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<GetCurrentUserQuery, GetCurrentUserQueryVariables>;
+export const GetCurrentUserIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetCurrentUserId"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<GetCurrentUserIdQuery, GetCurrentUserIdQueryVariables>;
+export const GetCurrentUserEmailAndUsernameDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetCurrentUserEmailAndUsername"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"username"}}]}}]}}]} as unknown as DocumentNode<GetCurrentUserEmailAndUsernameQuery, GetCurrentUserEmailAndUsernameQueryVariables>;
+export const CreateFirmwareExtractorJobDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateFirmwareExtractorJob"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"storageIndex"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createFirmwareExtractorJob"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"createFuzzyHashes"},"value":{"kind":"BooleanValue","value":false}},{"kind":"Argument","name":{"kind":"Name","value":"queueName"},"value":{"kind":"StringValue","value":"high-python","block":false}},{"kind":"Argument","name":{"kind":"Name","value":"storageIndex"},"value":{"kind":"Variable","name":{"kind":"Name","value":"storageIndex"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"jobId"}}]}}]}}]} as unknown as DocumentNode<CreateFirmwareExtractorJobMutation, CreateFirmwareExtractorJobMutationVariables>;
+export const GetFirmwareObjectIdListDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFirmwareObjectIdList"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"android_firmware_id_list"}}]}}]} as unknown as DocumentNode<GetFirmwareObjectIdListQuery, GetFirmwareObjectIdListQueryVariables>;
+export const GetFirmwaresByObjectIdsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFirmwaresByObjectIds"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"objectIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"android_firmware_list"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"objectIdList"},"value":{"kind":"Variable","name":{"kind":"Name","value":"objectIds"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"FirmwareTableRow"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"FirmwareTableRow"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AndroidFirmwareType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"absoluteStorePath"}},{"kind":"Field","name":{"kind":"Name","value":"aecsBuildFilePath"}},{"kind":"Field","name":{"kind":"Name","value":"filename"}},{"kind":"Field","name":{"kind":"Name","value":"hasFileIndex"}},{"kind":"Field","name":{"kind":"Name","value":"hasFuzzyHashIndex"}},{"kind":"Field","name":{"kind":"Name","value":"indexedDate"}},{"kind":"Field","name":{"kind":"Name","value":"md5"}},{"kind":"Field","name":{"kind":"Name","value":"originalFilename"}},{"kind":"Field","name":{"kind":"Name","value":"osVendor"}},{"kind":"Field","name":{"kind":"Name","value":"relativeStorePath"}},{"kind":"Field","name":{"kind":"Name","value":"sha1"}},{"kind":"Field","name":{"kind":"Name","value":"sha256"}},{"kind":"Field","name":{"kind":"Name","value":"tag"}},{"kind":"Field","name":{"kind":"Name","value":"versionDetected"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}}]}}]} as unknown as DocumentNode<GetFirmwaresByObjectIdsQuery, GetFirmwaresByObjectIdsQueryVariables>;
+export const GetFirmwaresByObjectIdsImporterDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFirmwaresByObjectIdsImporter"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"objectIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"android_firmware_list"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"objectIdList"},"value":{"kind":"Variable","name":{"kind":"Name","value":"objectIds"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"FirmwareTableRowImporter"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"FirmwareTableRowImporter"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AndroidFirmwareType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"indexedDate"}},{"kind":"Field","name":{"kind":"Name","value":"originalFilename"}},{"kind":"Field","name":{"kind":"Name","value":"osVendor"}},{"kind":"Field","name":{"kind":"Name","value":"versionDetected"}}]}}]} as unknown as DocumentNode<GetFirmwaresByObjectIdsImporterQuery, GetFirmwaresByObjectIdsImporterQueryVariables>;
+export const GetFirmwaresByObjectIdsScannerDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFirmwaresByObjectIdsScanner"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"objectIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"android_firmware_list"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"objectIdList"},"value":{"kind":"Variable","name":{"kind":"Name","value":"objectIds"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"FirmwareTableRowScanner"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"FirmwareTableRowScanner"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AndroidFirmwareType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"originalFilename"}}]}}]} as unknown as DocumentNode<GetFirmwaresByObjectIdsScannerQuery, GetFirmwaresByObjectIdsScannerQueryVariables>;
+export const DeleteFirmwareByObjectIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteFirmwareByObjectId"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"objectIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteAndroidFirmware"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"firmwareIdList"},"value":{"kind":"Variable","name":{"kind":"Name","value":"objectIds"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"jobId"}}]}}]}}]} as unknown as DocumentNode<DeleteFirmwareByObjectIdMutation, DeleteFirmwareByObjectIdMutationVariables>;

@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:experimental
-FROM node:20.7-slim AS firmwaredroid-frontend
+FROM node:22-slim AS firmwaredroid-frontend
 
 # Build frontend
 RUN mkdir -p /usr/src/app/build
