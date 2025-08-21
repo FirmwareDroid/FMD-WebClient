@@ -1,6 +1,6 @@
-import {ColumnDef} from "@tanstack/react-table";
 import {BasePage} from "@/pages/base-page.tsx";
-import {DataTable} from "@/components/ui/table/data-table.tsx";
+import {ColumnDef} from "@tanstack/react-table";
+import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
 import {FirmwareTableRowFragment} from "@/__generated__/graphql.ts";
 import {useQuery} from "@apollo/client";
 import {
@@ -19,11 +19,69 @@ const columns: ColumnDef<FirmwareTableRowFragment>[] = [
     {
         accessorKey: "absoluteStorePath",
         header: "Absolute Store Path",
-    }
+    },
+    {
+        accessorKey: "aecsBuildFilePath",
+        header: "AECS Build File Path",
+    },
+    {
+        accessorKey: "filename",
+        header: "Filename",
+    },
+    {
+        accessorKey: "hasFileIndex",
+        header: "Has File Index",
+    },
+    {
+        accessorKey: "hasFuzzyHashIndex",
+        header: "Has Fuzzy Hash Index",
+    },
+    {
+        accessorKey: "indexedDate",
+        header: "Indexed Date",
+    },
+    {
+        accessorKey: "md5",
+        header: "MD5",
+    },
+    {
+        accessorKey: "originalFilename",
+        header: "Original Filename",
+    },
+    {
+        accessorKey: "osVendor",
+        header: "OS Vendor",
+    },
+    {
+        accessorKey: "relativeStorePath",
+        header: "Relative Store Path",
+    },
+    {
+        accessorKey: "sha1",
+        header: "SHA-1",
+    },
+    {
+        accessorKey: "sha256",
+        header: "SHA-256",
+    },
+    {
+        accessorKey: "tag",
+        header: "Tag",
+    },
+    {
+        accessorKey: "versionDetected",
+        header: "Version Detected",
+    },
+    {
+        accessorKey: "pk",
+        header: "Object ID",
+    },
 ];
 
 export function FirmwaresPage() {
     const {
+        loading: idsLoading,
+        error: idsError,
         data: idsData,
     } = useQuery(GET_FIRMWARE_OBJECT_ID_LIST);
 
@@ -33,6 +91,8 @@ export function FirmwaresPage() {
     );
 
     const {
+        loading: firmwaresLoading,
+        error: firmwaresError,
         data: firmwaresData,
     } = useQuery(GET_FIRMWARES_BY_OBJECT_IDS, {
         variables: {objectIds},
@@ -52,7 +112,14 @@ export function FirmwaresPage() {
 
     return (
         <BasePage title="Firmwares">
-            <DataTable columns={columns} data={firmwares}/>
+            <StateHandlingScrollableDataTable
+                columns={columns}
+                data={firmwares}
+                idsLoading={idsLoading}
+                dataLoading={firmwaresLoading}
+                idsError={idsError}
+                dataError={firmwaresError}
+            />
         </BasePage>
     );
 }

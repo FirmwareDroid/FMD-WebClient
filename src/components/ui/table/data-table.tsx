@@ -25,7 +25,11 @@ import {
 } from "@/components/ui/dropdown-menu.tsx";
 import {DataTablePagination} from "@/components/ui/table/data-table-pagination.tsx";
 import {cn} from "@/lib/utils.ts";
-import {ChevronRightIcon} from "lucide-react";
+import {AlertCircleIcon, ChevronRightIcon} from "lucide-react";
+import {ScrollArea, ScrollBar} from "@/components/ui/scroll-area.tsx";
+import {Skeleton} from "@/components/ui/skeleton.tsx";
+import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
+import {ApolloError} from "@apollo/client";
 
 interface DataTableProps<TData, TValue> {
     className?: string;
@@ -33,12 +37,13 @@ interface DataTableProps<TData, TValue> {
     data: TData[];
 }
 
-export function DataTable<TData, TValue>(
+function DataTable<TData, TValue>(
     {
         className,
         columns,
         data,
-    }: Readonly<DataTableProps<TData, TValue>>) {
+    }: Readonly<DataTableProps<TData, TValue>>
+) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = useState({});
@@ -148,4 +153,68 @@ export function DataTable<TData, TValue>(
             </div>
         </div>
     );
+}
+
+function ScrollableDataTable<TData, TValue>(
+    {
+        columns,
+        data,
+    }: Readonly<DataTableProps<TData, TValue>>
+) {
+    return (
+        <ScrollArea className={cn("max-w-max w-full whitespace-nowrap")}>
+            <DataTable columns={columns} data={data}/>
+            <ScrollBar orientation="horizontal"/>
+        </ScrollArea>
+    );
+}
+
+function StateHandlingScrollableDataTable<TData, TValue>(
+    {
+        columns,
+        data,
+        idsLoading,
+        dataLoading,
+        idsError,
+        dataError,
+    }: Readonly<DataTableProps<TData, TValue>> & {
+        idsLoading: boolean,
+        dataLoading: boolean,
+        idsError: ApolloError | undefined,
+        dataError: ApolloError | undefined,
+    }
+) {
+    return (
+        <>
+            {(idsLoading || dataLoading) && (
+                <Skeleton className="w-full h-[400px]"/>
+            )}
+
+            {idsError && (
+                <Alert className="max-w-max" variant="destructive">
+                    <AlertCircleIcon/>
+                    <AlertTitle>Unable to load firmware IDs.</AlertTitle>
+                    <AlertDescription>Error message: "{idsError.message}"</AlertDescription>
+                </Alert>
+            )}
+
+            {dataError && (
+                <Alert className="max-w-max" variant="destructive">
+                    <AlertCircleIcon/>
+                    <AlertTitle>Unable to load firmwares.</AlertTitle>
+                    <AlertDescription>Error message: "{dataError.message}"</AlertDescription>
+                </Alert>
+            )}
+
+            {!idsLoading && !dataLoading && !idsError && !dataError && (
+                <ScrollableDataTable columns={columns} data={data}/>
+            )}
+        </>
+    );
+}
+
+export {
+    DataTable,
+    ScrollableDataTable,
+    StateHandlingScrollableDataTable,
 }

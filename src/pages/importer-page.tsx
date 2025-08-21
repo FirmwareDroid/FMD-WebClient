@@ -9,15 +9,13 @@ import {
     FIRMWARE_TABLE_ROW_IMPORTER, GET_FIRMWARE_OBJECT_ID_LIST,
     GET_FIRMWARES_BY_OBJECT_IDS_IMPORTER,
 } from "@/components/graphql/firmware.graphql.ts";
-import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
+import {Alert} from "@/components/ui/alert.tsx";
 import {AlertCircleIcon, LoaderCircle, Trash} from "lucide-react";
 import {convertIdToObjectId} from "@/lib/graphql/graphql-utils.ts";
-import {DataTable} from "@/components/ui/table/data-table.tsx";
+import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
 import {useMemo} from "react";
 import {nonNullable} from "@/lib/non-nullable.ts";
 import {useFragment} from "@/__generated__";
-import {ScrollArea, ScrollBar} from "@/components/ui/scroll-area.tsx";
-import {Skeleton} from "@/components/ui/skeleton.tsx";
 
 import type {ColumnDef} from "@tanstack/react-table";
 import type {FirmwareTableRowImporterFragment} from "@/__generated__/graphql.ts";
@@ -71,36 +69,14 @@ export function ImporterPage() {
             </Button>
             <Separator></Separator>
             <TypographyH2>Extracted Firmwares</TypographyH2>
-
-            {(idsLoading || firmwaresLoading) && (
-                <Skeleton className="w-full h-[400px]"/>
-            )}
-
-            {idsError && (
-                <Alert className="max-w-max" variant="destructive">
-                    <AlertCircleIcon/>
-                    <AlertTitle>Unable to load firmware IDs.</AlertTitle>
-                    <AlertDescription>Error message: "{idsError.message}"</AlertDescription>
-                </Alert>
-            )}
-
-            {firmwaresError && (
-                <Alert className="max-w-max" variant="destructive">
-                    <AlertCircleIcon/>
-                    <AlertTitle>Unable to load firmwares.</AlertTitle>
-                    <AlertDescription>Error message: "{firmwaresError.message}"</AlertDescription>
-                </Alert>
-            )}
-
-            {!idsLoading && !firmwaresLoading && !idsError && !firmwaresError && (
-                <ScrollArea className="max-w-max w-full whitespace-nowrap">
-                    <DataTable
-                        columns={columns}
-                        data={firmwares}
-                    />
-                    <ScrollBar orientation="horizontal"/>
-                </ScrollArea>
-            )}
+            <StateHandlingScrollableDataTable
+                columns={columns}
+                data={firmwares}
+                idsLoading={idsLoading}
+                dataLoading={firmwaresLoading}
+                idsError={idsError}
+                dataError={firmwaresError}
+            />
         </BasePage>
     );
 }

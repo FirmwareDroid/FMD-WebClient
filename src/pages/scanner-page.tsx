@@ -4,7 +4,7 @@ import {TypographyH4} from "@/components/ui/typography/headings.tsx";
 import {CheckboxForm} from "@/components/ui/checkbox-form.tsx";
 import {ColumnDef} from "@tanstack/react-table";
 import {Checkbox} from "@/components/ui/checkbox.tsx";
-import {DataTable} from "@/components/ui/table/data-table.tsx";
+import {DataTable, StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
 import {useQuery} from "@apollo/client";
 import {
     FIRMWARE_TABLE_ROW_SCANNER,
@@ -83,6 +83,8 @@ function FirmwaresPanel() {
     ];
 
     const {
+        loading: idsLoading,
+        error: idsError,
         data: idsData,
     } = useQuery(GET_FIRMWARE_OBJECT_ID_LIST);
 
@@ -92,6 +94,8 @@ function FirmwaresPanel() {
     );
 
     const {
+        loading: firmwaresLoading,
+        error: firmwaresError,
         data: firmwaresData,
     } = useQuery(GET_FIRMWARES_BY_OBJECT_IDS_SCANNER, {
         variables: {objectIds},
@@ -110,9 +114,16 @@ function FirmwaresPanel() {
     );
 
     return (
-        <div className="flex flex-col h-full p-6 gap-6">
+        <div className="flex flex-col h-full p-4 gap-6">
             <TypographyH4>Firmwares</TypographyH4>
-            <DataTable columns={columns} data={firmwares}/>
+            <StateHandlingScrollableDataTable
+                columns={columns}
+                data={firmwares}
+                idsLoading={idsLoading}
+                dataLoading={firmwaresLoading}
+                idsError={idsError}
+                dataError={firmwaresError}
+            />
         </div>
     );
 }
