@@ -31,7 +31,7 @@ type CheckboxFormProps = {
 
 const DefaultSchema = z.object({
     items: z.array(z.string()).refine((value) => value.some((item) => item), {
-        message: "You have to select at least one item.",
+        message: "Select at least one item.",
     }),
 })
 
@@ -69,12 +69,14 @@ export function CheckboxForm(
                     name="items"
                     render={() => (
                         <FormItem>
-                            {(label || description) && (<div className="mb-4">
-                                {label && <FormLabel className="text-base">{label}</FormLabel>}
-                                {description && <FormDescription>
-                                    {description}
-                                </FormDescription>}
-                            </div>)}
+                            {(label || description) && (
+                                <div className="mb-2">
+                                    {label && <FormLabel className="text-base">{label}</FormLabel>}
+                                    {description && <FormDescription>
+                                        {description}
+                                    </FormDescription>}
+                                </div>
+                            )}
                             <div className="gap-0">
                                 {items.map((item) => (
                                     <ItemField key={item.id} item={item} form={form}/>
@@ -103,7 +105,8 @@ function ItemField({item, form}: Readonly<ItemFieldProps>) {
             render={({field}) => {
                 return (
                     <FormItem key={item.id}>
-                        <FormLabel className="hover:bg-accent/50 flex flex-row items-center gap-2 w-full h-full rounded-md p-2 cursor-pointer">
+                        <FormLabel
+                            className="hover:bg-accent/50 flex flex-row items-center gap-2 w-full h-full rounded-md p-2 cursor-pointer">
                             <FormControl>
                                 <Checkbox
                                     checked={field.value.includes(item.id)}

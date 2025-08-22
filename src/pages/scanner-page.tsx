@@ -4,7 +4,7 @@ import {TypographyH4} from "@/components/ui/typography/headings.tsx";
 import {CheckboxForm} from "@/components/ui/checkbox-form.tsx";
 import {ColumnDef} from "@tanstack/react-table";
 import {Checkbox} from "@/components/ui/checkbox.tsx";
-import {DataTable, StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
+import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
 import {useQuery} from "@apollo/client";
 import {
     FIRMWARE_TABLE_ROW_SCANNER,
@@ -27,21 +27,19 @@ import {
 export function ScannerPage() {
     return (
         <BasePage title="App Scanner">
-            <div className="flex flex-col items-center my-8 mx-4 gap-8">
-                <ResizablePanelGroup direction="horizontal" className="border-t border-b">
-                    <ResizablePanel defaultSize={40}>
-                        <FirmwaresPanel/>
-                    </ResizablePanel>
-                    <ResizableHandle withHandle/>
-                    <ResizablePanel defaultSize={40}>
-                        <AppsPanel/>
-                    </ResizablePanel>
-                    <ResizableHandle withHandle/>
-                    <ResizablePanel defaultSize={20}>
-                        <ScannersPanel/>
-                    </ResizablePanel>
-                </ResizablePanelGroup>
-            </div>
+            <ResizablePanelGroup direction="horizontal" className="border-t border-b">
+                <ResizablePanel defaultSize={40}>
+                    <FirmwaresPanel/>
+                </ResizablePanel>
+                <ResizableHandle withHandle/>
+                <ResizablePanel defaultSize={40}>
+                    <AppsPanel/>
+                </ResizablePanel>
+                <ResizableHandle withHandle/>
+                <ResizablePanel defaultSize={20}>
+                    <ScannersPanel/>
+                </ResizablePanel>
+            </ResizablePanelGroup>
         </BasePage>
     );
 }
@@ -114,7 +112,7 @@ function FirmwaresPanel() {
     );
 
     return (
-        <div className="flex flex-col h-full p-4 gap-6">
+        <div className="flex flex-col p-4 gap-4">
             <TypographyH4>Firmwares</TypographyH4>
             <StateHandlingScrollableDataTable
                 columns={columns}
@@ -161,6 +159,8 @@ function AppsPanel() {
     ];
 
     const {
+        loading: idsLoading,
+        error: idsError,
         data: idsData,
     } = useQuery(GET_APP_OBJECT_IDS_BY_FIRMWARE_OBJECT_IDS);
 
@@ -170,6 +170,8 @@ function AppsPanel() {
     );
 
     const {
+        loading: appsLoading,
+        error: appsError,
         data: appsData,
     } = useQuery(GET_APPS_BY_OBJECT_IDS_SCANNER, {
         variables: {objectIds},
@@ -188,9 +190,16 @@ function AppsPanel() {
     );
 
     return (
-        <div className="flex flex-col h-full p-6 gap-6">
+        <div className="flex flex-col p-4 gap-4">
             <TypographyH4>Apps</TypographyH4>
-            <DataTable columns={columns} data={apps}/>
+            <StateHandlingScrollableDataTable
+                columns={columns}
+                data={apps}
+                idsLoading={idsLoading}
+                idsError={idsError}
+                dataLoading={appsLoading}
+                dataError={appsError}
+            />
         </div>
     );
 }
@@ -212,7 +221,7 @@ function ScannersPanel() {
     ];
 
     return (
-        <div className="flex flex-col h-full p-6 gap-6">
+        <div className="flex flex-col p-4 gap-4">
             <TypographyH4>Scanners</TypographyH4>
             <CheckboxForm
                 items={scanners.map((scanner) => ({
