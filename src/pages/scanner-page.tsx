@@ -50,6 +50,7 @@ function FirmwaresPanel() {
             id: "select",
             header: ({table}) => (
                 <Checkbox
+                    className="flex items-center"
                     checked={
                         table.getIsAllPageRowsSelected() ||
                         (table.getIsSomePageRowsSelected() && "indeterminate")
@@ -62,6 +63,7 @@ function FirmwaresPanel() {
             ),
             cell: ({row}) => (
                 <Checkbox
+                    className="flex items-center"
                     checked={row.getIsSelected()}
                     onCheckedChange={(value) => {
                         row.toggleSelected(!!value);
@@ -132,6 +134,7 @@ function AppsPanel() {
             id: "select",
             header: ({table}) => (
                 <Checkbox
+                    className="flex items-center"
                     checked={
                         table.getIsAllPageRowsSelected() ||
                         (table.getIsSomePageRowsSelected() && "indeterminate")
@@ -144,6 +147,7 @@ function AppsPanel() {
             ),
             cell: ({row}) => (
                 <Checkbox
+                    className="flex items-center"
                     checked={row.getIsSelected()}
                     onCheckedChange={(value) => {
                         row.toggleSelected(!!value);

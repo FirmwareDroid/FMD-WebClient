@@ -19,6 +19,7 @@ import {useFragment} from "@/__generated__";
 
 import type {ColumnDef} from "@tanstack/react-table";
 import type {FirmwareTableRowImporterFragment} from "@/__generated__/graphql.ts";
+import {Checkbox} from "@/components/ui/checkbox.tsx";
 
 export function ImporterPage() {
     const [createFirmwareExtractorJob, {loading: extractorJobLoading}] = useMutation(CREATE_FIRMWARE_EXTRACTOR_JOB);
@@ -83,6 +84,32 @@ export function ImporterPage() {
 
 const columns: ColumnDef<FirmwareTableRowImporterFragment>[] = [
     {
+        id: "select",
+        header: ({table}) => (
+            <Checkbox
+                className="flex items-center"
+                checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && "indeterminate")
+                }
+                onCheckedChange={(value) => {
+                    table.toggleAllPageRowsSelected(!!value);
+                }}
+                aria-label="Select all"
+            />
+        ),
+        cell: ({row}) => (
+            <Checkbox
+                className="flex items-center"
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => {
+                    row.toggleSelected(!!value);
+                }}
+                aria-label="Select row"
+            />
+        ),
+    },
+    {
         id: "delete",
         cell: ({row}) => {
             // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -109,7 +136,7 @@ const columns: ColumnDef<FirmwareTableRowImporterFragment>[] = [
             }
 
             return (
-                <Button onClick={() => void deleteFirmware()} variant="secondary">
+                <Button onClick={() => void deleteFirmware()} variant="destructive">
                     <Trash></Trash>
                 </Button>
             );
