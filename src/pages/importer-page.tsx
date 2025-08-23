@@ -5,13 +5,10 @@ import {Separator} from "@/components/ui/separator.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {useMutation, useQuery} from "@apollo/client";
 import {
-    CREATE_FIRMWARE_EXTRACTOR_JOB, DELETE_FIRMWARE_BY_OBJECT_ID,
+    CREATE_FIRMWARE_EXTRACTOR_JOB,
     FIRMWARE_TABLE_ROW_IMPORTER, GET_FIRMWARE_OBJECT_ID_LIST,
     GET_FIRMWARES_BY_OBJECT_IDS_IMPORTER,
 } from "@/components/graphql/firmware.graphql.ts";
-import {Alert} from "@/components/ui/alert.tsx";
-import {AlertCircleIcon, LoaderCircle, Trash} from "lucide-react";
-import {convertIdToObjectId} from "@/lib/graphql/graphql-utils.ts";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
 import {useMemo} from "react";
 import {nonNullable} from "@/lib/non-nullable.ts";
@@ -19,7 +16,7 @@ import {useFragment} from "@/__generated__";
 
 import type {ColumnDef} from "@tanstack/react-table";
 import type {FirmwareTableRowImporterFragment} from "@/__generated__/graphql.ts";
-import {Checkbox} from "@/components/ui/checkbox.tsx";
+import {buildFirmwareActionColumns} from "@/components/ui/firmware-action-columns.tsx";
 
 export function ImporterPage() {
     const [createFirmwareExtractorJob, {loading: extractorJobLoading}] = useMutation(CREATE_FIRMWARE_EXTRACTOR_JOB);
@@ -83,65 +80,7 @@ export function ImporterPage() {
 }
 
 const columns: ColumnDef<FirmwareTableRowImporterFragment>[] = [
-    {
-        id: "select",
-        header: ({table}) => (
-            <Checkbox
-                className="flex items-center"
-                checked={
-                    table.getIsAllPageRowsSelected() ||
-                    (table.getIsSomePageRowsSelected() && "indeterminate")
-                }
-                onCheckedChange={(value) => {
-                    table.toggleAllPageRowsSelected(!!value);
-                }}
-                aria-label="Select all"
-            />
-        ),
-        cell: ({row}) => (
-            <Checkbox
-                className="flex items-center"
-                checked={row.getIsSelected()}
-                onCheckedChange={(value) => {
-                    row.toggleSelected(!!value);
-                }}
-                aria-label="Select row"
-            />
-        ),
-    },
-    {
-        id: "delete",
-        cell: ({row}) => {
-            // eslint-disable-next-line react-hooks/rules-of-hooks
-            const [deleteFirmware, {loading, error}] = useMutation(
-                DELETE_FIRMWARE_BY_OBJECT_ID, {
-                    variables: {
-                        objectIds: convertIdToObjectId(row.getValue("id"))
-                    }
-                }
-            );
-
-            if (loading) {
-                return (
-                    <LoaderCircle className="animate-spin"></LoaderCircle>
-                );
-            }
-
-            if (error) {
-                return (
-                    <Alert variant="destructive">
-                        <AlertCircleIcon/>
-                    </Alert>
-                );
-            }
-
-            return (
-                <Button onClick={() => void deleteFirmware()} variant="destructive">
-                    <Trash></Trash>
-                </Button>
-            );
-        },
-    },
+    ...buildFirmwareActionColumns<FirmwareTableRowImporterFragment>(),
     {
         accessorKey: "id",
         header: "ID",

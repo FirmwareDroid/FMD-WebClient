@@ -10,8 +10,10 @@ import {
 import {useMemo} from "react";
 import {useFragment} from "@/__generated__";
 import {nonNullable} from "@/lib/non-nullable.ts";
+import {buildFirmwareActionColumns} from "@/components/ui/firmware-action-columns.tsx";
 
 const columns: ColumnDef<FirmwareTableRowFragment>[] = [
+    ...buildFirmwareActionColumns<FirmwareTableRowFragment>(),
     {
         accessorKey: "id",
         header: "ID",

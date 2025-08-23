@@ -23,6 +23,7 @@ import {
     GET_APP_OBJECT_IDS_BY_FIRMWARE_OBJECT_IDS,
     GET_APPS_BY_OBJECT_IDS_SCANNER
 } from "@/components/graphql/app.graphql.ts";
+import {buildSelectEntityColumn} from "@/components/ui/firmware-action-columns.tsx";
 
 export function ScannerPage() {
     return (
@@ -46,34 +47,9 @@ export function ScannerPage() {
 
 function FirmwaresPanel() {
     const columns: ColumnDef<FirmwareTableRowScannerFragment>[] = [
+        buildSelectEntityColumn<FirmwareTableRowScannerFragment>(),
         {
-            id: "select",
-            header: ({table}) => (
-                <Checkbox
-                    className="flex items-center"
-                    checked={
-                        table.getIsAllPageRowsSelected() ||
-                        (table.getIsSomePageRowsSelected() && "indeterminate")
-                    }
-                    onCheckedChange={(value) => {
-                        table.toggleAllPageRowsSelected(!!value);
-                    }}
-                    aria-label="Select all"
-                />
-            ),
-            cell: ({row}) => (
-                <Checkbox
-                    className="flex items-center"
-                    checked={row.getIsSelected()}
-                    onCheckedChange={(value) => {
-                        row.toggleSelected(!!value);
-                    }}
-                    aria-label="Select row"
-                />
-            ),
-        },
-        {
-            id: "id",
+            accessorKey: "id",
             header: "ID",
         },
         {
