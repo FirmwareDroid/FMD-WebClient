@@ -1,9 +1,28 @@
 type Query {
-  build_prop_file_id_list(objectIdList: [String], fieldFilter: BuildPropFileFilter): [BuildPropFileType]
+  build_prop_file_id_list(objectIdList: [String], fieldFilter: ExtendedBuildPropFileFilter): [BuildPropFileType]
   firmware_importer_setting_list: [FirmwareImporterSettingType]
   aecs_job_list(objectIdList: [String], fieldFilter: AecsJobFilter): [AecsJobType]
   isApiUp: Boolean
   rq_queue_name_list: [String]
+  rq_job_list(
+    """Filter jobs by queue name"""
+    queueName: String
+
+    """List of specific job IDs to retrieve"""
+    jobIds: [String]
+
+    """
+    Filter jobs by status (queued, started, finished, failed, scheduled, deferred)
+    """
+    status: String
+  ): [RqJobType]
+  rq_job(
+    """Job ID to retrieve"""
+    jobId: String!
+
+    """Queue name (optional, will search all queues if not provided)"""
+    queueName: String
+  ): RqJobType
   app_certificate_list(objectIdList: [String], fieldFilter: AppCertificateFilter): [AppCertificateType]
   tlsh_hash_list(objectIdList: [String], fieldFilter: TlshHashFilter): [TlshHashType]
   ssdeep_cluster_analysis_list(objectIdList: [String], fieldFilter: SsDeepClusterAnalysisFilter): [SsDeepClusterAnalysisType]
@@ -27,8 +46,10 @@ type Query {
   androwarn_report_list(objectIdList: [String], fieldFilter: AndrowarnReportFilter): [AndrowarnReportType]
   android_app_list(objectIdList: [String], fieldFilter: AndroidAppFilter): [AndroidAppType]
   android_app_id_list(objectIdList: [String], fieldFilter: AndroidAppFilter): [String]
+  scanner_module_name_list: [String]
   android_firmware_list(objectIdList: [String], fieldFilter: AndroidFirmwareFilter): [AndroidFirmwareType]
   android_firmware_id_list(fieldFilter: AndroidFirmwareFilter): [String]
+  android_firmware_connection(objectIdList: [String], fieldFilter: AndroidFirmwareFilter, before: String, after: String, first: Int, last: Int): AndroidFirmwareConnection
   users: [UserType]
   me: UserType
   store_settings_list(fieldFilter: StoreSettingFilter): [StoreSettingsType]
@@ -54,7 +75,7 @@ type BuildPropFileType implements Node {
   """"""
   properties: JSONString!
   pk: String
-  propertyValues(keys: [String]!): JSONString
+  propertyValues: JSONString
   propertyKeys: [String]
 }
 
@@ -474,9 +495,7 @@ type AndroidFirmwareType implements Node {
 
   """"""
   aecsBuildFilePath: String
-
-  """"""
-  fileSizeBytes: Int!
+  fileSizeBytes: Float
 
   """"""
   filename: String!
@@ -835,7 +854,7 @@ type TlshHashType {
   id: ID
 }
 
-input BuildPropFileFilter {
+input ExtendedBuildPropFileFilter {
   """Filter by firmware_id_reference"""
   firmware_id_reference: String
 
@@ -850,7 +869,20 @@ input BuildPropFileFilter {
 
   """Filter by id"""
   id: String
+
+  """Filter by property keys"""
+  propertyKeys: [String]
+
+  """Filter by property values"""
+  propertyValues: [GenericScalar]
 }
+
+"""
+The `GenericScalar` scalar type represents a generic
+GraphQL scalar value that could be:
+String, Boolean, Int, Float, List or Object.
+"""
+scalar GenericScalar
 
 type FirmwareImporterSettingType {
   """"""
@@ -866,7 +898,7 @@ type FirmwareImporterSettingType {
 type AecsJobType implements Node {
   """"""
   arch: String
-  firmwareIdList(before: String, after: String, first: Int, last: Int, absoluteStorePath: String, aecsBuildFilePath: String, fileSizeBytes: Int, filename: String, hasFileIndex: Boolean, hasFuzzyHashIndex: Boolean, id: ID, indexedDate: DateTime, md5: String, originalFilename: String, osVendor: String, partitionInfoDict: JSONString, relativeStorePath: String, sha1: String, sha256: String, tag: String, versionDetected: Int): AndroidFirmwareTypeConnection
+  firmwareIdList(before: String, after: String, first: Int, last: Int, absoluteStorePath: String, aecsBuildFilePath: String, fileSizeBytes: Float, filename: String, hasFileIndex: Boolean, hasFuzzyHashIndex: Boolean, id: ID, indexedDate: DateTime, md5: String, originalFilename: String, osVendor: String, partitionInfoDict: JSONString, relativeStorePath: String, sha1: String, sha256: String, tag: String, versionDetected: Int): AndroidFirmwareTypeConnection
 
   """The ID of the object"""
   id: ID!
@@ -899,6 +931,48 @@ input AecsJobFilter {
 
   """Filter by id"""
   id: String
+}
+
+"""GraphQL type representing an RQ job"""
+type RqJobType {
+  """Unique job identifier"""
+  id: String
+
+  """Job status (queued, started, finished, failed, etc.)"""
+  status: String
+
+  """When the job was created"""
+  createdAt: DateTime
+
+  """When the job started executing"""
+  startedAt: DateTime
+
+  """When the job finished"""
+  endedAt: DateTime
+
+  """Description of the job function"""
+  description: String
+
+  """Name of the function being executed"""
+  funcName: String
+
+  """Job timeout in seconds"""
+  timeout: Int
+
+  """Name of the queue the job belongs to"""
+  queueName: String
+
+  """Whether the job has finished"""
+  isFinished: Boolean
+
+  """Whether the job has failed"""
+  isFailed: Boolean
+
+  """String representation of job result"""
+  result: String
+
+  """Exception information if job failed"""
+  excInfo: String
 }
 
 input AppCertificateFilter {
@@ -2024,6 +2098,23 @@ input AndroidFirmwareFilter {
   id: String
 }
 
+type AndroidFirmwareConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [AndroidFirmwareEdge]!
+}
+
+"""A Relay edge containing a `AndroidFirmware` and its cursor."""
+type AndroidFirmwareEdge {
+  """The item at the end of the edge"""
+  node: AndroidFirmwareType
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
 type UserType {
   id: ID!
   lastLogin: DateTime
@@ -2181,13 +2272,6 @@ type ObtainJSONWebToken {
   refreshExpiresIn: Int!
   token: String!
 }
-
-"""
-The `GenericScalar` scalar type represents a generic
-GraphQL scalar value that could be:
-String, Boolean, Int, Float, List or Object.
-"""
-scalar GenericScalar
 
 type Verify {
   payload: GenericScalar!

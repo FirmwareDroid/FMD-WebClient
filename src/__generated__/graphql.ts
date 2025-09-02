@@ -59,7 +59,7 @@ export type AecsJobTypeFirmwareIdListArgs = {
   aecsBuildFilePath?: InputMaybe<Scalars['String']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
-  fileSizeBytes?: InputMaybe<Scalars['Int']['input']>;
+  fileSizeBytes?: InputMaybe<Scalars['Float']['input']>;
   filename?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   hasFileIndex?: InputMaybe<Scalars['Boolean']['input']>;
@@ -438,6 +438,23 @@ export type AndroidAppTypeEdge = {
   node?: Maybe<AndroidAppType>;
 };
 
+export type AndroidFirmwareConnection = {
+  __typename?: 'AndroidFirmwareConnection';
+  /** Contains the nodes in this connection. */
+  edges: Array<Maybe<AndroidFirmwareEdge>>;
+  /** Pagination data for this connection. */
+  pageInfo: PageInfo;
+};
+
+/** A Relay edge containing a `AndroidFirmware` and its cursor. */
+export type AndroidFirmwareEdge = {
+  __typename?: 'AndroidFirmwareEdge';
+  /** A cursor for use in pagination */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge */
+  node?: Maybe<AndroidFirmwareType>;
+};
+
 export type AndroidFirmwareFilter = {
   /** Filter by absolute_store_path */
   absolute_store_path?: InputMaybe<Scalars['String']['input']>;
@@ -487,7 +504,7 @@ export type AndroidFirmwareType = Node & {
   aecsBuildFilePath?: Maybe<Scalars['String']['output']>;
   androidAppIdList?: Maybe<AndroidAppTypeConnection>;
   buildPropFileIdList?: Maybe<BuildPropFileTypeConnection>;
-  fileSizeBytes: Scalars['Int']['output'];
+  fileSizeBytes?: Maybe<Scalars['Float']['output']>;
   filename: Scalars['String']['output'];
   firmwareFileIdList?: Maybe<FirmwareFileTypeConnection>;
   hasFileIndex?: Maybe<Scalars['Boolean']['output']>;
@@ -908,19 +925,6 @@ export type AppCertificateTypeEdge = {
   node?: Maybe<AppCertificateType>;
 };
 
-export type BuildPropFileFilter = {
-  /** Filter by build_prop_file */
-  build_prop_file?: InputMaybe<Scalars['String']['input']>;
-  /** Filter by firmware_file_id_reference */
-  firmware_file_id_reference?: InputMaybe<Scalars['String']['input']>;
-  /** Filter by firmware_id_reference */
-  firmware_id_reference?: InputMaybe<Scalars['String']['input']>;
-  /** Filter by id */
-  id?: InputMaybe<Scalars['String']['input']>;
-  /** Filter by properties */
-  properties?: InputMaybe<Scalars['String']['input']>;
-};
-
 export type BuildPropFileType = Node & {
   __typename?: 'BuildPropFileType';
   firmwareFileIdReference: FirmwareFileType;
@@ -931,11 +935,6 @@ export type BuildPropFileType = Node & {
   properties: Scalars['JSONString']['output'];
   propertyKeys?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   propertyValues?: Maybe<Scalars['JSONString']['output']>;
-};
-
-
-export type BuildPropFileTypePropertyValuesArgs = {
-  keys: Array<InputMaybe<Scalars['String']['input']>>;
 };
 
 export type BuildPropFileTypeConnection = {
@@ -1150,6 +1149,23 @@ export type ExodusStatisticsReportType = {
 export type ExportFirmwareFileByRegexMutation = {
   __typename?: 'ExportFirmwareFileByRegexMutation';
   jobId?: Maybe<Scalars['String']['output']>;
+};
+
+export type ExtendedBuildPropFileFilter = {
+  /** Filter by build_prop_file */
+  build_prop_file?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by firmware_file_id_reference */
+  firmware_file_id_reference?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by firmware_id_reference */
+  firmware_id_reference?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by id */
+  id?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by properties */
+  properties?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by property keys */
+  propertyKeys?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** Filter by property values */
+  propertyValues?: InputMaybe<Array<InputMaybe<Scalars['GenericScalar']['input']>>>;
 };
 
 export type FileFieldType = {
@@ -1538,6 +1554,7 @@ export type Query = {
   androguard_report_list?: Maybe<Array<Maybe<AndroGuardReportType>>>;
   android_app_id_list?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   android_app_list?: Maybe<Array<Maybe<AndroidAppType>>>;
+  android_firmware_connection?: Maybe<AndroidFirmwareConnection>;
   android_firmware_id_list?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   android_firmware_list?: Maybe<Array<Maybe<AndroidFirmwareType>>>;
   androwarn_report_list?: Maybe<Array<Maybe<AndrowarnReportType>>>;
@@ -1559,7 +1576,10 @@ export type Query = {
   quark_engine_report_list?: Maybe<Array<Maybe<QuarkEngineReportType>>>;
   quark_engine_statistics_report_list?: Maybe<Array<Maybe<QuarkEngineStatisticsReportType>>>;
   refreshToken?: Maybe<Refresh>;
+  rq_job?: Maybe<RqJobType>;
+  rq_job_list?: Maybe<Array<Maybe<RqJobType>>>;
   rq_queue_name_list?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  scanner_module_name_list?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   ssdeep_cluster_analysis_list?: Maybe<Array<Maybe<SsDeepClusterAnalysisType>>>;
   statistics_report_list?: Maybe<Array<Maybe<StatisticsReportType>>>;
   store_settings_list?: Maybe<Array<Maybe<StoreSettingsType>>>;
@@ -1595,6 +1615,16 @@ export type QueryAndroid_App_Id_ListArgs = {
 
 export type QueryAndroid_App_ListArgs = {
   fieldFilter?: InputMaybe<AndroidAppFilter>;
+  objectIdList?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+
+export type QueryAndroid_Firmware_ConnectionArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  fieldFilter?: InputMaybe<AndroidFirmwareFilter>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
   objectIdList?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
@@ -1647,7 +1677,7 @@ export type QueryApp_Certificate_ListArgs = {
 
 
 export type QueryBuild_Prop_File_Id_ListArgs = {
-  fieldFilter?: InputMaybe<BuildPropFileFilter>;
+  fieldFilter?: InputMaybe<ExtendedBuildPropFileFilter>;
   objectIdList?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
@@ -1702,6 +1732,19 @@ export type QueryQuark_Engine_Statistics_Report_ListArgs = {
 
 export type QueryRefreshTokenArgs = {
   token?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryRq_JobArgs = {
+  jobId: Scalars['String']['input'];
+  queueName?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryRq_Job_ListArgs = {
+  jobIds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  queueName?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -1761,6 +1804,37 @@ export type Refresh = {
   payload: Scalars['GenericScalar']['output'];
   refreshExpiresIn: Scalars['Int']['output'];
   token: Scalars['String']['output'];
+};
+
+/** GraphQL type representing an RQ job */
+export type RqJobType = {
+  __typename?: 'RqJobType';
+  /** When the job was created */
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Description of the job function */
+  description?: Maybe<Scalars['String']['output']>;
+  /** When the job finished */
+  endedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Exception information if job failed */
+  excInfo?: Maybe<Scalars['String']['output']>;
+  /** Name of the function being executed */
+  funcName?: Maybe<Scalars['String']['output']>;
+  /** Unique job identifier */
+  id?: Maybe<Scalars['String']['output']>;
+  /** Whether the job has failed */
+  isFailed?: Maybe<Scalars['Boolean']['output']>;
+  /** Whether the job has finished */
+  isFinished?: Maybe<Scalars['Boolean']['output']>;
+  /** Name of the queue the job belongs to */
+  queueName?: Maybe<Scalars['String']['output']>;
+  /** String representation of job result */
+  result?: Maybe<Scalars['String']['output']>;
+  /** When the job started executing */
+  startedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Job status (queued, started, finished, failed, etc.) */
+  status?: Maybe<Scalars['String']['output']>;
+  /** Job timeout in seconds */
+  timeout?: Maybe<Scalars['Int']['output']>;
 };
 
 export type SsDeepClusterAnalysisFilter = {
