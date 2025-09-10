@@ -1,6 +1,6 @@
 import {ApolloClient, from, HttpLink, InMemoryCache} from "@apollo/client";
 import {RetryLink} from "@apollo/client/link/retry";
-import {CSRF_URL, GRAPHQL_URL} from "../../envconfig.ts";
+import {CSRF_URL, GRAPHQL_URL} from "../../EnvConfig.js";
 
 let cachedCsrf: string | null = null;
 let inflightCsrf: Promise<string> | null = null;
