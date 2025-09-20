@@ -7,6 +7,7 @@ import {useMutation} from "@apollo/client";
 import {DELETE_FIRMWARE_BY_OBJECT_ID} from "@/components/graphql/firmware.graphql.ts";
 import {convertIdToObjectId} from "@/lib/graphql/graphql-utils.ts";
 import {Alert} from "@/components/ui/alert.tsx";
+import {useNavigate} from "react-router";
 
 type WithId = { id: string };
 
@@ -136,11 +137,17 @@ function buildViewEntityColumn<T extends WithId>(): ColumnDef<T> {
     return (
         {
             id: "view",
-            cell: () => {
+            cell: ({row}) => {
+                const navigate = useNavigate();
+                const firmwareId = row.original.id;
+
                 return (
                     <Tooltip delayDuration={500}>
                         <TooltipTrigger asChild>
-                            <Button variant="outline">
+                            <Button
+                                variant="outline"
+                                onClick={() => navigate(`/firmwares/${firmwareId}`)}
+                            >
                                 <ViewIcon/>
                             </Button>
                         </TooltipTrigger>

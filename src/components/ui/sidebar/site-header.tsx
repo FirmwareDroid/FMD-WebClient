@@ -14,9 +14,13 @@ import {Button} from "@/components/ui/button.tsx"
 import {Separator} from "@/components/ui/separator.tsx"
 import {useSidebar} from "@/components/ui/sidebar.tsx"
 import {ModeToggle} from "@/components/ui/theming/mode-toggle.tsx";
+import {Link, useLocation, useParams} from "react-router";
 
 export function SiteHeader() {
-    const {toggleSidebar} = useSidebar()
+    const {toggleSidebar} = useSidebar();
+    const location = useLocation();
+    const {firmwareId} = useParams<{ firmwareId?: string }>();
+    const isFirmwareDetail = location.pathname.startsWith("/firmwares/") && firmwareId;
 
     return (
         <header className="bg-background sticky top-0 z-50 flex w-full items-center border-b">
@@ -30,31 +34,23 @@ export function SiteHeader() {
                     >
                         <SidebarIcon/>
                     </Button>
+
                     <Separator orientation="vertical" className="mr-2 h-4"/>
+
                     <Breadcrumb className="hidden sm:block">
-                        <BreadcrumbList>
-                            <BreadcrumbItem>
-                                <BreadcrumbLink href="/firmwares">
-                                    Firmwares
-                                </BreadcrumbLink>
-                            </BreadcrumbItem>
-                            <BreadcrumbSeparator/>
-                            <BreadcrumbItem>
-                                <BreadcrumbLink href="/firmware_xyz">
-                                    Firmware XYZ
-                                </BreadcrumbLink>
-                            </BreadcrumbItem>
-                            <BreadcrumbSeparator/>
-                            <BreadcrumbItem>
-                                <BreadcrumbLink href="/firmware_xyz/app_xyz">
-                                    App XYZ
-                                </BreadcrumbLink>
-                            </BreadcrumbItem>
-                            <BreadcrumbSeparator/>
-                            <BreadcrumbItem>
-                                <BreadcrumbPage>Report XYZ</BreadcrumbPage>
-                            </BreadcrumbItem>
-                        </BreadcrumbList>
+                        {isFirmwareDetail && (
+                            <BreadcrumbList>
+                                <BreadcrumbItem>
+                                    <BreadcrumbLink asChild>
+                                        <Link to="/firmwares">Firmwares</Link>
+                                    </BreadcrumbLink>
+                                </BreadcrumbItem>
+                                <BreadcrumbSeparator/>
+                                <BreadcrumbItem>
+                                    <BreadcrumbPage>{firmwareId}</BreadcrumbPage>
+                                </BreadcrumbItem>
+                            </BreadcrumbList>
+                        )}
                     </Breadcrumb>
                 </div>
                 <ModeToggle/>

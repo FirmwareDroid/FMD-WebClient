@@ -64,7 +64,7 @@ export const FIRMWARE_TABLE_ROW = gql(`
         id
         absoluteStorePath
         aecsBuildFilePath
-#        fileSizeBytes
+        fileSizeBytes
         filename
         hasFileIndex
         hasFuzzyHashIndex
@@ -72,7 +72,7 @@ export const FIRMWARE_TABLE_ROW = gql(`
         md5
         originalFilename
         osVendor
-#        partitionInfoDict
+        partitionInfoDict
         relativeStorePath
         sha1
         sha256
