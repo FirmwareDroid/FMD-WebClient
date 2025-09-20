@@ -23,7 +23,9 @@ type Documents = {
     "\n    mutation DeleteTokenCookie {\n        deleteTokenCookie {\n            deleted\n        }\n    }\n": typeof types.DeleteTokenCookieDocument,
     "\n    query GetCurrentUserId {\n        me {\n            id\n        }\n    }\n": typeof types.GetCurrentUserIdDocument,
     "\n    query GetCurrentUserEmailAndUsername {\n        me {\n            email\n            username\n        }\n    }\n": typeof types.GetCurrentUserEmailAndUsernameDocument,
+    "\n    query GetRqJobList {\n        rq_job_list {\n            funcName\n            id\n            isFailed\n            isFinished\n            startedAt\n            status\n        }\n    }\n": typeof types.GetRqJobListDocument,
     "\n    mutation CreateFirmwareExtractorJob($storageIndex: Int!) {\n        createFirmwareExtractorJob(\n            createFuzzyHashes: false\n            queueName: \"high-python\"\n            storageIndex: $storageIndex\n        ) {\n            jobId\n        }\n    }\n": typeof types.CreateFirmwareExtractorJobDocument,
+    "\n    mutation CreateAppImportJob($storageIndex: Int!) {\n        createAppImportJob(\n            queueName: \"high-python\",\n            storageIndex: $storageIndex\n        ) {\n            jobId\n        }\n    }\n": typeof types.CreateAppImportJobDocument,
     "\n    query GetFirmwareObjectIdList {\n        android_firmware_id_list\n    }\n": typeof types.GetFirmwareObjectIdListDocument,
     "\n    fragment FirmwareTableRow on AndroidFirmwareType {\n        id\n        absoluteStorePath\n        aecsBuildFilePath\n#        fileSizeBytes\n        filename\n        hasFileIndex\n        hasFuzzyHashIndex\n        indexedDate\n        md5\n        originalFilename\n        osVendor\n#        partitionInfoDict\n        relativeStorePath\n        sha1\n        sha256\n        tag\n        versionDetected\n        pk\n    }\n": typeof types.FirmwareTableRowFragmentDoc,
     "\n    query GetFirmwaresByObjectIds($objectIds: [String!]!) {\n        android_firmware_list(objectIdList: $objectIds) {\n            ...FirmwareTableRow\n        }\n    }\n": typeof types.GetFirmwaresByObjectIdsDocument,
@@ -43,7 +45,9 @@ const documents: Documents = {
     "\n    mutation DeleteTokenCookie {\n        deleteTokenCookie {\n            deleted\n        }\n    }\n": types.DeleteTokenCookieDocument,
     "\n    query GetCurrentUserId {\n        me {\n            id\n        }\n    }\n": types.GetCurrentUserIdDocument,
     "\n    query GetCurrentUserEmailAndUsername {\n        me {\n            email\n            username\n        }\n    }\n": types.GetCurrentUserEmailAndUsernameDocument,
+    "\n    query GetRqJobList {\n        rq_job_list {\n            funcName\n            id\n            isFailed\n            isFinished\n            startedAt\n            status\n        }\n    }\n": types.GetRqJobListDocument,
     "\n    mutation CreateFirmwareExtractorJob($storageIndex: Int!) {\n        createFirmwareExtractorJob(\n            createFuzzyHashes: false\n            queueName: \"high-python\"\n            storageIndex: $storageIndex\n        ) {\n            jobId\n        }\n    }\n": types.CreateFirmwareExtractorJobDocument,
+    "\n    mutation CreateAppImportJob($storageIndex: Int!) {\n        createAppImportJob(\n            queueName: \"high-python\",\n            storageIndex: $storageIndex\n        ) {\n            jobId\n        }\n    }\n": types.CreateAppImportJobDocument,
     "\n    query GetFirmwareObjectIdList {\n        android_firmware_id_list\n    }\n": types.GetFirmwareObjectIdListDocument,
     "\n    fragment FirmwareTableRow on AndroidFirmwareType {\n        id\n        absoluteStorePath\n        aecsBuildFilePath\n#        fileSizeBytes\n        filename\n        hasFileIndex\n        hasFuzzyHashIndex\n        indexedDate\n        md5\n        originalFilename\n        osVendor\n#        partitionInfoDict\n        relativeStorePath\n        sha1\n        sha256\n        tag\n        versionDetected\n        pk\n    }\n": types.FirmwareTableRowFragmentDoc,
     "\n    query GetFirmwaresByObjectIds($objectIds: [String!]!) {\n        android_firmware_list(objectIdList: $objectIds) {\n            ...FirmwareTableRow\n        }\n    }\n": types.GetFirmwaresByObjectIdsDocument,
@@ -107,7 +111,15 @@ export function gql(source: "\n    query GetCurrentUserEmailAndUsername {\n     
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function gql(source: "\n    query GetRqJobList {\n        rq_job_list {\n            funcName\n            id\n            isFailed\n            isFinished\n            startedAt\n            status\n        }\n    }\n"): (typeof documents)["\n    query GetRqJobList {\n        rq_job_list {\n            funcName\n            id\n            isFailed\n            isFinished\n            startedAt\n            status\n        }\n    }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function gql(source: "\n    mutation CreateFirmwareExtractorJob($storageIndex: Int!) {\n        createFirmwareExtractorJob(\n            createFuzzyHashes: false\n            queueName: \"high-python\"\n            storageIndex: $storageIndex\n        ) {\n            jobId\n        }\n    }\n"): (typeof documents)["\n    mutation CreateFirmwareExtractorJob($storageIndex: Int!) {\n        createFirmwareExtractorJob(\n            createFuzzyHashes: false\n            queueName: \"high-python\"\n            storageIndex: $storageIndex\n        ) {\n            jobId\n        }\n    }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    mutation CreateAppImportJob($storageIndex: Int!) {\n        createAppImportJob(\n            queueName: \"high-python\",\n            storageIndex: $storageIndex\n        ) {\n            jobId\n        }\n    }\n"): (typeof documents)["\n    mutation CreateAppImportJob($storageIndex: Int!) {\n        createAppImportJob(\n            queueName: \"high-python\",\n            storageIndex: $storageIndex\n        ) {\n            jobId\n        }\n    }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

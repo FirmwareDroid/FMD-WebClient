@@ -3,15 +3,16 @@ import {useApolloClient, useMutation, useQuery} from "@apollo/client";
 import {GET_CURRENT_USER_ID} from "@/components/graphql/current-user.graphql.ts";
 import {DELETE_TOKEN_COOKIE} from "@/components/graphql/auth.graphql.ts";
 
-
 type AuthContextValue = {
-    currentUser: {__typename?: "UserType", id: string} | null | undefined;
+    currentUser: { __typename?: "UserType", id: string } | null | undefined;
     isAuthenticated: boolean;
     initializing: boolean;
     refreshMe: () => Promise<boolean>;
-    logIn: () => Promise<boolean>;
+    logIn: (token?: string) => Promise<boolean>;
     logOut: () => Promise<void>;
-}
+    getToken: () => string | null;
+    setToken: (token: string | null) => void;
+};
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -24,8 +25,11 @@ export function AuthProvider({children}: Readonly<{ children: ReactNode }>) {
     const client = useApolloClient();
     const [doLogout] = useMutation(DELETE_TOKEN_COOKIE);
 
-    // Avoid flashing during initial load
     const [bootstrapped, setBootstrapped] = useState(false);
+    const [jwtToken, setJwtToken] = useState<string | null>(
+        () => localStorage.getItem("jwtToken")
+    );
+
     useEffect(() => {
         if (!loading) setBootstrapped(true);
     }, [loading]);
@@ -43,9 +47,16 @@ export function AuthProvider({children}: Readonly<{ children: ReactNode }>) {
         }
     }, [refetch]);
 
-    const logIn = useCallback(async () => {
-        return refreshMe();
-    }, [refreshMe]);
+    const logIn = useCallback(
+        async (token?: string) => {
+            if (token) {
+                setJwtToken(token);
+                localStorage.setItem("jwtToken", token);
+            }
+            return refreshMe();
+        },
+        [refreshMe]
+    );
 
     const logOut = useCallback(async () => {
         try {
@@ -53,7 +64,10 @@ export function AuthProvider({children}: Readonly<{ children: ReactNode }>) {
         } catch {
             // ignore
         }
-        await client.clearStore().catch(() => {});
+        setJwtToken(null);
+        localStorage.removeItem("jwtToken");
+        await client.clearStore().catch(() => {
+        });
         try {
             await refetch();
         } catch {
@@ -69,8 +83,14 @@ export function AuthProvider({children}: Readonly<{ children: ReactNode }>) {
             refreshMe,
             logIn,
             logOut,
+            getToken: () => jwtToken,
+            setToken: (token) => {
+                setJwtToken(token);
+                if (token) localStorage.setItem("jwtToken", token);
+                else localStorage.removeItem("jwtToken");
+            },
         }),
-        [currentUser, isAuthenticated, initializing, refreshMe, logIn, logOut]
+        [currentUser, isAuthenticated, initializing, refreshMe, logIn, logOut, jwtToken]
     );
 
     return <AuthContext value={value}>{children}</AuthContext>;
@@ -78,6 +98,6 @@ export function AuthProvider({children}: Readonly<{ children: ReactNode }>) {
 
 export function useAuth() {
     const context = useContext(AuthContext);
-    if (!context) throw new Error('useAuth must be used within a AuthProvider');
+    if (!context) throw new Error("useAuth must be used within a AuthProvider");
     return context;
 }

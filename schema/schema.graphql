@@ -1,5 +1,13 @@
 type Query {
-  build_prop_file_id_list(objectIdList: [String], fieldFilter: ExtendedBuildPropFileFilter): [BuildPropFileType]
+  build_prop_file_id_list(
+    objectIdList: [String]
+    fieldFilter: ExtendedBuildPropFileFilter
+
+    """
+    Return distinct records based on the specified field (e.g., 'firmware_id_reference')
+    """
+    distinctOn: String
+  ): [BuildPropFileType]
   firmware_importer_setting_list: [FirmwareImporterSettingType]
   aecs_job_list(objectIdList: [String], fieldFilter: AecsJobFilter): [AecsJobType]
   isApiUp: Boolean
@@ -2312,6 +2320,18 @@ type Mutation {
   createFirmwareReImportJob(createFuzzyHashes: Boolean = false, firmwareIdList: [String!]!, queueName: String! = "high-python"): CreateFirmwareReImportJob
 
   """
+  Updates OS vendor information for firmware based on build.prop files.
+  This mutation analyzes build.prop files to detect and set the os_vendor field.
+  """
+  updateFirmwareVendor(
+    """
+    Specific firmware IDs to update. If not provided, updates all firmware with 'Unknown' vendor
+    """
+    firmwareIdList: [String]
+    queueName: String! = "default-python"
+  ): UpdateFirmwareVendorMutation
+
+  """
   Create or update the aecs-job. There can only be one aecs-job in the database. In case a new
   job is created the old will be overwritten by the new. The aecs-job is used to store a
   list of firmware ids for further processing by the aecs-service.
@@ -2375,6 +2395,14 @@ First, copies the firmware into the importer queue. Second, deletes the firmware
 the importer.
 """
 type CreateFirmwareReImportJob {
+  jobId: String
+}
+
+"""
+Updates OS vendor information for firmware based on build.prop files.
+This mutation analyzes build.prop files to detect and set the os_vendor field.
+"""
+type UpdateFirmwareVendorMutation {
   jobId: String
 }
 

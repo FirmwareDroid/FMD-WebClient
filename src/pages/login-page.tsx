@@ -1,6 +1,6 @@
 import {useAuth} from "@/lib/auth.tsx";
 import {useLocation, useNavigate} from "react-router";
-import {FormEvent, useEffect, useState} from "react";
+import React, {FormEvent, useEffect, useState} from "react";
 import {useLazyQuery} from "@apollo/client";
 import {GET_AUTH_TOKEN} from "@/components/graphql/auth.graphql.ts";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card.tsx";
@@ -17,7 +17,7 @@ export default function LoginPage() {
 
     useEffect(() => {
         if (!initializing && isAuthenticated) {
-            void navigate("/", {replace: true});
+            navigate("/", {replace: true});
         }
     }, [isAuthenticated, initializing, navigate]);
 
@@ -52,7 +52,7 @@ function LoginForm({className, ...props}: React.ComponentProps<"div">) {
         if (!token) return;
 
         void (async () => {
-            await logIn();
+            await logIn(token);
             const dest = location?.state?.from?.pathname ?? "/";
             navigate(dest, {replace: true});
         })();

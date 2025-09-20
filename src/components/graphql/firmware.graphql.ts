@@ -1,5 +1,23 @@
 import {gql} from "@/__generated__";
 
+
+// ----------------------------------------------------------------------------------------------------
+// RQ JOBS
+// ----------------------------------------------------------------------------------------------------
+
+export const GET_RQ_JOB_LIST = gql(`
+    query GetRqJobList {
+        rq_job_list {
+            funcName
+            id
+            isFailed
+            isFinished
+            startedAt
+            status
+        }
+    }
+`);
+
 // ----------------------------------------------------------------------------------------------------
 // FIRMWARE EXTRACTION
 // ----------------------------------------------------------------------------------------------------
@@ -9,6 +27,21 @@ export const CREATE_FIRMWARE_EXTRACTOR_JOB = gql(`
         createFirmwareExtractorJob(
             createFuzzyHashes: false
             queueName: "high-python"
+            storageIndex: $storageIndex
+        ) {
+            jobId
+        }
+    }
+`);
+
+// ----------------------------------------------------------------------------------------------------
+// APK IMPORT
+// ----------------------------------------------------------------------------------------------------
+
+export const CREATE_APP_IMPORT_JOB = gql(`
+    mutation CreateAppImportJob($storageIndex: Int!) {
+        createAppImportJob(
+            queueName: "high-python",
             storageIndex: $storageIndex
         ) {
             jobId
