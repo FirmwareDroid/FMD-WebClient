@@ -2,39 +2,61 @@ import type {ColumnDef, Table} from "@tanstack/react-table";
 import {Checkbox} from "@/components/ui/checkbox.tsx";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {AlertCircleIcon, LoaderCircle, LoaderCircleIcon, Trash, TrashIcon, ViewIcon} from "lucide-react";
-import {useMutation} from "@apollo/client";
+import {LoaderCircle, LoaderCircleIcon, Trash, TrashIcon, ViewIcon} from "lucide-react";
+import {useLazyQuery, useMutation} from "@apollo/client";
 import {DELETE_FIRMWARE_BY_OBJECT_ID} from "@/components/graphql/firmware.graphql.ts";
 import {convertIdToObjectId} from "@/lib/graphql/graphql-utils.ts";
-import {Alert} from "@/components/ui/alert.tsx";
 import {useNavigate} from "react-router";
+import {GET_RQ_JOB_LIST} from "@/components/graphql/rq-job.graphql.ts";
+import {GetRqJobListQuery} from "@/__generated__/graphql.ts";
 
 type WithId = { id: string };
 
+const DELETION_JOB_FUNC_NAME = "api.v2.types.GenericDeletion.delete_queryset_background";
+
+function isDeletionOngoing(objectIds: string[], rqJobListData: GetRqJobListQuery | undefined) {
+    // const {data: rqJobListData} = useQuery(GET_RQ_JOB_LIST, {
+    //     fetchPolicy: "cache-and-network",
+    //     pollInterval: 5000,
+    // });
+    //
+    const ongoingDeletionJobs = rqJobListData?.rq_job_list
+        ?.filter(job =>
+            job?.funcName === DELETION_JOB_FUNC_NAME &&
+            !job.isFinished &&
+            !job.isFailed
+        ).filter(job => {
+            if (!job?.description) return false;
+
+            /*
+            The job description contains the affected elements in the following format:
+            "api.v2.types.GenericDeletion.delete_queryset_background(['68d2c1f78773bc31564c1dab', '68d2c2008773bc31564c1dac'], <class 'model.AndroidFirmware.AndroidFirmware'>)",
+             */
+            const start = job.description.indexOf("['");
+            const end = job.description.indexOf("']");
+            const deletedObjectIdsSubstring = job.description.substring(start, end + 2);
+            // We parse the substring to a string array. But first, we need to replace both ' with ".
+            const deletedObjectIds = JSON.parse(deletedObjectIdsSubstring.replace(/'/g, '"')) as string[];
+            return objectIds.some((id) => deletedObjectIds.includes(id));
+        });
+
+    return (ongoingDeletionJobs?.length ?? 0) > 0;
+}
+
 function DeleteSelectedButton<T extends WithId>({table}: Readonly<{ table: Table<T> }>) {
     const selectedObjectIds = table.getSelectedRowModel().rows.map((row) => convertIdToObjectId(row.original.id));
-    const [deleteFirmwares, {loading, error}] = useMutation(DELETE_FIRMWARE_BY_OBJECT_ID, {
+    const [deleteFirmwares] = useMutation(DELETE_FIRMWARE_BY_OBJECT_ID, {
         variables: {objectIds: selectedObjectIds},
     });
 
-    if (loading) {
+    const [getRqJobList, {data: rqJobListData}] = useLazyQuery(GET_RQ_JOB_LIST, {
+        fetchPolicy: "cache-and-network",
+        pollInterval: 5000,
+    });
+
+    if (isDeletionOngoing(selectedObjectIds, rqJobListData)) {
         return (
             <LoaderCircleIcon className="animate-spin"></LoaderCircleIcon>
-        );
-    }
-
-    if (error) {
-        return (
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <Alert variant="destructive">
-                        <AlertCircleIcon/>
-                    </Alert>
-                </TooltipTrigger>
-                <TooltipContent>
-                    <p>Error: '{error.message}'</p>
-                </TooltipContent>
-            </Tooltip>
         );
     }
 
@@ -43,10 +65,12 @@ function DeleteSelectedButton<T extends WithId>({table}: Readonly<{ table: Table
     return (
         <Tooltip delayDuration={500}>
             <TooltipTrigger asChild>
-                <Button
-                    disabled={disabled}
-                    onClick={() => void deleteFirmwares()}
-                    variant="destructive"
+                <Button variant="destructive"
+                        disabled={disabled}
+                        onClick={() => {
+                            void deleteFirmwares();
+                            void getRqJobList();
+                        }}
                 >
                     <TrashIcon/>
                 </Button>
@@ -59,39 +83,35 @@ function DeleteSelectedButton<T extends WithId>({table}: Readonly<{ table: Table
 }
 
 function DeleteRowButton({id}: Readonly<{ id: string }>) {
-    const [deleteFirmware, {loading, error}] = useMutation(
+    const objectId = convertIdToObjectId(id);
+    const [deleteFirmware] = useMutation(
         DELETE_FIRMWARE_BY_OBJECT_ID, {
             variables: {
-                objectIds: convertIdToObjectId(id)
+                objectIds: objectId,
             }
         }
     );
 
-    if (loading) {
-        return (
-            <LoaderCircle className="animate-spin"></LoaderCircle>
-        );
-    }
+    const [getRqJobList, {data: rqJobListData}] = useLazyQuery(GET_RQ_JOB_LIST, {
+        fetchPolicy: "cache-and-network",
+        pollInterval: 5000,
+    });
 
-    if (error) {
+    if (isDeletionOngoing([objectId], rqJobListData)) {
         return (
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <Alert variant="destructive">
-                        <AlertCircleIcon/>
-                    </Alert>
-                </TooltipTrigger>
-                <TooltipContent>
-                    <p>Error: '{error.message}'</p>
-                </TooltipContent>
-            </Tooltip>
+            <div className="flex items-center justify-center">
+                <LoaderCircle className="animate-spin"></LoaderCircle>
+            </div>
         );
     }
 
     return (
         <Tooltip delayDuration={500}>
             <TooltipTrigger asChild>
-                <Button onClick={() => void deleteFirmware()} variant="destructive">
+                <Button variant="destructive" onClick={() => {
+                    void deleteFirmware();
+                    void getRqJobList();
+                }}>
                     <Trash></Trash>
                 </Button>
             </TooltipTrigger>
@@ -138,6 +158,7 @@ function buildViewEntityColumn<T extends WithId>(): ColumnDef<T> {
         {
             id: "view",
             cell: ({row}) => {
+                // eslint-disable-next-line react-hooks/rules-of-hooks
                 const navigate = useNavigate();
                 const firmwareId = row.original.id;
 
