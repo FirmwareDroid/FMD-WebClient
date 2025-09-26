@@ -1,5 +1,24 @@
 import {gql} from "@/__generated__";
 
+// ----------------------------------------------------------------------------------------------------
+// APP IMPORT
+// ----------------------------------------------------------------------------------------------------
+
+export const CREATE_APP_IMPORT_JOB = gql(`
+    mutation CreateAppImportJob($storageIndex: Int!) {
+        createAppImportJob(
+            queueName: "high-python",
+            storageIndex: $storageIndex
+        ) {
+            jobId
+        }
+    }
+`);
+
+// ----------------------------------------------------------------------------------------------------
+// RETRIEVE APPS
+// ----------------------------------------------------------------------------------------------------
+
 export const GET_APP_OBJECT_IDS_BY_FIRMWARE_OBJECT_IDS = gql(`
     query GetApkObjectIdsByFirmwareObjectIds {
         android_app_id_list
@@ -19,6 +38,10 @@ export const GET_APPS_BY_OBJECT_IDS_SCANNER = gql(`
         }
     }
 `);
+
+// ----------------------------------------------------------------------------------------------------
+// APK SCAN
+// ----------------------------------------------------------------------------------------------------
 
 export const CREATE_APK_SCAN_JOB = gql(`
     mutation CreateApkScanJob($objectIds: [String!]!, $scannerName: String!) {

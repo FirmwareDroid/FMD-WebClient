@@ -178,9 +178,9 @@ function StateHandlingScrollableDataTable<TData, TValue>(
         idsError,
         dataError,
     }: Readonly<DataTableProps<TData, TValue>> & {
-        idsLoading: boolean,
+        idsLoading?: boolean,
         dataLoading: boolean,
-        idsError: ApolloError | undefined,
+        idsError?: ApolloError,
         dataError: ApolloError | undefined,
     }
 ) {

@@ -4,49 +4,27 @@ import {Dropzone} from "@/components/ui/importer/dropzone.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
 import {useQuery} from "@apollo/client";
 import {
-    FIRMWARE_TABLE_ROW_IMPORTER, GET_FIRMWARE_OBJECT_ID_LIST,
-    GET_FIRMWARES_BY_OBJECT_IDS_IMPORTER,
+    FIRMWARE_ROW_IMPORTER_PAGE, GET_FIRMWARES_IMPORTER_PAGE,
 } from "@/components/graphql/firmware.graphql.ts";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
-import {useMemo} from "react";
-import {nonNullable} from "@/lib/non-nullable.ts";
 import {useFragment} from "@/__generated__";
 
 import type {ColumnDef} from "@tanstack/react-table";
-import type {FirmwareTableRowImporterFragment} from "@/__generated__/graphql.ts";
 import {buildFirmwareActionColumns} from "@/components/ui/firmware-action-columns.tsx";
+import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
+import {FirmwareRowImporterPageFragment} from "@/__generated__/graphql.ts";
 
 export function ImporterPage() {
-    const {
-        data: idsData,
-        loading: idsLoading,
-        error: idsError,
-    } = useQuery(GET_FIRMWARE_OBJECT_ID_LIST);
-
-    const objectIds = useMemo(() =>
-            (idsData?.android_firmware_id_list ?? []).filter(Boolean) as string[],
-        [idsData]
-    );
-
     const {
         data: firmwaresData,
         loading: firmwaresLoading,
         error: firmwaresError,
-    } = useQuery(GET_FIRMWARES_BY_OBJECT_IDS_IMPORTER, {
-        variables: {objectIds},
-        skip: objectIds.length === 0,
-    });
+    } = useQuery(GET_FIRMWARES_IMPORTER_PAGE);
 
-    const firmwares: FirmwareTableRowImporterFragment[] = useMemo(
-        () =>
-            ((firmwaresData?.android_firmware_list ?? [])
-                    .filter(nonNullable)
-                    // eslint-disable-next-line react-hooks/rules-of-hooks
-                    .map((item) => useFragment(FIRMWARE_TABLE_ROW_IMPORTER, item))
-                    .filter(nonNullable)
-            ),
-        [firmwaresData]
-    );
+    const firmwares = (firmwaresData?.android_firmware_connection?.edges ?? [])
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        .map(edge => useFragment(FIRMWARE_ROW_IMPORTER_PAGE, edge?.node))
+        .filter(isNonNullish)
 
     return (
         <BasePage title="Importer">
@@ -57,17 +35,15 @@ export function ImporterPage() {
             <StateHandlingScrollableDataTable
                 columns={columns}
                 data={firmwares}
-                idsLoading={idsLoading}
                 dataLoading={firmwaresLoading}
-                idsError={idsError}
                 dataError={firmwaresError}
             />
         </BasePage>
     );
 }
 
-const columns: ColumnDef<FirmwareTableRowImporterFragment>[] = [
-    ...buildFirmwareActionColumns<FirmwareTableRowImporterFragment>(),
+const columns: ColumnDef<FirmwareRowImporterPageFragment>[] = [
+    ...buildFirmwareActionColumns<FirmwareRowImporterPageFragment>(),
     {
         accessorKey: "id",
         header: "ID",

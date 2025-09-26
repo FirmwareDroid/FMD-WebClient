@@ -7,16 +7,13 @@ import {Checkbox} from "@/components/ui/checkbox.tsx";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
 import {useQuery} from "@apollo/client";
 import {
-    FIRMWARE_TABLE_ROW_SCANNER,
-    GET_FIRMWARE_OBJECT_ID_LIST,
-    GET_FIRMWARES_BY_OBJECT_IDS_SCANNER
+    FIRMWARE_ROW_SCANNER_PAGE,
+    GET_FIRMWARES_SCANNER_PAGE,
 } from "@/components/graphql/firmware.graphql.ts";
 import {useMemo} from "react";
 import {
-    AppTableRowScannerFragment,
-    FirmwareTableRowScannerFragment
+    AppTableRowScannerFragment, FirmwareRowScannerPageFragment,
 } from "@/__generated__/graphql.ts";
-import {nonNullable} from "@/lib/non-nullable.ts";
 import {useFragment} from "@/__generated__";
 import {
     APP_TABLE_ROW_SCANNER,
@@ -24,6 +21,7 @@ import {
     GET_APPS_BY_OBJECT_IDS_SCANNER
 } from "@/components/graphql/app.graphql.ts";
 import {buildSelectEntityColumn} from "@/components/ui/firmware-action-columns.tsx";
+import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 
 export function ScannerPage() {
     return (
@@ -46,8 +44,8 @@ export function ScannerPage() {
 }
 
 function FirmwaresPanel() {
-    const columns: ColumnDef<FirmwareTableRowScannerFragment>[] = [
-        buildSelectEntityColumn<FirmwareTableRowScannerFragment>(),
+    const columns: ColumnDef<FirmwareRowScannerPageFragment>[] = [
+        buildSelectEntityColumn<FirmwareRowScannerPageFragment>(),
         {
             accessorKey: "id",
             header: "ID",
@@ -59,35 +57,15 @@ function FirmwaresPanel() {
     ];
 
     const {
-        loading: idsLoading,
-        error: idsError,
-        data: idsData,
-    } = useQuery(GET_FIRMWARE_OBJECT_ID_LIST);
-
-    const objectIds = useMemo(() =>
-            (idsData?.android_firmware_id_list ?? []).filter(Boolean) as string[],
-        [idsData]
-    );
-
-    const {
         loading: firmwaresLoading,
         error: firmwaresError,
         data: firmwaresData,
-    } = useQuery(GET_FIRMWARES_BY_OBJECT_IDS_SCANNER, {
-        variables: {objectIds},
-        skip: objectIds.length === 0,
-    });
+    } = useQuery(GET_FIRMWARES_SCANNER_PAGE);
 
-    const firmwares: FirmwareTableRowScannerFragment[] = useMemo(
-        () =>
-            ((firmwaresData?.android_firmware_list ?? [])
-                    .filter(nonNullable)
-                    // eslint-disable-next-line react-hooks/rules-of-hooks
-                    .map((item) => useFragment(FIRMWARE_TABLE_ROW_SCANNER, item))
-                    .filter(nonNullable)
-            ),
-        [firmwaresData]
-    );
+    const firmwares = (firmwaresData?.android_firmware_connection?.edges ?? [])
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        .map(edge => useFragment(FIRMWARE_ROW_SCANNER_PAGE, edge?.node))
+        .filter(isNonNullish)
 
     return (
         <div className="flex flex-col p-4 gap-4">
@@ -95,9 +73,7 @@ function FirmwaresPanel() {
             <StateHandlingScrollableDataTable
                 columns={columns}
                 data={firmwares}
-                idsLoading={idsLoading}
                 dataLoading={firmwaresLoading}
-                idsError={idsError}
                 dataError={firmwaresError}
             />
         </div>
@@ -161,10 +137,10 @@ function AppsPanel() {
     const apps: AppTableRowScannerFragment[] = useMemo(
         () =>
             ((appsData?.android_app_list ?? [])
-                    .filter(nonNullable)
+                    .filter(isNonNullish)
                     // eslint-disable-next-line react-hooks/rules-of-hooks
                     .map((item) => useFragment(APP_TABLE_ROW_SCANNER, item))
-                    .filter(nonNullable)
+                    .filter(isNonNullish)
             ),
         [appsData]
     );

@@ -1,19 +1,18 @@
 import {BasePage} from "@/pages/base-page.tsx";
 import {ColumnDef} from "@tanstack/react-table";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
-import {FirmwareTableRowFragment} from "@/__generated__/graphql.ts";
+import {FirmwareAllFragment} from "@/__generated__/graphql.ts";
 import {useQuery} from "@apollo/client";
 import {
-    FIRMWARE_TABLE_ROW,
-    GET_FIRMWARE_OBJECT_ID_LIST, GET_FIRMWARES_BY_OBJECT_IDS,
+    FIRMWARE_ALL,
+    GET_FIRMWARES_BY_OBJECT_IDS,
 } from "@/components/graphql/firmware.graphql.ts";
-import {useMemo} from "react";
-import {useFragment} from "@/__generated__";
-import {nonNullable} from "@/lib/non-nullable.ts";
 import {buildFirmwareActionColumns} from "@/components/ui/firmware-action-columns.tsx";
+import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
+import {useFragment} from "@/__generated__";
 
-const columns: ColumnDef<FirmwareTableRowFragment>[] = [
-    ...buildFirmwareActionColumns<FirmwareTableRowFragment>(),
+const columns: ColumnDef<FirmwareAllFragment>[] = [
+    ...buildFirmwareActionColumns<FirmwareAllFragment>(),
     {
         accessorKey: "id",
         header: "ID",
@@ -82,44 +81,22 @@ const columns: ColumnDef<FirmwareTableRowFragment>[] = [
 
 export function FirmwaresPage() {
     const {
-        loading: idsLoading,
-        error: idsError,
-        data: idsData,
-    } = useQuery(GET_FIRMWARE_OBJECT_ID_LIST);
-
-    const objectIds = useMemo(() =>
-            (idsData?.android_firmware_id_list ?? []).filter(Boolean) as string[],
-        [idsData]
-    );
-
-    const {
         loading: firmwaresLoading,
         error: firmwaresError,
         data: firmwaresData,
-    } = useQuery(GET_FIRMWARES_BY_OBJECT_IDS, {
-        variables: {objectIds},
-        skip: objectIds.length === 0,
-    });
+    } = useQuery(GET_FIRMWARES_BY_OBJECT_IDS);
 
-    const firmwares: FirmwareTableRowFragment[] = useMemo(
-        () =>
-            ((firmwaresData?.android_firmware_list ?? [])
-                    .filter(nonNullable)
-                    // eslint-disable-next-line react-hooks/rules-of-hooks
-                    .map((item) => useFragment(FIRMWARE_TABLE_ROW, item))
-                    .filter(nonNullable)
-            ),
-        [firmwaresData]
-    );
+    const firmwares = (firmwaresData?.android_firmware_connection?.edges ?? [])
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        .map(edge => useFragment(FIRMWARE_ALL, edge?.node))
+        .filter(isNonNullish)
 
     return (
         <BasePage title="Firmwares">
             <StateHandlingScrollableDataTable
                 columns={columns}
                 data={firmwares}
-                idsLoading={idsLoading}
                 dataLoading={firmwaresLoading}
-                idsError={idsError}
                 dataError={firmwaresError}
             />
         </BasePage>

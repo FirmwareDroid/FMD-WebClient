@@ -16,13 +16,13 @@ import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {ApolloQueryResult, useMutation, useQuery} from "@apollo/client";
 import {
-    CREATE_APP_IMPORT_JOB,
     CREATE_FIRMWARE_EXTRACTOR_JOB,
 } from "@/components/graphql/firmware.graphql.ts";
 import {Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle,} from "@/components/ui/dialog.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {Exact, GetRqJobListQuery} from "@/__generated__/graphql.ts";
 import {GET_RQ_JOB_LIST} from "@/components/graphql/rq-job.graphql.ts";
+import {CREATE_APP_IMPORT_JOB} from "@/components/graphql/app.graphql.ts";
 
 type DropzoneProps = {
     className?: string;

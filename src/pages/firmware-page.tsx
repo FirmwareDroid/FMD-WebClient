@@ -1,14 +1,12 @@
 import {BasePage} from "@/pages/base-page.tsx";
 import {useParams} from "react-router";
 import {useQuery} from "@apollo/client";
-import {FIRMWARE_TABLE_ROW, GET_FIRMWARES_BY_OBJECT_IDS} from "@/components/graphql/firmware.graphql.ts";
-import {FirmwareTableRowFragment} from "@/__generated__/graphql.ts";
-import {useMemo} from "react";
-import {nonNullable} from "@/lib/non-nullable.ts";
+import {FIRMWARE_ALL, GET_FIRMWARES_BY_OBJECT_IDS} from "@/components/graphql/firmware.graphql.ts";
+import {FirmwareAllFragment} from "@/__generated__/graphql.ts";
 import {useFragment} from "@/__generated__";
 import {Alert, AlertTitle} from "@/components/ui/alert.tsx";
 import {AlertCircleIcon} from "lucide-react";
-import {convertIdToObjectId} from "@/lib/graphql/graphql-utils.ts";
+import {convertIdToObjectId, isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {Table, TableBody, TableCell, TableRow} from "@/components/ui/table.tsx";
 
@@ -24,16 +22,10 @@ export function FirmwarePage() {
         skip: !firmwareId,
     });
 
-    const firmwares: FirmwareTableRowFragment[] = useMemo(
-        () =>
-            ((firmwaresData?.android_firmware_list ?? [])
-                    .filter(nonNullable)
-                    // eslint-disable-next-line react-hooks/rules-of-hooks
-                    .map((item) => useFragment(FIRMWARE_TABLE_ROW, item))
-                    .filter(nonNullable)
-            ),
-        [firmwaresData]
-    );
+    const firmwares = (firmwaresData?.android_firmware_connection?.edges ?? [])
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        .map(edge => useFragment(FIRMWARE_ALL, edge?.node))
+        .filter(isNonNullish)
 
     if (!firmwareId) {
         return (
@@ -55,7 +47,7 @@ export function FirmwarePage() {
     }
 
     if (firmwares.length === 1) {
-        const firmware: FirmwareTableRowFragment = firmwares[0];
+        const firmware: FirmwareAllFragment = firmwares[0];
 
         return (
             <BasePage title="Firmware">

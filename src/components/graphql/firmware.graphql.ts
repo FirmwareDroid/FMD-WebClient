@@ -17,57 +17,40 @@ export const CREATE_FIRMWARE_EXTRACTOR_JOB = gql(`
 `);
 
 // ----------------------------------------------------------------------------------------------------
-// APK IMPORT
-// ----------------------------------------------------------------------------------------------------
-
-export const CREATE_APP_IMPORT_JOB = gql(`
-    mutation CreateAppImportJob($storageIndex: Int!) {
-        createAppImportJob(
-            queueName: "high-python",
-            storageIndex: $storageIndex
-        ) {
-            jobId
-        }
-    }
-`);
-
-// ----------------------------------------------------------------------------------------------------
 // GET FIRMWARES (ALL FIELDS)
 // ----------------------------------------------------------------------------------------------------
 
-export const GET_FIRMWARE_OBJECT_ID_LIST = gql(`
-    query GetFirmwareObjectIdList {
-        android_firmware_id_list
-    }
-`);
-
-export const FIRMWARE_TABLE_ROW = gql(`
-    fragment FirmwareTableRow on AndroidFirmwareType {
-        id
+export const FIRMWARE_ALL = gql(`
+    fragment FirmwareAll on AndroidFirmwareType {
         absoluteStorePath
         aecsBuildFilePath
         fileSizeBytes
         filename
         hasFileIndex
         hasFuzzyHashIndex
+        id
         indexedDate
         md5
         originalFilename
         osVendor
         partitionInfoDict
+        pk
         relativeStorePath
         sha1
         sha256
         tag
         versionDetected
-        pk
     }
 `);
 
 export const GET_FIRMWARES_BY_OBJECT_IDS = gql(`
-    query GetFirmwaresByObjectIds($objectIds: [String!]!) {
-        android_firmware_list(objectIdList: $objectIds) {
-            ...FirmwareTableRow
+    query GetFirmwaresByObjectIds($objectIds: [String!]) {
+        android_firmware_connection(objectIdList: $objectIds) {
+            edges {
+                node {
+                    ...FirmwareAll
+                }
+            }
         }
     }
 `);
@@ -76,8 +59,8 @@ export const GET_FIRMWARES_BY_OBJECT_IDS = gql(`
 // GET FIRMWARES FOR IMPORTER PAGE
 // ----------------------------------------------------------------------------------------------------
 
-export const FIRMWARE_TABLE_ROW_IMPORTER = gql(`
-    fragment FirmwareTableRowImporter on AndroidFirmwareType {
+export const FIRMWARE_ROW_IMPORTER_PAGE = gql(`
+    fragment FirmwareRowImporterPage on AndroidFirmwareType {
         id
         indexedDate
         originalFilename
@@ -86,10 +69,14 @@ export const FIRMWARE_TABLE_ROW_IMPORTER = gql(`
     }
 `);
 
-export const GET_FIRMWARES_BY_OBJECT_IDS_IMPORTER = gql(`
-    query GetFirmwaresByObjectIdsImporter($objectIds: [String!]!) {
-        android_firmware_list(objectIdList: $objectIds) {
-            ...FirmwareTableRowImporter
+export const GET_FIRMWARES_IMPORTER_PAGE = gql(`
+    query GetFirmwaresImporterPage {
+        android_firmware_connection {
+            edges {
+                node {
+                    ...FirmwareRowImporterPage
+                }
+            }
         }
     }
 `);
@@ -98,17 +85,21 @@ export const GET_FIRMWARES_BY_OBJECT_IDS_IMPORTER = gql(`
 // GET FIRMWARES FOR SCANNER PAGE
 // ----------------------------------------------------------------------------------------------------
 
-export const FIRMWARE_TABLE_ROW_SCANNER = gql(`
-    fragment FirmwareTableRowScanner on AndroidFirmwareType {
+export const FIRMWARE_ROW_SCANNER_PAGE = gql(`
+    fragment FirmwareRowScannerPage on AndroidFirmwareType {
         id
         originalFilename
     }
 `);
 
-export const GET_FIRMWARES_BY_OBJECT_IDS_SCANNER = gql(`
-    query GetFirmwaresByObjectIdsScanner($objectIds: [String!]!) {
-        android_firmware_list(objectIdList: $objectIds) {
-            ...FirmwareTableRowScanner
+export const GET_FIRMWARES_SCANNER_PAGE = gql(`
+    query GetFirmwaresScannerPage {
+        android_firmware_connection {
+            edges {
+                node {
+                    ...FirmwareRowScannerPage
+                }
+            }
         }
     }
 `);
