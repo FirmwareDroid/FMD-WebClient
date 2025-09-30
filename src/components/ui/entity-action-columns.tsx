@@ -6,20 +6,17 @@ import {LoaderCircle, LoaderCircleIcon, Trash, TrashIcon, ViewIcon} from "lucide
 import {useLazyQuery, useMutation} from "@apollo/client";
 import {DELETE_FIRMWARE_BY_OBJECT_ID} from "@/components/graphql/firmware.graphql.ts";
 import {convertIdToObjectId} from "@/lib/graphql/graphql-utils.ts";
-import {useNavigate} from "react-router";
+import {useNavigate, useParams} from "react-router";
 import {GET_RQ_JOB_LIST} from "@/components/graphql/rq-job.graphql.ts";
-import {GetRqJobListQuery} from "@/__generated__/graphql.ts";
+import {Exact, GetRqJobListQuery, Scalars} from "@/__generated__/graphql.ts";
+import {TypedDocumentNode} from "@graphql-typed-document-node/core";
 
 type WithId = { id: string };
+type WithTypenameMutation = { __typename?: "Mutation" };
 
 const DELETION_JOB_FUNC_NAME = "api.v2.types.GenericDeletion.delete_queryset_background";
 
 function isDeletionOngoing(objectIds: string[], rqJobListData: GetRqJobListQuery | undefined) {
-    // const {data: rqJobListData} = useQuery(GET_RQ_JOB_LIST, {
-    //     fetchPolicy: "cache-and-network",
-    //     pollInterval: 5000,
-    // });
-    //
     const ongoingDeletionJobs = rqJobListData?.rq_job_list
         ?.filter(job =>
             job?.funcName === DELETION_JOB_FUNC_NAME &&
@@ -43,9 +40,21 @@ function isDeletionOngoing(objectIds: string[], rqJobListData: GetRqJobListQuery
     return (ongoingDeletionJobs?.length ?? 0) > 0;
 }
 
-function DeleteSelectedButton<T extends WithId>({table}: Readonly<{ table: Table<T> }>) {
+function DeleteSelectedButton<T extends WithId, U extends WithTypenameMutation>(
+    {
+        tooltip,
+        table,
+        deleteMutation,
+    }: Readonly<{
+        tooltip: string;
+        table: Table<T>;
+        deleteMutation: TypedDocumentNode<U, Exact<{
+            objectIds: Array<Scalars["String"]["input"]> | Scalars["String"]["input"]
+        }>>;
+    }>,
+) {
     const selectedObjectIds = table.getSelectedRowModel().rows.map((row) => convertIdToObjectId(row.original.id));
-    const [deleteFirmwares] = useMutation(DELETE_FIRMWARE_BY_OBJECT_ID, {
+    const [deleteEntities] = useMutation(deleteMutation, {
         variables: {objectIds: selectedObjectIds},
     });
 
@@ -68,7 +77,7 @@ function DeleteSelectedButton<T extends WithId>({table}: Readonly<{ table: Table
                 <Button variant="destructive"
                         disabled={disabled}
                         onClick={() => {
-                            void deleteFirmwares();
+                            void deleteEntities();
                             void getRqJobList();
                         }}
                 >
@@ -76,16 +85,28 @@ function DeleteSelectedButton<T extends WithId>({table}: Readonly<{ table: Table
                 </Button>
             </TooltipTrigger>
             <TooltipContent>
-                <p>Delete selected firmwares</p>
+                <p>{tooltip}</p>
             </TooltipContent>
         </Tooltip>
     )
 }
 
-function DeleteRowButton({id}: Readonly<{ id: string }>) {
+function DeleteRowButton<T extends WithTypenameMutation>(
+    {
+        tooltip,
+        id,
+        deleteMutation,
+    }: Readonly<{
+        tooltip: string;
+        id: string;
+        deleteMutation: TypedDocumentNode<T, Exact<{
+            objectIds: Array<Scalars["String"]["input"]> | Scalars["String"]["input"]
+        }>>;
+    }>,
+) {
     const objectId = convertIdToObjectId(id);
-    const [deleteFirmware] = useMutation(
-        DELETE_FIRMWARE_BY_OBJECT_ID, {
+    const [deleteEntity] = useMutation(
+        deleteMutation, {
             variables: {
                 objectIds: objectId,
             }
@@ -109,14 +130,14 @@ function DeleteRowButton({id}: Readonly<{ id: string }>) {
         <Tooltip delayDuration={500}>
             <TooltipTrigger asChild>
                 <Button variant="destructive" onClick={() => {
-                    void deleteFirmware();
+                    void deleteEntity();
                     void getRqJobList();
                 }}>
                     <Trash></Trash>
                 </Button>
             </TooltipTrigger>
             <TooltipContent>
-                <p>Delete firmware</p>
+                <p>{tooltip}</p>
             </TooltipContent>
         </Tooltip>
     );
@@ -153,27 +174,38 @@ function buildSelectEntityColumn<T extends WithId>(): ColumnDef<T> {
     );
 }
 
-function buildViewEntityColumn<T extends WithId>(): ColumnDef<T> {
+function buildViewEntityColumn<T extends WithId>(
+    tooltip: string,
+    basePath: string,
+): ColumnDef<T> {
     return (
         {
             id: "view",
             cell: ({row}) => {
                 // eslint-disable-next-line react-hooks/rules-of-hooks
                 const navigate = useNavigate();
-                const firmwareId = row.original.id;
+                // eslint-disable-next-line react-hooks/rules-of-hooks
+                const {firmwareId} = useParams<{ firmwareId?: string }>();
+                const rowOriginalId = row.original.id;
 
                 return (
                     <Tooltip delayDuration={500}>
                         <TooltipTrigger asChild>
                             <Button
                                 variant="outline"
-                                onClick={() => navigate(`/firmwares/${firmwareId}`)}
+                                onClick={() => {
+                                    if (basePath === "/apps" && firmwareId) {
+                                        void navigate(`/firmwares/${firmwareId}${basePath}/${rowOriginalId}`);
+                                    } else {
+                                        void navigate(`${basePath}/${rowOriginalId}`);
+                                    }
+                                }}
                             >
                                 <ViewIcon/>
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>View firmware</p>
+                            <p>{tooltip}</p>
                         </TooltipContent>
                     </Tooltip>
                 );
@@ -182,12 +214,20 @@ function buildViewEntityColumn<T extends WithId>(): ColumnDef<T> {
     );
 }
 
-function buildDeleteEntityColumn<T extends WithId>(): ColumnDef<T> {
+function buildDeleteEntityColumn<T extends WithId, U extends WithTypenameMutation>(
+    tooltipSingle: string,
+    tooltipSelected: string,
+    deleteMutation: TypedDocumentNode<U, Exact<{
+        objectIds: Array<Scalars["String"]["input"]> | Scalars["String"]["input"]
+    }>>
+): ColumnDef<T> {
     return (
         {
             id: "delete",
-            header: ({table}) => <DeleteSelectedButton<T> table={table}/>,
-            cell: ({row}) => <DeleteRowButton id={row.original.id}/>,
+            header: ({table}) => <DeleteSelectedButton<T, U> tooltip={tooltipSelected} table={table}
+                                                             deleteMutation={deleteMutation}/>,
+            cell: ({row}) => <DeleteRowButton tooltip={tooltipSingle} id={row.original.id}
+                                              deleteMutation={deleteMutation}/>,
         }
     );
 }
@@ -195,8 +235,15 @@ function buildDeleteEntityColumn<T extends WithId>(): ColumnDef<T> {
 function buildFirmwareActionColumns<T extends WithId>(): ColumnDef<T>[] {
     return [
         buildSelectEntityColumn(),
-        buildViewEntityColumn(),
-        buildDeleteEntityColumn(),
+        buildViewEntityColumn("View firmware", "/firmwares"),
+        buildDeleteEntityColumn("Delete firmware", "Delete selected firmwares", DELETE_FIRMWARE_BY_OBJECT_ID),
+    ];
+}
+
+function buildAppActionColumns<T extends WithId>(): ColumnDef<T>[] {
+    return [
+        buildSelectEntityColumn(),
+        buildViewEntityColumn("View app", "/apps"),
     ];
 }
 
@@ -205,4 +252,5 @@ export {
     buildViewEntityColumn,
     buildDeleteEntityColumn,
     buildFirmwareActionColumns,
+    buildAppActionColumns,
 }

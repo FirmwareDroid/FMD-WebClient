@@ -16,25 +16,89 @@ export const CREATE_APP_IMPORT_JOB = gql(`
 `);
 
 // ----------------------------------------------------------------------------------------------------
-// RETRIEVE APPS
+// GET APPS (ALL FIELDS)
 // ----------------------------------------------------------------------------------------------------
 
-export const GET_APP_OBJECT_IDS_BY_FIRMWARE_OBJECT_IDS = gql(`
-    query GetApkObjectIdsByFirmwareObjectIds {
-        android_app_id_list
+export const APP_ALL = gql(`
+    fragment AppAll on AndroidAppType {
+        absoluteStorePath
+        androidManifestDict
+        fileSizeBytes
+        filename
+        id
+        indexedDate
+        md5
+        originalFilename
+        packagename
+        partitionName
+        pk
+        relativeFirmwarePath
+        relativeStorePath
+        sha1
+        sha256
     }
 `);
 
-export const APP_TABLE_ROW_SCANNER = gql(`
-    fragment AppTableRowScanner on AndroidAppType {
+export const GET_APPS_BY_FIRMWARE_OBJECT_IDS = gql(`
+    query GetAppsByFirmwareObjectIds($objectIds: [String!]) {
+        android_firmware_connection(objectIdList: $objectIds) {
+            edges {
+                node {
+                    androidAppIdList {
+                        edges {
+                            node {
+                                ...AppAll
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+`);
+
+export const GET_APP_BY_ID = gql(`
+    query GetAppsById($id: ID!) {
+        android_firmware_connection {
+            edges {
+                node {
+                    androidAppIdList(id: $id) {
+                        edges {
+                            node {
+                                ...AppAll
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+`);
+
+// ----------------------------------------------------------------------------------------------------
+// GET APPS FOR SCANNER PAGE
+// ----------------------------------------------------------------------------------------------------
+
+export const APP_ROW_SCANNER_PAGE = gql(`
+    fragment AppRowScannerPage on AndroidAppType {
         id
     }
 `);
 
-export const GET_APPS_BY_OBJECT_IDS_SCANNER = gql(`
-    query GetAppsByObjectIdsScanner($objectIds: [String!]!) {
-        android_app_list(objectIdList: $objectIds) {
-            ...AppTableRowScanner
+export const GET_APPS_SCANNER_PAGE = gql(`
+    query GetAppsScannerPage {
+        android_firmware_connection {
+            edges {
+                node {
+                    androidAppIdList {
+                        edges {
+                            node {
+                                ...AppRowScannerPage
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 `);

@@ -10,17 +10,16 @@ import {
     FIRMWARE_ROW_SCANNER_PAGE,
     GET_FIRMWARES_SCANNER_PAGE,
 } from "@/components/graphql/firmware.graphql.ts";
-import {useMemo} from "react";
 import {
-    AppTableRowScannerFragment, FirmwareRowScannerPageFragment,
+    AppRowScannerPageFragment,
+    FirmwareRowScannerPageFragment,
 } from "@/__generated__/graphql.ts";
 import {useFragment} from "@/__generated__";
 import {
-    APP_TABLE_ROW_SCANNER,
-    GET_APP_OBJECT_IDS_BY_FIRMWARE_OBJECT_IDS,
-    GET_APPS_BY_OBJECT_IDS_SCANNER
+    APP_ROW_SCANNER_PAGE,
+    GET_APPS_SCANNER_PAGE
 } from "@/components/graphql/app.graphql.ts";
-import {buildSelectEntityColumn} from "@/components/ui/firmware-action-columns.tsx";
+import {buildSelectEntityColumn} from "@/components/ui/entity-action-columns.tsx";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 
 export function ScannerPage() {
@@ -81,7 +80,7 @@ function FirmwaresPanel() {
 }
 
 function AppsPanel() {
-    const columns: ColumnDef<AppTableRowScannerFragment>[] = [
+    const columns: ColumnDef<AppRowScannerPageFragment>[] = [
         {
             id: "select",
             header: ({table}) => (
@@ -115,35 +114,16 @@ function AppsPanel() {
     ];
 
     const {
-        loading: idsLoading,
-        error: idsError,
-        data: idsData,
-    } = useQuery(GET_APP_OBJECT_IDS_BY_FIRMWARE_OBJECT_IDS);
-
-    const objectIds = useMemo(() =>
-            (idsData?.android_app_id_list ?? []).filter(Boolean) as string[],
-        [idsData]
-    );
-
-    const {
         loading: appsLoading,
         error: appsError,
         data: appsData,
-    } = useQuery(GET_APPS_BY_OBJECT_IDS_SCANNER, {
-        variables: {objectIds},
-        skip: objectIds.length === 0,
-    });
+    } = useQuery(GET_APPS_SCANNER_PAGE);
 
-    const apps: AppTableRowScannerFragment[] = useMemo(
-        () =>
-            ((appsData?.android_app_list ?? [])
-                    .filter(isNonNullish)
-                    // eslint-disable-next-line react-hooks/rules-of-hooks
-                    .map((item) => useFragment(APP_TABLE_ROW_SCANNER, item))
-                    .filter(isNonNullish)
-            ),
-        [appsData]
-    );
+    const apps = (appsData?.android_firmware_connection?.edges ?? [])
+        .flatMap(firmwareEdge => (firmwareEdge?.node?.androidAppIdList?.edges ?? []))
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        .map(edge => useFragment(APP_ROW_SCANNER_PAGE, edge?.node))
+        .filter(isNonNullish)
 
     return (
         <div className="flex flex-col p-4 gap-4">
@@ -151,8 +131,6 @@ function AppsPanel() {
             <StateHandlingScrollableDataTable
                 columns={columns}
                 data={apps}
-                idsLoading={idsLoading}
-                idsError={idsError}
                 dataLoading={appsLoading}
                 dataError={appsError}
             />
