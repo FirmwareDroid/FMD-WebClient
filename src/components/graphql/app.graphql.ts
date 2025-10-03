@@ -36,6 +36,10 @@ export const APP_ALL = gql(`
         relativeStorePath
         sha1
         sha256
+        firmwareIdReference {
+            id
+            originalFilename
+        }
     }
 `);
 

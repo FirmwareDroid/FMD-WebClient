@@ -1,17 +1,19 @@
-import {useParams} from "react-router";
+import {useNavigate, useParams} from "react-router";
 import {BasePage} from "@/pages/base-page.tsx";
 import {useQuery} from "@apollo/client";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {APP_ALL, GET_APP_BY_ID} from "@/components/graphql/app.graphql.ts";
 import {useFragment} from "@/__generated__";
 import {Alert, AlertTitle} from "@/components/ui/alert.tsx";
-import {AlertCircleIcon} from "lucide-react";
+import {AlertCircleIcon, CpuIcon} from "lucide-react";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {AppAllFragment} from "@/__generated__/graphql.ts";
 import {EntityTable} from "@/components/ui/entity-table.tsx";
+import {Button} from "@/components/ui/button.tsx";
 
 export function AppPage() {
     const {appId} = useParams<{ appId: string }>();
+    const navigate = useNavigate();
 
     const {
         loading: appsLoading,
@@ -51,6 +53,17 @@ export function AppPage() {
 
         return (
             <BasePage title="App">
+                <div className="w-full flex gap-4 flex-wrap">
+                    <Button
+                        hidden={!app.firmwareIdReference?.id}
+                        size="sm"
+                        onClick={() => {
+                            void navigate(`/firmwares/${app.firmwareIdReference?.id ?? ""}`);
+                        }}
+                    >
+                        <CpuIcon/> Firmware ({app.firmwareIdReference?.originalFilename})
+                    </Button>
+                </div>
                 <EntityTable entity={app}/>
             </BasePage>
         );
@@ -62,6 +75,17 @@ export function AppPage() {
                 <Alert variant="destructive">
                     <AlertCircleIcon/>
                     <AlertTitle>Could not find an app with ID '{appId}'.</AlertTitle>
+                </Alert>
+            </BasePage>
+        );
+    }
+
+    if (apps.length > 1) {
+        return (
+            <BasePage title={"App (multiple matches)"}>
+                <Alert variant="destructive">
+                    <AlertCircleIcon/>
+                    <AlertTitle>Found multiple apps with ID '{appId}'.</AlertTitle>
                 </Alert>
             </BasePage>
         );
