@@ -76,43 +76,21 @@ export const GET_APP_BY_ID = gql(`
 `);
 
 // ----------------------------------------------------------------------------------------------------
-// GET APPS FOR SCANNER PAGE
-// ----------------------------------------------------------------------------------------------------
-
-export const APP_ROW_SCANNER_PAGE = gql(`
-    fragment AppRowScannerPage on AndroidAppType {
-        id
-    }
-`);
-
-export const GET_APPS_SCANNER_PAGE = gql(`
-    query GetAppsScannerPage {
-        android_firmware_connection {
-            edges {
-                node {
-                    androidAppIdList {
-                        edges {
-                            node {
-                                ...AppRowScannerPage
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-`);
-
-// ----------------------------------------------------------------------------------------------------
 // APK SCAN
 // ----------------------------------------------------------------------------------------------------
 
-export const CREATE_APK_SCAN_JOB = gql(`
-    mutation CreateApkScanJob($objectIds: [String!]!, $scannerName: String!) {
+export const GET_SCANNER_MODULE_NAMES = gql(`
+    query GetScannerModuleNames {
+        scanner_module_name_list
+    }
+`);
+
+export const SCAN_APKS_BY_OBJECT_IDS = gql(`
+    mutation ScanApksByObjectIds($objectIds: [String!]!, $scannerName: String!) {
         createApkScanJob(
-            moduleName: $scannerName
-            objectIdList: $objectIds
-            queueName: "high-python"
+            objectIdList: $objectIds,
+            moduleName: $scannerName,
+            queueName: "default-python",
         ) {
             jobIdList
         }

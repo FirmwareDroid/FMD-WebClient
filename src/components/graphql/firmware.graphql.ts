@@ -82,24 +82,17 @@ export const GET_FIRMWARES_IMPORTER_PAGE = gql(`
 `);
 
 // ----------------------------------------------------------------------------------------------------
-// GET FIRMWARES FOR SCANNER PAGE
+// SCAN ALL APKs OF FIRMWARES
 // ----------------------------------------------------------------------------------------------------
 
-export const FIRMWARE_ROW_SCANNER_PAGE = gql(`
-    fragment FirmwareRowScannerPage on AndroidFirmwareType {
-        id
-        originalFilename
-    }
-`);
-
-export const GET_FIRMWARES_SCANNER_PAGE = gql(`
-    query GetFirmwaresScannerPage {
-        android_firmware_connection {
-            edges {
-                node {
-                    ...FirmwareRowScannerPage
-                }
-            }
+export const SCAN_APKS_BY_FIRMWARE_OBJECT_IDS = gql(`
+    mutation ScanApksByFirmwareObjectIds($objectIds: [String!]!, $scannerName: String!) {
+        createApkScanJob(
+            firmwareIdList: $objectIds,
+            moduleName: $scannerName,
+            queueName: "default-python",
+        ) {
+            jobIdList
         }
     }
 `);

@@ -1,11 +1,12 @@
 import * as React from "react"
 import {
-    BookOpen,
-    Bug,
-    Cpu,
-    Import,
-    ScanEye,
-    Smartphone, Square,
+    BookOpenIcon,
+    BugIcon,
+    CpuIcon,
+    ImportIcon,
+    ScanSearchIcon,
+    SmartphoneIcon,
+    SquareIcon,
 } from "lucide-react"
 
 import {NavAnalyses} from "@/components/ui/sidebar/nav-analyses.tsx"
@@ -28,41 +29,41 @@ const data = {
         {
             title: "Importer",
             url: "/importer",
-            icon: Import,
+            icon: ImportIcon,
         },
         {
             title: "Scanner",
             url: "/scanner",
-            icon: ScanEye,
+            icon: ScanSearchIcon,
         },
         {
             title: "Emulator",
             url: "/emulator",
-            icon: Smartphone,
+            icon: SmartphoneIcon,
         },
     ],
     analyses: [
         {
             name: "Firmwares",
             url: "/firmwares",
-            icon: Cpu,
+            icon: CpuIcon,
         },
         {
             name: "Apps",
             url: "/apps",
-            icon: Square,
+            icon: SquareIcon,
         },
         {
             name: "Reports",
             url: "/reports",
-            icon: BookOpen,
+            icon: BookOpenIcon,
         },
     ],
     options: [
         {
             title: "Report Bug",
             url: "https://github.com/FirmwareDroid/FirmwareDroid/issues/new",
-            icon: Bug,
+            icon: BugIcon,
         },
     ],
 }
@@ -86,7 +87,7 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
                                 <div
                                     className="flex aspect-square size-8 items-center justify-center rounded-lg">
                                     <Avatar>
-                                        <AvatarImage src="/Logo1.jpg" />
+                                        <AvatarImage src="/Logo1.jpg"/>
                                         <AvatarFallback>FMD</AvatarFallback>
                                     </Avatar>
                                 </div>
@@ -101,7 +102,7 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
             <SidebarContent>
                 <NavOperations items={data.operations}/>
                 <NavAnalyses analyses={data.analyses}/>
-                <NavOptions items={data.options} className="mt-auto" />
+                <NavOptions items={data.options} className="mt-auto"/>
             </SidebarContent>
             <SidebarFooter>
                 <NavUser user={{email: email, name: username, avatar: ""}}/>

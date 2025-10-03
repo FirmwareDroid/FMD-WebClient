@@ -16,7 +16,7 @@ import {
     TableRow,
 } from "@/components/ui/table.tsx"
 import {Button} from "@/components/ui/button.tsx";
-import {useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -35,6 +35,7 @@ interface DataTableProps<TData, TValue> {
     className?: string;
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
+    onRowSelectionChange?: (selectedRows: TData[]) => void;
 }
 
 function DataTable<TData, TValue>(
@@ -42,6 +43,7 @@ function DataTable<TData, TValue>(
         className,
         columns,
         data,
+        onRowSelectionChange,
     }: Readonly<DataTableProps<TData, TValue>>
 ) {
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -54,6 +56,7 @@ function DataTable<TData, TValue>(
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
+        enableRowSelection: true,
         onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
         onColumnVisibilityChange: setColumnVisibility,
@@ -64,6 +67,17 @@ function DataTable<TData, TValue>(
             rowSelection,
         },
     });
+
+    const onRowSelectionChangeRef = useRef(onRowSelectionChange);
+    useEffect(() => {
+        onRowSelectionChangeRef.current = onRowSelectionChange;
+    }, [onRowSelectionChange]);
+
+    useEffect(() => {
+        if (!onRowSelectionChangeRef.current) return;
+        const selectedRows = table.getSelectedRowModel().flatRows.map(row => row.original);
+        onRowSelectionChangeRef.current(selectedRows);
+    }, [rowSelection]); // Ignore ESLint here, we need the effect whenever row selection changes
 
     return (
         <div className={cn(className)}>
@@ -162,11 +176,16 @@ function ScrollableDataTable<TData, TValue>(
     {
         columns,
         data,
+        onRowSelectionChange,
     }: Readonly<DataTableProps<TData, TValue>>
 ) {
     return (
         <ScrollArea className={cn("max-w-max w-full whitespace-nowrap")}>
-            <DataTable columns={columns} data={data}/>
+            <DataTable
+                columns={columns}
+                data={data}
+                onRowSelectionChange={onRowSelectionChange}
+            />
             <ScrollBar orientation="horizontal"/>
         </ScrollArea>
     );
@@ -176,15 +195,16 @@ function StateHandlingScrollableDataTable<TData, TValue>(
     {
         columns,
         data,
+        onRowSelectionChange,
         idsLoading,
         dataLoading,
         idsError,
         dataError,
     }: Readonly<DataTableProps<TData, TValue>> & {
         idsLoading?: boolean,
-        dataLoading: boolean,
+        dataLoading?: boolean,
         idsError?: ApolloError,
-        dataError: ApolloError | undefined,
+        dataError?: ApolloError,
     }
 ) {
     return (
@@ -210,7 +230,11 @@ function StateHandlingScrollableDataTable<TData, TValue>(
             )}
 
             {!idsLoading && !dataLoading && !idsError && !dataError && (
-                <ScrollableDataTable columns={columns} data={data}/>
+                <ScrollableDataTable
+                    columns={columns}
+                    data={data}
+                    onRowSelectionChange={onRowSelectionChange}
+                />
             )}
         </>
     );

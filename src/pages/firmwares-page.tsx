@@ -5,14 +5,14 @@ import {FirmwareAllFragment} from "@/__generated__/graphql.ts";
 import {useQuery} from "@apollo/client";
 import {
     FIRMWARE_ALL,
-    GET_FIRMWARES_BY_OBJECT_IDS,
+    GET_FIRMWARES_BY_OBJECT_IDS, SCAN_APKS_BY_FIRMWARE_OBJECT_IDS,
 } from "@/components/graphql/firmware.graphql.ts";
 import {buildFirmwareActionColumns} from "@/components/ui/entity-action-columns.tsx";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {useFragment} from "@/__generated__";
 
 const columns: ColumnDef<FirmwareAllFragment>[] = [
-    ...buildFirmwareActionColumns<FirmwareAllFragment>(),
+    ...buildFirmwareActionColumns<FirmwareAllFragment>(SCAN_APKS_BY_FIRMWARE_OBJECT_IDS),
     {
         accessorKey: "id",
         header: "ID",

@@ -5,12 +5,12 @@ import {useFragment} from "@/__generated__";
 import {convertIdToObjectId, isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {BasePage} from "@/pages/base-page.tsx";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
-import {APP_ALL, GET_APPS_BY_FIRMWARE_OBJECT_IDS} from "@/components/graphql/app.graphql.ts";
+import {APP_ALL, GET_APPS_BY_FIRMWARE_OBJECT_IDS, SCAN_APKS_BY_OBJECT_IDS} from "@/components/graphql/app.graphql.ts";
 import {buildAppActionColumns} from "@/components/ui/entity-action-columns.tsx";
 import {useParams} from "react-router";
 
 const columns: ColumnDef<AppAllFragment>[] = [
-    ...buildAppActionColumns<AppAllFragment>(),
+    ...buildAppActionColumns<AppAllFragment>(SCAN_APKS_BY_OBJECT_IDS),
     {
         accessorKey: "id",
         header: "ID",

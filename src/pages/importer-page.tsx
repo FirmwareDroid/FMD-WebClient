@@ -4,7 +4,7 @@ import {Dropzone} from "@/components/ui/importer/dropzone.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
 import {useQuery} from "@apollo/client";
 import {
-    FIRMWARE_ROW_IMPORTER_PAGE, GET_FIRMWARES_IMPORTER_PAGE,
+    FIRMWARE_ROW_IMPORTER_PAGE, GET_FIRMWARES_IMPORTER_PAGE, SCAN_APKS_BY_FIRMWARE_OBJECT_IDS,
 } from "@/components/graphql/firmware.graphql.ts";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
 import {useFragment} from "@/__generated__";
@@ -43,7 +43,7 @@ export function ImporterPage() {
 }
 
 const columns: ColumnDef<FirmwareRowImporterPageFragment>[] = [
-    ...buildFirmwareActionColumns<FirmwareRowImporterPageFragment>(),
+    ...buildFirmwareActionColumns<FirmwareRowImporterPageFragment>(SCAN_APKS_BY_FIRMWARE_OBJECT_IDS),
     {
         accessorKey: "id",
         header: "ID",

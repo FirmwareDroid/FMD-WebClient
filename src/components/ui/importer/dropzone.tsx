@@ -5,7 +5,6 @@ import {cn} from "@/lib/utils.ts";
 import {useAuth} from "@/lib/auth.tsx";
 import {Progress} from "@/components/ui/progress.tsx";
 import {
-    CircleAlertIcon,
     CircleCheckBigIcon,
     CloudAlertIcon,
     LoaderCircleIcon,
@@ -14,15 +13,14 @@ import {
 } from "lucide-react";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
-import {ApolloQueryResult, useMutation, useQuery} from "@apollo/client";
+import {useMutation} from "@apollo/client";
 import {
     CREATE_FIRMWARE_EXTRACTOR_JOB,
 } from "@/components/graphql/firmware.graphql.ts";
 import {Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle,} from "@/components/ui/dialog.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {Exact, GetRqJobListQuery} from "@/__generated__/graphql.ts";
-import {GET_RQ_JOB_LIST} from "@/components/graphql/rq-job.graphql.ts";
 import {CREATE_APP_IMPORT_JOB} from "@/components/graphql/app.graphql.ts";
+import {RqJobsTable} from "@/components/ui/rq-jobs-table.tsx";
 
 type DropzoneProps = {
     className?: string;
@@ -54,14 +52,11 @@ const makeUploadId = (file: File) => `${file.name}:${file.size.toString()}:${fil
 
 const getUploadType = (file: File): UploadType => file.type === MIME_TYPE_APK ? "apk" : "firmware";
 
-function UploadDialog({storageIndex, fileUploads, setFileUploads, removeUpload, refetchRqJobList}: Readonly<{
+function UploadDialog({storageIndex, fileUploads, setFileUploads, removeUpload}: Readonly<{
     storageIndex: number;
     fileUploads: FileUpload[];
     setFileUploads: Dispatch<SetStateAction<FileUpload[]>>;
     removeUpload: (id: string) => void;
-    refetchRqJobList: (variables?: (Partial<Exact<{
-        [p: string]: never
-    }>>)) => Promise<ApolloQueryResult<GetRqJobListQuery>>;
 }>) {
     const cancelUpload = (upload: FileUpload) => {
         if (upload.xhr) {
@@ -175,39 +170,13 @@ function UploadDialog({storageIndex, fileUploads, setFileUploads, removeUpload, 
                                 void createAppImportJob({variables: {storageIndex}});
                             }
 
-                            setFileUploads(prev => prev.map(upload => ({...upload, importStarted: true})))
-                            void refetchRqJobList();
+                            setFileUploads(prev => prev.map(upload => ({...upload, importStarted: true})));
                         }}>
                         Import
                     </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
-    );
-}
-
-function JobStatus({status, isFinished, isFailed}: Readonly<{
-    status: string;
-    isFinished?: boolean | null;
-    isFailed?: boolean | null;
-}>) {
-    if (isFinished) {
-        return (
-            <CircleCheckBigIcon color="green"/>
-        );
-    }
-
-    if (isFailed) {
-        return (
-            <CircleAlertIcon color="red"/>
-        );
-    }
-
-    return (
-        <>
-            <LoaderCircleIcon className="animate-spin mr-2"/>
-            <span>{status}</span>
-        </>
     );
 }
 
@@ -220,18 +189,6 @@ export function Dropzone(
 ) {
     const {getToken} = useAuth();
     const [fileUploads, setFileUploads] = useState<FileUpload[]>([]);
-    const {data: rqJobListData, refetch: refetchRqJobList} = useQuery(GET_RQ_JOB_LIST, {
-        fetchPolicy: "cache-and-network",
-        pollInterval: 10000,
-    });
-
-    const importJobs = rqJobListData?.rq_job_list
-        ?.filter(job =>
-            job?.funcName === FIRMWARE_IMPORT_JOB_FUNC_NAME ||
-            job?.funcName === APP_IMPORT_JOB_FUNC_NAME
-        )
-        .sort((a, b) => new Date(b?.startedAt).getTime() - new Date(a?.startedAt).getTime());
-
 
     const updateUpload = useCallback((id: string, patch: Partial<FileUpload>) => {
         setFileUploads(prev => prev.map(upload => (upload.id === id ? {...upload, ...patch} : upload)));
@@ -325,57 +282,8 @@ export function Dropzone(
                 fileUploads={fileUploads}
                 setFileUploads={setFileUploads}
                 removeUpload={removeUpload}
-                refetchRqJobList={refetchRqJobList}
             />
-            {importJobs && importJobs.length > 0 && (
-                <Table className="w-full mt-2">
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Job ID</TableHead>
-                            <TableHead>Started At</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead className="text-center">Status</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {importJobs.map((job) => {
-                            if (job) {
-                                return (
-                                    <TableRow key={job.id}>
-                                        <TableCell>
-                                            <span>{job.id}</span>
-                                        </TableCell>
-                                        <TableCell>
-                                            <span>{job.startedAt}</span>
-                                        </TableCell>
-                                        <TableCell>
-                                            {job.funcName === FIRMWARE_IMPORT_JOB_FUNC_NAME && (
-                                                <span>Firmware</span>
-                                            )}
-                                            {job.funcName === APP_IMPORT_JOB_FUNC_NAME && (
-                                                <span>APK</span>
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center justify-center">
-                                                {job.status ? (
-                                                    <JobStatus status={job.status} isFinished={job.isFinished}
-                                                               isFailed={job.isFailed}/>
-                                                ) : (
-                                                    <>
-                                                        <CircleAlertIcon color="red"/>
-                                                        <span>Unknown status</span>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            }
-                        })}
-                    </TableBody>
-                </Table>
-            )}
+            <RqJobsTable funcNames={[FIRMWARE_IMPORT_JOB_FUNC_NAME, APP_IMPORT_JOB_FUNC_NAME]}/>
         </div>
     );
 }
