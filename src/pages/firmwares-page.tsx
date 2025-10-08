@@ -27,15 +27,15 @@ const columns: ColumnDef<FirmwareAllFragment>[] = [
     },
     {
         accessorKey: "filename",
-        header: "File name",
+        header: "Filename",
     },
     {
         accessorKey: "hasFileIndex",
-        header: "Has File Index",
+        header: "Has file index?",
     },
     {
         accessorKey: "hasFuzzyHashIndex",
-        header: "Has Fuzzy Hash Index",
+        header: "Has fuzzy hash index?",
     },
     {
         accessorKey: "indexedDate",
@@ -84,7 +84,9 @@ export function FirmwaresPage() {
         loading: firmwaresLoading,
         error: firmwaresError,
         data: firmwaresData,
-    } = useQuery(GET_FIRMWARES_BY_OBJECT_IDS);
+    } = useQuery(GET_FIRMWARES_BY_OBJECT_IDS, {
+        fetchPolicy: "cache-first",
+    });
 
     const firmwares = (firmwaresData?.android_firmware_connection?.edges ?? [])
         // eslint-disable-next-line react-hooks/rules-of-hooks

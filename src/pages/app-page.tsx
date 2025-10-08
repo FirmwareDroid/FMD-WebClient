@@ -5,7 +5,7 @@ import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {APP_ALL, GET_APP_BY_ID} from "@/components/graphql/app.graphql.ts";
 import {useFragment} from "@/__generated__";
 import {Alert, AlertTitle} from "@/components/ui/alert.tsx";
-import {AlertCircleIcon, CpuIcon} from "lucide-react";
+import {AlertCircleIcon, FileIcon} from "lucide-react";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {AppAllFragment} from "@/__generated__/graphql.ts";
 import {EntityTable} from "@/components/ui/entity-table.tsx";
@@ -55,13 +55,13 @@ export function AppPage() {
             <BasePage title="App">
                 <div className="w-full flex gap-4 flex-wrap">
                     <Button
-                        hidden={!app.firmwareIdReference?.id}
+                        hidden={!app.firmwareIdReference?.id || !app.firmwareFileReference?.id}
                         size="sm"
                         onClick={() => {
-                            void navigate(`/firmwares/${app.firmwareIdReference?.id ?? ""}`);
+                            void navigate(`/firmwares/${app.firmwareIdReference?.id ?? ""}/files/${app.firmwareFileReference?.id ?? ""}`);
                         }}
                     >
-                        <CpuIcon/> Firmware ({app.firmwareIdReference?.originalFilename})
+                        <FileIcon/> File ({app.filename})
                     </Button>
                 </div>
                 <EntityTable entity={app}/>

@@ -1,4 +1,4 @@
-import {Navigate, Route, Routes} from "react-router";
+import {Route, Routes} from "react-router";
 import LoginPage from "@/pages/login-page.tsx";
 import PublicOnlyRoute from "@/routes/public-only-route.tsx";
 import ProtectedLayout from "@/routes/protected-layout.tsx";
@@ -10,6 +10,9 @@ import {FirmwaresPage} from "@/pages/firmwares-page.tsx";
 import {FirmwarePage} from "@/pages/firmware-page.tsx";
 import {AppsPage} from "@/pages/apps-page.tsx";
 import {AppPage} from "@/pages/app-page.tsx";
+import {FilePage} from "@/pages/file-page.tsx";
+import {FilesPage} from "@/pages/files-page.tsx";
+import {NotFoundPage} from "@/pages/not-found-page.tsx";
 
 function App() {
     return (
@@ -27,10 +30,10 @@ function App() {
                 <Route path="/firmwares/:firmwareId" element={<FirmwarePage/>}/>
                 <Route path="/firmwares/:firmwareId/apps" element={<AppsPage/>}/>
                 <Route path="/firmwares/:firmwareId/apps/:appId" element={<AppPage/>}/>
+                <Route path="/firmwares/:firmwareId/files" element={<FilesPage/>}/>
+                <Route path="/firmwares/:firmwareId/files/:fileId" element={<FilePage/>}/>
                 <Route path="/apps" element={<AppsPage/>}/>
-                <Route path="/apps/:appId" element={<AppPage/>}/>
-                <Route path="*" element={<Navigate to="/" replace/>}/>
-                {/*<Route path="*" element={<NotFoundPage/>}/>*/} {/*TOOD: Add 404 page?*/}
+                <Route path="*" element={<NotFoundPage/>}/>
             </Route>
         </Routes>
     );

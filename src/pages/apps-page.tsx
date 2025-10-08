@@ -25,11 +25,11 @@ const columns: ColumnDef<AppAllFragment>[] = [
     },
     {
         accessorKey: "fileSizeBytes",
-        header: "File Size Bytes",
+        header: "File Size (Bytes)",
     },
     {
         accessorKey: "filename",
-        header: "File name",
+        header: "Filename",
     },
     {
         accessorKey: "indexedDate",
@@ -45,7 +45,7 @@ const columns: ColumnDef<AppAllFragment>[] = [
     },
     {
         accessorKey: "packagename",
-        header: "Package name",
+        header: "Package Name",
     },
     {
         accessorKey: "partitionName",
@@ -71,14 +71,18 @@ const columns: ColumnDef<AppAllFragment>[] = [
         accessorKey: "sha256",
         header: "SHA-256",
     },
+    {
+        accessorKey: "firmwareIdReference.id",
+        header: "Firmware ID",
+    },
 ];
 
 export function AppsPage() {
     const {firmwareId} = useParams<{ firmwareId?: string }>();
 
-    let objectId: string | undefined;
+    let firmwareObjectId: string | undefined;
     if (firmwareId) {
-        objectId = convertIdToObjectId(firmwareId);
+        firmwareObjectId = convertIdToObjectId(firmwareId);
     }
 
     const {
@@ -86,14 +90,15 @@ export function AppsPage() {
         error: appsError,
         data: appsData,
     } = useQuery(GET_APPS_BY_FIRMWARE_OBJECT_IDS, {
-        variables: {objectIds: objectId}
+        variables: {objectIds: firmwareObjectId},
+        fetchPolicy: "cache-first",
     });
 
     const apps = (appsData?.android_firmware_connection?.edges ?? [])
         .flatMap(firmwareEdge => (firmwareEdge?.node?.androidAppIdList?.edges ?? []))
         // eslint-disable-next-line react-hooks/rules-of-hooks
         .map(edge => useFragment(APP_ALL, edge?.node))
-        .filter(isNonNullish)
+        .filter(isNonNullish);
 
     return (
         <BasePage title="Apps">
