@@ -7,7 +7,7 @@ import {
     FIRMWARE_ALL,
     GET_FIRMWARES_BY_OBJECT_IDS, SCAN_APKS_BY_FIRMWARE_OBJECT_IDS,
 } from "@/components/graphql/firmware.graphql.ts";
-import {buildFirmwareActionColumns} from "@/components/ui/entity-action-columns.tsx";
+import {buildFirmwareActionColumns} from "@/components/ui/table/action-columns/entity-action-columns.tsx";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {useFragment} from "@/__generated__";
 

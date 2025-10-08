@@ -1,6 +1,6 @@
 import {ColumnDef} from "@tanstack/react-table";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
-import {buildSelectEntityColumn} from "@/components/ui/entity-action-columns.tsx";
+import {buildSelectEntityColumn} from "@/components/ui/table/action-columns/entity-action-columns.tsx";
 import React from "react";
 import {useQuery} from "@apollo/client";
 import {GET_SCANNER_MODULE_NAMES} from "@/components/graphql/app.graphql.ts";

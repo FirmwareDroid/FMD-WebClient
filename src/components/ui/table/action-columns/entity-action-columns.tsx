@@ -1,8 +1,7 @@
 import type {ColumnDef} from "@tanstack/react-table";
 import {Checkbox} from "@/components/ui/checkbox.tsx";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
-import {Button, buttonVariants} from "@/components/ui/button.tsx";
-import {EyeIcon, LoaderCircleIcon, ScanSearchIcon, TrashIcon} from "lucide-react";
+import {EyeIcon, LoaderCircleIcon, TrashIcon} from "lucide-react";
 import {useLazyQuery, useMutation} from "@apollo/client";
 import {DELETE_FIRMWARE_BY_OBJECT_ID} from "@/components/graphql/firmware.graphql.ts";
 import {convertIdToObjectId} from "@/lib/graphql/graphql-utils.ts";
@@ -16,19 +15,7 @@ import {
     ScanApksByObjectIdsMutation
 } from "@/__generated__/graphql.ts";
 import {TypedDocumentNode} from "@graphql-typed-document-node/core";
-import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger
-} from "@/components/ui/dialog.tsx";
-import * as React from "react";
-import type {VariantProps} from "class-variance-authority";
-import {cn} from "@/lib/utils.ts";
-import {Scanner, ScannersTable} from "@/components/ui/scanners-table.tsx";
-import {useState} from "react";
+import {ActionButton, ScanAppActionButton} from "@/components/ui/table/action-columns/action-buttons.tsx";
 
 type WithId = { id: string };
 type WithIdAndFirmwareIdReference = {
@@ -66,25 +53,6 @@ function isDeletionOngoing(objectIds: string[], rqJobListData: GetRqJobListQuery
     return (ongoingDeletionJobs?.length ?? 0) > 0;
 }
 
-function ActionButton(
-    {
-        className,
-        variant,
-        asChild = false,
-        ...props
-    }: React.ComponentProps<"button"> &
-        VariantProps<typeof buttonVariants> & {
-        asChild?: boolean
-    }) {
-    return (
-        <Button
-            className={cn(className, "p-0 has-[>svg]:p-0 w-9")}
-            variant={variant}
-            asChild={asChild}
-            {...props}
-        ></Button>
-    );
-}
 
 function DeleteEntityButton<T extends WithTypenameMutation>(
     {
@@ -234,61 +202,6 @@ function buildDeleteEntityColumn<T extends WithId, U extends WithTypenameMutatio
     );
 }
 
-function ScanAppButton(
-    {
-        ids,
-        tooltip,
-        mutation,
-    }: Readonly<{
-        ids: string[];
-        tooltip: string;
-        mutation: TypedDocumentNode<ScanApksByObjectIdsMutation | ScanApksByFirmwareObjectIdsMutation, Exact<{
-            objectIds: Array<Scalars["String"]["input"]> | Scalars["String"]["input"]
-            scannerName: Scalars["String"]["input"]
-        }>>;
-    }>
-) {
-    const [selectedScanners, setSelectedScanners] = useState<Scanner[]>([]);
-    const [scanApk] = useMutation(mutation);
-    const navigate = useNavigate();
-
-    return (
-        <Dialog modal={true}>
-            <DialogTrigger>
-                <Tooltip delayDuration={500}>
-                    <TooltipTrigger asChild>
-                        <ActionButton variant="outline" disabled={ids.length <= 0}>
-                            <ScanSearchIcon className="size-5"/>
-                        </ActionButton>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>{tooltip}</p>
-                    </TooltipContent>
-                </Tooltip>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-5xl">
-                <DialogHeader>
-                    <DialogTitle>Select Scanner(s)</DialogTitle>
-                </DialogHeader>
-                <ScannersTable setSelectedScanners={setSelectedScanners}/>
-                <DialogFooter>
-                    <Button
-                        disabled={selectedScanners.length <= 0}
-                        onClick={() => {
-                            selectedScanners.forEach((scanner) => void scanApk({
-                                variables: {
-                                    objectIds: ids.map(id => convertIdToObjectId(id)),
-                                    scannerName: scanner.id,
-                                }
-                            }));
-                            void navigate("/scanner");
-                        }}>Start Scan</Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
-}
-
 function buildScanAppColumn<T extends WithId>(
     tooltipSingle: string,
     tooltipSelected: string,
@@ -301,13 +214,13 @@ function buildScanAppColumn<T extends WithId>(
         {
             id: "scan",
             header: ({table}) =>
-                <ScanAppButton
+                <ScanAppActionButton
                     ids={table.getSelectedRowModel().flatRows.map(row => row.original.id)}
                     tooltip={tooltipSelected}
                     mutation={mutation}
                 />,
             cell: ({row}) =>
-                <ScanAppButton
+                <ScanAppActionButton
                     ids={[row.original.id]}
                     tooltip={tooltipSingle}
                     mutation={mutation}

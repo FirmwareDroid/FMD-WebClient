@@ -10,7 +10,7 @@ import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table
 import {useFragment} from "@/__generated__";
 
 import type {ColumnDef} from "@tanstack/react-table";
-import {buildFirmwareActionColumns} from "@/components/ui/entity-action-columns.tsx";
+import {buildFirmwareActionColumns} from "@/components/ui/table/action-columns/entity-action-columns.tsx";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {FirmwareRowImporterPageFragment} from "@/__generated__/graphql.ts";
 
