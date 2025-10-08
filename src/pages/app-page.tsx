@@ -2,7 +2,7 @@ import {useNavigate, useParams} from "react-router";
 import {BasePage} from "@/pages/base-page.tsx";
 import {useQuery} from "@apollo/client";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
-import {APP_ALL, GET_APP_BY_ID} from "@/components/graphql/app.graphql.ts";
+import {APP_ALL, GET_APP_BY_ID, SCAN_APKS_BY_OBJECT_IDS} from "@/components/graphql/app.graphql.ts";
 import {useFragment} from "@/__generated__";
 import {Alert, AlertTitle} from "@/components/ui/alert.tsx";
 import {AlertCircleIcon, FileIcon} from "lucide-react";
@@ -10,6 +10,7 @@ import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {AppAllFragment} from "@/__generated__/graphql.ts";
 import {EntityTable} from "@/components/ui/entity-table.tsx";
 import {Button} from "@/components/ui/button.tsx";
+import {ScanAppActionButton} from "@/components/ui/table/action-columns/action-buttons.tsx";
 
 export function AppPage() {
     const {appId} = useParams<{ appId: string }>();
@@ -63,6 +64,11 @@ export function AppPage() {
                     >
                         <FileIcon/> File ({app.filename})
                     </Button>
+                    <ScanAppActionButton
+                        ids={[appId]}
+                        tooltip={"Scan app"}
+                        mutation={SCAN_APKS_BY_OBJECT_IDS}
+                    />
                 </div>
                 <EntityTable entity={app}/>
             </BasePage>

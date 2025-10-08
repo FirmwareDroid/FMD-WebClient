@@ -1,7 +1,11 @@
 import {BasePage} from "@/pages/base-page.tsx";
 import {useNavigate, useParams} from "react-router";
 import {useQuery} from "@apollo/client";
-import {FIRMWARE_ALL, GET_FIRMWARES_BY_OBJECT_IDS} from "@/components/graphql/firmware.graphql.ts";
+import {
+    FIRMWARE_ALL,
+    GET_FIRMWARES_BY_OBJECT_IDS,
+    SCAN_APKS_BY_FIRMWARE_OBJECT_IDS
+} from "@/components/graphql/firmware.graphql.ts";
 import {FirmwareAllFragment} from "@/__generated__/graphql.ts";
 import {useFragment} from "@/__generated__";
 import {Alert, AlertTitle} from "@/components/ui/alert.tsx";
@@ -10,6 +14,7 @@ import {convertIdToObjectId, isNonNullish} from "@/lib/graphql/graphql-utils.ts"
 import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {EntityTable} from "@/components/ui/entity-table.tsx";
 import {Button} from "@/components/ui/button.tsx";
+import {ScanAppActionButton} from "@/components/ui/table/action-columns/action-buttons.tsx";
 
 export function FirmwarePage() {
     const {firmwareId} = useParams<{ firmwareId: string }>();
@@ -69,6 +74,11 @@ export function FirmwarePage() {
                     >
                         <FilesIcon/> Files
                     </Button>
+                    <ScanAppActionButton
+                        ids={[firmwareId]}
+                        tooltip={"Scan all apps of this firmware"}
+                        mutation={SCAN_APKS_BY_FIRMWARE_OBJECT_IDS}
+                    />
                 </div>
                 <EntityTable entity={firmware}/>
             </BasePage>
