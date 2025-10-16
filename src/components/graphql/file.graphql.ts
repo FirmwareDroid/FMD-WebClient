@@ -5,7 +5,7 @@ export const FILE_ALL = gql(`
         id
         name
         absoluteStorePath
-#        fileSizeBytes
+        fileSizeBytes
         indexedDate
         isDirectory
         isOnDisk

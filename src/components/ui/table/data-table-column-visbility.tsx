@@ -15,42 +15,49 @@ export function DataTableViewOptions<TData>(
     {
         table,
     }: Readonly<{ table: Table<TData> }>) {
+    const hideableColumns = table.getAllColumns()
+        .filter(c => typeof c.accessorFn !== "undefined" && c.getCanHide());
+
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="ml-auto hidden h-8 lg:flex"
-                >
-                    <Settings2/>
-                    View
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[150px]">
-                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
-                <DropdownMenuSeparator/>
-                {table
-                    .getAllColumns()
-                    .filter(
-                        (column) =>
-                            typeof column.accessorFn !== "undefined" && column.getCanHide()
-                    )
-                    .map((column) => {
-                        return (
-                            <DropdownMenuCheckboxItem
-                                key={column.id}
-                                className="capitalize"
-                                checked={column.getIsVisible()}
-                                onCheckedChange={(value) => {
-                                    column.toggleVisibility(value);
-                                }}
+        <>
+            {
+                hideableColumns.length > 0 && (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="ml-auto hidden h-8 lg:flex"
                             >
-                                {column.id}
-                            </DropdownMenuCheckboxItem>
-                        )
-                    })}
-            </DropdownMenuContent>
-        </DropdownMenu>
+                                <Settings2/>
+                                View
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-[150px]">
+                            <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                            <DropdownMenuSeparator/>
+                            {hideableColumns
+                                .map((column) => {
+                                    return (
+                                        <DropdownMenuCheckboxItem
+                                            key={column.id}
+                                            className="capitalize"
+                                            checked={column.getIsVisible()}
+                                            onCheckedChange={(value) => {
+                                                column.toggleVisibility(value);
+                                            }}
+                                        >
+                                            {typeof column.columnDef.header === "string"
+                                                ? (column.columnDef.header)
+                                                : (column.id)
+                                            }
+                                        </DropdownMenuCheckboxItem>
+                                    )
+                                })}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )
+            }
+        </>
     )
 }

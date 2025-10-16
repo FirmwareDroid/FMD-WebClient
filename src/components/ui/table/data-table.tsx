@@ -15,27 +15,29 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table.tsx"
-import {Button} from "@/components/ui/button.tsx";
 import {useEffect, useRef, useState} from "react";
-import {
-    DropdownMenu,
-    DropdownMenuCheckboxItem,
-    DropdownMenuContent,
-    DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu.tsx";
 import {DataTablePagination} from "@/components/ui/table/data-table-pagination.tsx";
 import {cn} from "@/lib/utils.ts";
-import {AlertCircleIcon, ChevronRightIcon} from "lucide-react";
+import {AlertCircleIcon} from "lucide-react";
 import {ScrollArea, ScrollBar} from "@/components/ui/scroll-area.tsx";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
 import {ApolloError} from "@apollo/client";
+import {DataTableViewOptions} from "@/components/ui/table/data-table-column-visbility.tsx";
+
+declare module "@tanstack/table-core" {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface ColumnMeta<TData, TValue> {
+        hidden?: boolean;
+    }
+}
 
 interface DataTableProps<TData, TValue> {
     className?: string;
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
     onRowSelectionChange?: (selectedRows: TData[]) => void;
+    dataTablePagination?: boolean;
 }
 
 function DataTable<TData, TValue>(
@@ -44,17 +46,27 @@ function DataTable<TData, TValue>(
         columns,
         data,
         onRowSelectionChange,
+        dataTablePagination = true,
     }: Readonly<DataTableProps<TData, TValue>>
 ) {
     const [sorting, setSorting] = useState<SortingState>([]);
-    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() =>
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        Object.fromEntries(
+            columns.map(c => [c.id, !(c.meta?.hidden ?? false)])
+        )
+    );
     const [rowSelection, setRowSelection] = useState({});
-    const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
+    const [pagination, setPagination] = useState({
+        pageIndex: 0,
+        pageSize: dataTablePagination ? 25 : Number.MAX_SAFE_INTEGER,
+    });
 
     const table = useReactTable({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
+        onPaginationChange: setPagination,
         getPaginationRowModel: getPaginationRowModel(),
         enableRowSelection: true,
         onSortingChange: setSorting,
@@ -65,6 +77,7 @@ function DataTable<TData, TValue>(
             sorting,
             columnVisibility,
             rowSelection,
+            pagination,
         },
     });
 
@@ -77,45 +90,13 @@ function DataTable<TData, TValue>(
         if (!onRowSelectionChangeRef.current) return;
         const selectedRows = table.getSelectedRowModel().flatRows.map(row => row.original);
         onRowSelectionChangeRef.current(selectedRows);
-    }, [rowSelection]); // Ignore ESLint here, we need the effect whenever row selection changes
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [rowSelection]);
 
     return (
         <div className={cn(className)}>
             <div className="flex items-center p-4">
-                <DropdownMenu open={isColumnMenuOpen} onOpenChange={setIsColumnMenuOpen}>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="ml-auto">
-                            Columns
-                            <ChevronRightIcon
-                                className={`transition-transform ${isColumnMenuOpen ? "rotate-90" : "rotate-0"}`}
-                            />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        {table
-                            .getAllColumns()
-                            .filter(
-                                (column) => column.getCanHide()
-                            )
-                            .map((column) => {
-                                return (
-                                    <DropdownMenuCheckboxItem
-                                        key={column.id}
-                                        className="capitalize"
-                                        checked={column.getIsVisible()}
-                                        onCheckedChange={(value) => {
-                                            column.toggleVisibility(value);
-                                        }}
-                                    >
-                                        {typeof column.columnDef.header === "string"
-                                            ? (column.columnDef.header)
-                                            : (column.id)
-                                        }
-                                    </DropdownMenuCheckboxItem>
-                                )
-                            })}
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <DataTableViewOptions table={table}/>
             </div>
             <div className="overflow-hidden rounded-xs border">
                 <Table>
@@ -166,7 +147,7 @@ function DataTable<TData, TValue>(
                     {table.getFilteredSelectedRowModel().rows.length} of{" "}
                     {table.getFilteredRowModel().rows.length} row(s) selected.
                 </div>
-                <DataTablePagination table={table}/>
+                {dataTablePagination && <DataTablePagination table={table}/>}
             </div>
         </div>
     );
@@ -177,14 +158,16 @@ function ScrollableDataTable<TData, TValue>(
         columns,
         data,
         onRowSelectionChange,
+        dataTablePagination,
     }: Readonly<DataTableProps<TData, TValue>>
 ) {
     return (
-        <ScrollArea className={cn("max-w-max w-full whitespace-nowrap")}>
+        <ScrollArea className={cn("w-full whitespace-nowrap")}>
             <DataTable
                 columns={columns}
                 data={data}
                 onRowSelectionChange={onRowSelectionChange}
+                dataTablePagination={dataTablePagination}
             />
             <ScrollBar orientation="horizontal"/>
         </ScrollArea>
@@ -196,6 +179,7 @@ function StateHandlingScrollableDataTable<TData, TValue>(
         columns,
         data,
         onRowSelectionChange,
+        dataTablePagination,
         idsLoading,
         dataLoading,
         idsError,
@@ -234,6 +218,7 @@ function StateHandlingScrollableDataTable<TData, TValue>(
                     columns={columns}
                     data={data}
                     onRowSelectionChange={onRowSelectionChange}
+                    dataTablePagination={dataTablePagination}
                 />
             )}
         </>

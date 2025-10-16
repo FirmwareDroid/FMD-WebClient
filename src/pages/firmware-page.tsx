@@ -15,6 +15,7 @@ import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {EntityTable} from "@/components/ui/entity-table.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {ScanAppActionButton} from "@/components/ui/table/action-columns/action-buttons.tsx";
+import {APPS_URL, FILES_URL, FIRMWARES_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 
 export function FirmwarePage() {
     const {firmwareId} = useParams<{ firmwareId: string }>();
@@ -61,7 +62,7 @@ export function FirmwarePage() {
                     <Button
                         size="sm"
                         onClick={() => {
-                            void navigate(`/firmwares/${firmwareId}/apps`);
+                            void navigate(`${FIRMWARES_URL}/${firmwareId}${APPS_URL}`);
                         }}
                     >
                         <SquareIcon/> Apps
@@ -69,7 +70,7 @@ export function FirmwarePage() {
                     <Button
                         size="sm"
                         onClick={() => {
-                            void navigate(`/firmwares/${firmwareId}/files`);
+                            void navigate(`${FIRMWARES_URL}/${firmwareId}${FILES_URL}`);
                         }}
                     >
                         <FilesIcon/> Files
