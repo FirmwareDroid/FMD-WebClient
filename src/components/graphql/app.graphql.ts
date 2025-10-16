@@ -5,9 +5,9 @@ import {gql} from "@/__generated__";
 // ----------------------------------------------------------------------------------------------------
 
 export const CREATE_APP_IMPORT_JOB = gql(`
-    mutation CreateAppImportJob($storageIndex: Int!) {
+    mutation CreateAppImportJob($queueName: String!, $storageIndex: Int!) {
         createAppImportJob(
-            queueName: "high-python",
+            queueName: $queueName,
             storageIndex: $storageIndex
         ) {
             jobId
@@ -92,11 +92,11 @@ export const GET_SCANNER_MODULE_NAMES = gql(`
 `);
 
 export const SCAN_APKS_BY_OBJECT_IDS = gql(`
-    mutation ScanApksByObjectIds($objectIds: [String!]!, $scannerName: String!) {
+    mutation ScanApksByObjectIds($objectIds: [String!]!, $scannerName: String!, $queueName: String!) {
         createApkScanJob(
             objectIdList: $objectIds,
             moduleName: $scannerName,
-            queueName: "default-python",
+            queueName: $queueName,
         ) {
             jobIdList
         }

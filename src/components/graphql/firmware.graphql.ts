@@ -5,10 +5,10 @@ import {gql} from "@/__generated__";
 // ----------------------------------------------------------------------------------------------------
 
 export const CREATE_FIRMWARE_EXTRACTOR_JOB = gql(`
-    mutation CreateFirmwareExtractorJob($storageIndex: Int!) {
+    mutation CreateFirmwareExtractorJob($queueName: String!, $storageIndex: Int!) {
         createFirmwareExtractorJob(
             createFuzzyHashes: false
-            queueName: "high-python"
+            queueName: $queueName
             storageIndex: $storageIndex
         ) {
             jobId
@@ -86,11 +86,11 @@ export const GET_FIRMWARES_IMPORTER_PAGE = gql(`
 // ----------------------------------------------------------------------------------------------------
 
 export const SCAN_APKS_BY_FIRMWARE_OBJECT_IDS = gql(`
-    mutation ScanApksByFirmwareObjectIds($objectIds: [String!]!, $scannerName: String!) {
+    mutation ScanApksByFirmwareObjectIds($objectIds: [String!]!, $scannerName: String!, $queueName: String!) {
         createApkScanJob(
             firmwareIdList: $objectIds,
             moduleName: $scannerName,
-            queueName: "default-python",
+            queueName: $queueName,
         ) {
             jobIdList
         }

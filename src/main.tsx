@@ -12,7 +12,7 @@ createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <ApolloProvider client={client}>
             <AuthProvider>
-                <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+                <ThemeProvider defaultTheme="dark" storageKey="theme">
                     <BrowserRouter>
                         <App/>
                     </BrowserRouter>

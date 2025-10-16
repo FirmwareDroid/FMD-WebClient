@@ -14,11 +14,12 @@ import {Separator} from "@/components/ui/separator.tsx"
 import {useSidebar} from "@/components/ui/sidebar.tsx"
 import {ModeToggle} from "@/components/ui/theming/mode-toggle.tsx";
 import {Link, useLocation} from "react-router";
+import {APPS_URL, FIRMWARES_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 
 export function SiteHeader() {
     const {toggleSidebar} = useSidebar();
     const pathname = useLocation().pathname;
-    const isFirmwaresOrAppsPath = pathname.startsWith("/firmwares") || pathname.startsWith("/apps");
+    const isFirmwaresOrAppsPath = pathname.startsWith(FIRMWARES_URL) || pathname.startsWith(APPS_URL);
     const splitPathname = pathname.split("/").filter(item => item.length > 0);
 
     return (

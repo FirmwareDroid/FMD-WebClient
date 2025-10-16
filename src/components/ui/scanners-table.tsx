@@ -12,8 +12,10 @@ export type Scanner = {
 const columns: ColumnDef<Scanner>[] = [
     buildSelectEntityColumn<Scanner>(),
     {
+        id: "id",
         accessorKey: "id",
         header: "Module",
+        enableHiding: false,
     },
 ];
 
@@ -38,6 +40,7 @@ export function ScannersTable(
             onRowSelectionChange={(selectedRows: Scanner[]) => {
                 setSelectedScanners(selectedRows);
             }}
+            dataTablePagination={false}
         />
     );
 }

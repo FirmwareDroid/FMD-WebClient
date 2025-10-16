@@ -21,6 +21,7 @@ import {Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTi
 import {Button} from "@/components/ui/button.tsx";
 import {CREATE_APP_IMPORT_JOB} from "@/components/graphql/app.graphql.ts";
 import {RqJobsTable} from "@/components/ui/rq-jobs-table.tsx";
+import {RqJobQueuesDropdownMenu} from "@/components/rq-jobs/rq-job-queues-dropdown-menu.tsx";
 
 type DropzoneProps = {
     className?: string;
@@ -72,6 +73,8 @@ function UploadDialog({storageIndex, fileUploads, setFileUploads, removeUpload}:
 
     const [createFirmwareExtractorJob] = useMutation(CREATE_FIRMWARE_EXTRACTOR_JOB);
     const [createAppImportJob] = useMutation(CREATE_APP_IMPORT_JOB);
+
+    const [selectedQueue, setSelectedQueue] = useState<string>("");
 
     return (
         <Dialog open={fileUploads.length > 0 && !fileUploads.every(u => u.importStarted)} modal={true}>
@@ -156,6 +159,9 @@ function UploadDialog({storageIndex, fileUploads, setFileUploads, removeUpload}:
                             Cancel
                         </Button>
                     </DialogClose>
+                    <RqJobQueuesDropdownMenu onSelect={(queue) => {
+                        setSelectedQueue(queue);
+                    }}/>
                     <Button
                         disabled={
                             !fileUploads.every(upload => upload.serverResponded) ||
@@ -163,11 +169,11 @@ function UploadDialog({storageIndex, fileUploads, setFileUploads, removeUpload}:
                         }
                         onClick={() => {
                             if (fileUploads.some(upload => upload.type === "firmware")) {
-                                void createFirmwareExtractorJob({variables: {storageIndex}});
+                                void createFirmwareExtractorJob({variables: {queueName: selectedQueue, storageIndex}});
                             }
 
                             if (fileUploads.some(upload => upload.type === "apk")) {
-                                void createAppImportJob({variables: {storageIndex}});
+                                void createAppImportJob({variables: {queueName: selectedQueue, storageIndex}});
                             }
 
                             setFileUploads(prev => prev.map(upload => ({...upload, importStarted: true})));
@@ -270,8 +276,8 @@ export function Dropzone(
     });
 
     return (
-        <div className={cn(className)}>
-            <div {...getRootProps({className: "dropzone rounded-xl cursor-pointer"})}>
+        <div className={cn(className, "flex flex-col gap-4 items-center")}>
+            <div {...getRootProps({className: "dropzone w-full rounded-xl cursor-pointer"})}>
                 <Card className="flex justify-center text-center min-h-48 p-4 border-2 border-dashed">
                     <input {...getInputProps()} />
                     <p>{message}</p>

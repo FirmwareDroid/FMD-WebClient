@@ -8,8 +8,15 @@ export const GET_RQ_JOB_LIST = gql(`
             id
             isFailed
             isFinished
+            queueName
             startedAt
             status
         }
+    }
+`);
+
+export const GET_RQ_QUEUE_NAMES = gql(`
+    query GetRqJobQueueNames {
+        rq_queue_name_list
     }
 `);

@@ -53,6 +53,7 @@ export function RqJobsTable(
                 <TableRow>
                     <TableHead>Job ID</TableHead>
                     <TableHead>Started At</TableHead>
+                    <TableHead>RQ Queue</TableHead>
                     <TableHead className="text-center">Status</TableHead>
                 </TableRow>
             </TableHeader>
@@ -66,6 +67,9 @@ export function RqJobsTable(
                                 </TableCell>
                                 <TableCell>
                                     <span>{job.startedAt}</span>
+                                </TableCell>
+                                <TableCell>
+                                    <span>{job.queueName}</span>
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex items-center justify-center">
@@ -86,7 +90,7 @@ export function RqJobsTable(
                 })}
                 {!importJobs || importJobs.length <= 0 && (
                     <TableRow>
-                        <TableCell className="text-center" colSpan={3}>
+                        <TableCell className="text-center" colSpan={4}>
                             No recent jobs found.
                         </TableCell>
                     </TableRow>
