@@ -4,7 +4,7 @@ import {APKLEAKS_REPORT, GET_SCANNER_REPORT} from "@/components/graphql/report.g
 import {useFragment} from "@/__generated__";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {BasePage} from "@/pages/base-page.tsx";
-import {EntityTable} from "@/components/ui/entity-table.tsx";
+import {EntityTable} from "@/components/entity-table.tsx";
 
 export function ApkleaksReportPage({reportId}: Readonly<ImplReportPageProps>) {
     const {

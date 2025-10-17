@@ -1,5 +1,5 @@
 import {BasePage} from "@/pages/base-page.tsx";
-import {RqJobsTable} from "@/components/ui/rq-jobs-table.tsx";
+import {RqJobsTable} from "@/components/rq-jobs-table.tsx";
 import {Alert, AlertTitle} from "@/components/ui/alert.tsx";
 import {AlertCircleIcon} from "lucide-react";
 import {useNavigate} from "react-router";

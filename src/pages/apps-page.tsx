@@ -7,7 +7,7 @@ import {BasePage} from "@/pages/base-page.tsx";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
 import {APP_ALL, GET_APPS_BY_FIRMWARE_OBJECT_IDS, SCAN_APKS_BY_OBJECT_IDS} from "@/components/graphql/app.graphql.ts";
 import {useParams} from "react-router";
-import {buildAppActionColumns} from "@/components/ui/table/action-columns/app-action-columns.tsx";
+import {buildAppActionColumns} from "@/components/data-table-action-columns/app-action-columns.tsx";
 
 const columns: ColumnDef<AppAllFragment>[] = [
     ...buildAppActionColumns<AppAllFragment>(SCAN_APKS_BY_OBJECT_IDS),

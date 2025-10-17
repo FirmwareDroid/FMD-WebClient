@@ -7,7 +7,7 @@ import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {useFragment} from "@/__generated__";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {FileAllFragment} from "@/__generated__/graphql.ts";
-import {EntityTable} from "@/components/ui/entity-table.tsx";
+import {EntityTable} from "@/components/entity-table.tsx";
 import {FILE_ALL, GET_FILE_BY_ID} from "@/components/graphql/file.graphql.ts";
 import {Button} from "@/components/ui/button.tsx";
 import {APPS_URL, FIRMWARES_URL} from "@/components/ui/sidebar/app-sidebar.tsx";

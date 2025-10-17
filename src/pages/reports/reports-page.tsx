@@ -9,7 +9,7 @@ import {
     BASIC_REPORT_INFO
 } from "@/components/graphql/report.graphql.ts";
 import {useParams} from "react-router";
-import {buildViewReportColumn} from "@/components/ui/table/action-columns/report-action-columns.tsx";
+import {buildViewReportColumn} from "@/components/data-table-action-columns/report-action-columns.tsx";
 import {BasicReportInfoFragment} from "@/__generated__/graphql.ts";
 
 const columns: ColumnDef<BasicReportInfoFragment>[] = [

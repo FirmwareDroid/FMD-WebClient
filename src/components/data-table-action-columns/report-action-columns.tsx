@@ -1,7 +1,7 @@
 import type {ColumnDef} from "@tanstack/react-table";
 import {useNavigate} from "react-router";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
-import {ActionButton} from "@/components/ui/table/action-columns/action-buttons.tsx";
+import {ActionButton} from "@/components/data-table-action-columns/action-buttons.tsx";
 import {APPS_URL, FIRMWARES_URL, REPORTS_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 import {EyeIcon} from "lucide-react";
 

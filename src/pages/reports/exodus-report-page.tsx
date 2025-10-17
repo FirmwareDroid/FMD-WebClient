@@ -6,7 +6,7 @@ import {
 } from "@/components/graphql/report.graphql.ts";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {BasePage} from "@/pages/base-page.tsx";
-import {EntityTable} from "@/components/ui/entity-table.tsx";
+import {EntityTable} from "@/components/entity-table.tsx";
 import {useFragment} from "@/__generated__";
 
 export function ExodusReportPage({reportId}: Readonly<ImplReportPageProps>) {

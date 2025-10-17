@@ -6,13 +6,13 @@ import {
     buildDeleteEntityColumn,
     buildSelectEntityColumn,
     WithId
-} from "@/components/ui/table/action-columns/entity-action-columns.tsx";
+} from "@/components/data-table-action-columns/entity-action-columns.tsx";
 import {useNavigate} from "react-router";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
-import {ActionButton} from "@/components/ui/table/action-columns/action-buttons.tsx";
+import {ActionButton} from "@/components/data-table-action-columns/action-buttons.tsx";
 import {FIRMWARES_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 import {EyeIcon} from "lucide-react";
-import {buildScanAppColumn} from "@/components/ui/table/action-columns/app-action-columns.tsx";
+import {buildScanAppColumn} from "@/components/data-table-action-columns/app-action-columns.tsx";
 
 function buildViewFirmwareColumn<T extends WithId>(): ColumnDef<T> {
     return (

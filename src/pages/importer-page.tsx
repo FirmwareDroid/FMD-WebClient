@@ -1,6 +1,6 @@
-import {TypographyH2} from "@/components/ui/typography/headings.tsx";
+import {TypographyH2} from "@/components/typography/headings.tsx";
 import {BasePage} from "@/pages/base-page.tsx";
-import {Dropzone} from "@/components/ui/importer/dropzone.tsx";
+import {Dropzone} from "@/components/importer/dropzone.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
 import {useQuery} from "@apollo/client";
 import {
@@ -12,7 +12,7 @@ import {useFragment} from "@/__generated__";
 import type {ColumnDef} from "@tanstack/react-table";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {FirmwareRowImporterPageFragment} from "@/__generated__/graphql.ts";
-import {buildFirmwareActionColumns} from "@/components/ui/table/action-columns/firmware-action-columns.tsx";
+import {buildFirmwareActionColumns} from "@/components/data-table-action-columns/firmware-action-columns.tsx";
 
 const columns: ColumnDef<FirmwareRowImporterPageFragment>[] = [
     ...buildFirmwareActionColumns<FirmwareRowImporterPageFragment>(SCAN_APKS_BY_FIRMWARE_OBJECT_IDS),

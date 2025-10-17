@@ -20,7 +20,7 @@ import {
 import {Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle,} from "@/components/ui/dialog.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {CREATE_APP_IMPORT_JOB} from "@/components/graphql/app.graphql.ts";
-import {RqJobsTable} from "@/components/ui/rq-jobs-table.tsx";
+import {RqJobsTable} from "@/components/rq-jobs-table.tsx";
 import {RqJobQueuesDropdownMenu} from "@/components/rq-jobs/rq-job-queues-dropdown-menu.tsx";
 
 type DropzoneProps = {

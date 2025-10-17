@@ -6,7 +6,7 @@ import {
     ScanApksByObjectIdsMutation
 } from "@/__generated__/graphql.ts";
 import {useState} from "react";
-import {Scanner, ScannersTable} from "@/components/ui/scanners-table.tsx";
+import {Scanner, ScannersTable} from "@/components/scanners-table.tsx";
 import {useLazyQuery, useMutation} from "@apollo/client";
 import {useNavigate} from "react-router";
 import {
@@ -25,7 +25,7 @@ import * as React from "react";
 import type {VariantProps} from "class-variance-authority";
 import {cn} from "@/lib/utils.ts";
 import {GET_RQ_JOB_LIST} from "@/components/graphql/rq-job.graphql.ts";
-import {WithTypenameMutation} from "@/components/ui/table/action-columns/entity-action-columns.tsx";
+import {WithTypenameMutation} from "@/components/data-table-action-columns/entity-action-columns.tsx";
 import {SCAN_JOBS_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 import {RqJobQueuesDropdownMenu} from "@/components/rq-jobs/rq-job-queues-dropdown-menu.tsx";
 

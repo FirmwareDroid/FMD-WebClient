@@ -22,25 +22,7 @@ function TypographyH2({children, className}: Readonly<props>) {
     )
 }
 
-function TypographyH3({children, className}: Readonly<props>) {
-    return (
-        <h3 className={cn("scroll-m-20 text-2xl font-semibold tracking-tight", className)}>
-            {children}
-        </h3>
-    )
-}
-
-function TypographyH4({children, className}: Readonly<props>) {
-    return (
-        <h4 className={cn("scroll-m-20 text-xl font-semibold tracking-tight", className)}>
-            {children}
-        </h4>
-    )
-}
-
 export {
     TypographyH1,
     TypographyH2,
-    TypographyH3,
-    TypographyH4,
 }

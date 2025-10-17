@@ -7,7 +7,7 @@ import {useQuery} from "@apollo/client";
 import {useFragment} from "@/__generated__";
 import {FILE_ALL, GET_FILES_BY_FIRMWARE_OBJECT_IDS} from "@/components/graphql/file.graphql.ts";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
-import {buildFileActionColumns} from "@/components/ui/table/action-columns/file-action-columns.tsx";
+import {buildFileActionColumns} from "@/components/data-table-action-columns/file-action-columns.tsx";
 
 const columns: ColumnDef<FileAllFragment>[] = [
     ...buildFileActionColumns<FileAllFragment>(),

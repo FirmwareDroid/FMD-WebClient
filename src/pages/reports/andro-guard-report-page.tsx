@@ -7,7 +7,7 @@ import {
 import {BasePage} from "@/pages/base-page.tsx";
 import {useFragment} from "@/__generated__";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
-import {EntityTable} from "@/components/ui/entity-table.tsx";
+import {EntityTable} from "@/components/entity-table.tsx";
 
 export function AndroGuardReportPage({reportId}: Readonly<ImplReportPageProps>) {
     const {

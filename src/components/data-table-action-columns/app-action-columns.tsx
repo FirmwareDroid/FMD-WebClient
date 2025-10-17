@@ -8,10 +8,10 @@ import {
 import type {ColumnDef} from "@tanstack/react-table";
 import {
     buildSelectEntityColumn, WithId, WithIdAndFirmwareIdReference
-} from "@/components/ui/table/action-columns/entity-action-columns.tsx";
+} from "@/components/data-table-action-columns/entity-action-columns.tsx";
 import {useNavigate} from "react-router";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
-import {ActionButton, ScanAppActionButton} from "@/components/ui/table/action-columns/action-buttons.tsx";
+import {ActionButton, ScanAppActionButton} from "@/components/data-table-action-columns/action-buttons.tsx";
 import {APPS_URL, FIRMWARES_URL, REPORTS_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 import {BookOpenIcon, EyeIcon} from "lucide-react";
 

@@ -2,10 +2,10 @@ import type {ColumnDef} from "@tanstack/react-table";
 import {
     buildSelectEntityColumn,
     WithIdAndFirmwareIdReference
-} from "@/components/ui/table/action-columns/entity-action-columns.tsx";
+} from "@/components/data-table-action-columns/entity-action-columns.tsx";
 import {useNavigate} from "react-router";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
-import {ActionButton} from "@/components/ui/table/action-columns/action-buttons.tsx";
+import {ActionButton} from "@/components/data-table-action-columns/action-buttons.tsx";
 import {FILES_URL, FIRMWARES_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 import {EyeIcon} from "lucide-react";
 

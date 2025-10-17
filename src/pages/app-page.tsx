@@ -8,9 +8,9 @@ import {Alert, AlertTitle} from "@/components/ui/alert.tsx";
 import {AlertCircleIcon, BookOpenIcon, FileIcon} from "lucide-react";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {AppAllFragment} from "@/__generated__/graphql.ts";
-import {EntityTable} from "@/components/ui/entity-table.tsx";
+import {EntityTable} from "@/components/entity-table.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {ScanAppActionButton} from "@/components/ui/table/action-columns/action-buttons.tsx";
+import {ScanAppActionButton} from "@/components/data-table-action-columns/action-buttons.tsx";
 import {APPS_URL, FILES_URL, FIRMWARES_URL, REPORTS_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 
 export function AppPage() {

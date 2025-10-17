@@ -7,7 +7,7 @@ import {
 import {TypedDocumentNode} from "@graphql-typed-document-node/core";
 import {
     DeleteEntityButton,
-} from "@/components/ui/table/action-columns/action-buttons.tsx";
+} from "@/components/data-table-action-columns/action-buttons.tsx";
 
 export type WithId = { id: string };
 export type WithIdAndFirmwareIdReference = {

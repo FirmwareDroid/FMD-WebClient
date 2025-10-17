@@ -1,5 +1,5 @@
 import {ReactNode} from "react";
-import {TypographyH1} from "@/components/ui/typography/headings.tsx";
+import {TypographyH1} from "@/components/typography/headings.tsx";
 import {cn} from "@/lib/utils.ts";
 
 type Props = {

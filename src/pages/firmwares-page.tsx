@@ -9,7 +9,7 @@ import {
 } from "@/components/graphql/firmware.graphql.ts";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {useFragment} from "@/__generated__";
-import {buildFirmwareActionColumns} from "@/components/ui/table/action-columns/firmware-action-columns.tsx";
+import {buildFirmwareActionColumns} from "@/components/data-table-action-columns/firmware-action-columns.tsx";
 
 const columns: ColumnDef<FirmwareAllFragment>[] = [
     ...buildFirmwareActionColumns<FirmwareAllFragment>(SCAN_APKS_BY_FIRMWARE_OBJECT_IDS),
