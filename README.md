@@ -18,7 +18,9 @@ Next, please open directory `/FirmwareDroid` and uncomment the following line in
 
 ```shell
 cd FirmwareDroid
+```
 
+```dockerfile
 - ./firmware-droid-client/build:/usr/share/nginx/html # Dev-Route
 ```
 
