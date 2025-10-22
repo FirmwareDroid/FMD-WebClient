@@ -24,6 +24,7 @@ import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
 import {ApolloError} from "@apollo/client";
 import {DataTableViewOptions} from "@/components/ui/table/data-table-column-visbility.tsx";
+import {CursorPagination, CursorPaginationProps} from "@/components/ui/table/cursor-pagination.tsx";
 
 declare module "@tanstack/table-core" {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -38,6 +39,7 @@ interface DataTableProps<TData, TValue> {
     data: TData[];
     onRowSelectionChange?: (selectedRows: TData[]) => void;
     dataTablePagination?: boolean;
+    cursorPagination?: CursorPaginationProps;
 }
 
 function DataTable<TData, TValue>(
@@ -47,6 +49,7 @@ function DataTable<TData, TValue>(
         data,
         onRowSelectionChange,
         dataTablePagination = true,
+        cursorPagination,
     }: Readonly<DataTableProps<TData, TValue>>
 ) {
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -66,13 +69,13 @@ function DataTable<TData, TValue>(
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
-        onPaginationChange: setPagination,
         getPaginationRowModel: getPaginationRowModel(),
         enableRowSelection: true,
-        onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
         onColumnVisibilityChange: setColumnVisibility,
+        onPaginationChange: setPagination,
         onRowSelectionChange: setRowSelection,
+        onSortingChange: setSorting,
         state: {
             sorting,
             columnVisibility,
@@ -147,7 +150,8 @@ function DataTable<TData, TValue>(
                     {table.getFilteredSelectedRowModel().rows.length} of{" "}
                     {table.getFilteredRowModel().rows.length} row(s) selected.
                 </div>
-                {dataTablePagination && <DataTablePagination table={table}/>}
+                {dataTablePagination && !cursorPagination && <DataTablePagination table={table}/>}
+                {dataTablePagination && cursorPagination && <CursorPagination {...cursorPagination}/>}
             </div>
         </div>
     );
@@ -159,6 +163,7 @@ function ScrollableDataTable<TData, TValue>(
         data,
         onRowSelectionChange,
         dataTablePagination,
+        cursorPagination,
     }: Readonly<DataTableProps<TData, TValue>>
 ) {
     return (
@@ -168,6 +173,7 @@ function ScrollableDataTable<TData, TValue>(
                 data={data}
                 onRowSelectionChange={onRowSelectionChange}
                 dataTablePagination={dataTablePagination}
+                cursorPagination={cursorPagination}
             />
             <ScrollBar orientation="horizontal"/>
         </ScrollArea>
@@ -180,6 +186,7 @@ function StateHandlingScrollableDataTable<TData, TValue>(
         data,
         onRowSelectionChange,
         dataTablePagination,
+        cursorPagination,
         idsLoading,
         dataLoading,
         idsError,
@@ -219,6 +226,7 @@ function StateHandlingScrollableDataTable<TData, TValue>(
                     data={data}
                     onRowSelectionChange={onRowSelectionChange}
                     dataTablePagination={dataTablePagination}
+                    cursorPagination={cursorPagination}
                 />
             )}
         </>

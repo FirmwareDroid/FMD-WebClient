@@ -10,6 +10,8 @@ import {
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {useFragment} from "@/__generated__";
 import {buildFirmwareActionColumns} from "@/components/data-table-action-columns/firmware-action-columns.tsx";
+import {useEffect, useState} from "react";
+import {CursorPaginationProps} from "@/components/ui/table/cursor-pagination.tsx";
 
 const columns: ColumnDef<FirmwareAllFragment>[] = [
     ...buildFirmwareActionColumns<FirmwareAllFragment>(SCAN_APKS_BY_FIRMWARE_OBJECT_IDS),
@@ -106,26 +108,68 @@ const columns: ColumnDef<FirmwareAllFragment>[] = [
 ];
 
 export function FirmwaresPage() {
+    const [pageSize, setPageSize] = useState<number>(25);
+    const [afterStack, setAfterStack] = useState<(string | null)[]>([null]);
+    const after = afterStack.at(-1);
+
     const {
-        loading: firmwaresLoading,
-        error: firmwaresError,
-        data: firmwaresData,
+        loading,
+        error,
+        data,
+        refetch,
     } = useQuery(GET_FIRMWARES_BY_OBJECT_IDS, {
+        variables: {
+            first: pageSize,
+            after,
+        },
         fetchPolicy: "cache-first",
+        notifyOnNetworkStatusChange: true,
     });
 
-    const firmwares = (firmwaresData?.android_firmware_connection?.edges ?? [])
+    const pageInfo = data?.android_firmware_connection?.pageInfo;
+    const edges = data?.android_firmware_connection?.edges ?? [];
+
+    const firmwares = edges
         // eslint-disable-next-line react-hooks/rules-of-hooks
         .map(edge => useFragment(FIRMWARE_ALL, edge?.node))
-        .filter(isNonNullish)
+        .filter(isNonNullish);
+
+    const goNext = () => {
+        if (!pageInfo?.hasNextPage) return;
+        setAfterStack(prev => [...prev, pageInfo.endCursor ?? null]);
+    };
+
+    const goPrevious = () => {
+        if (afterStack.length <= 1) return;
+        setAfterStack(prev => prev.slice(0, -1));
+    };
+
+    useEffect(() => {
+        void refetch({first: pageSize, after});
+    }, [pageSize, after, refetch]);
+
+    const onPageSizeChange = (n: number) => {
+        setAfterStack([null]);
+        setPageSize(n);
+    }
+
+    const cursorPagination: CursorPaginationProps = {
+        pageSize: pageSize,
+        onPageSizeChange: onPageSizeChange,
+        hasPrevious: afterStack.length > 1,
+        hasNext: Boolean(pageInfo?.hasNextPage),
+        onPrevious: goPrevious,
+        onNext: goNext,
+    }
 
     return (
         <BasePage title="Firmwares">
             <StateHandlingScrollableDataTable
                 columns={columns}
                 data={firmwares}
-                dataLoading={firmwaresLoading}
-                dataError={firmwaresError}
+                dataLoading={loading}
+                dataError={error}
+                cursorPagination={cursorPagination}
             />
         </BasePage>
     );

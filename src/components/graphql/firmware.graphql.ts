@@ -44,12 +44,27 @@ export const FIRMWARE_ALL = gql(`
 `);
 
 export const GET_FIRMWARES_BY_OBJECT_IDS = gql(`
-    query GetFirmwaresByObjectIds($objectIds: [String!]) {
-        android_firmware_connection(objectIdList: $objectIds) {
+    query GetFirmwaresByObjectIds(
+        $objectIds: [String!]
+        $first: Int
+        $after: String
+    ) {
+        android_firmware_connection(
+            objectIdList: $objectIds
+            first: $first
+            after: $after
+        ) {
             edges {
+                cursor
                 node {
                     ...FirmwareAll
                 }
+            }
+            pageInfo {
+                hasNextPage
+                hasPreviousPage
+                startCursor
+                endCursor
             }
         }
     }
@@ -70,12 +85,19 @@ export const FIRMWARE_ROW_IMPORTER_PAGE = gql(`
 `);
 
 export const GET_FIRMWARES_IMPORTER_PAGE = gql(`
-    query GetFirmwaresImporterPage {
-        android_firmware_connection {
+    query GetFirmwaresImporterPage($first: Int, $after: String) {
+        android_firmware_connection(first: $first, after: $after) {
             edges {
+                cursor
                 node {
                     ...FirmwareRowImporterPage
                 }
+            }
+            pageInfo {
+                hasNextPage
+                hasPreviousPage
+                startCursor
+                endCursor
             }
         }
     }
