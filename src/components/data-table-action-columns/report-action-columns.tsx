@@ -2,7 +2,7 @@ import type {ColumnDef} from "@tanstack/react-table";
 import {useNavigate} from "react-router";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
 import {ActionButton} from "@/components/data-table-action-columns/action-buttons.tsx";
-import {APPS_URL, FIRMWARES_URL, REPORTS_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
+import {APPS_URL, FIRMWARE_URL, REPORTS_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 import {EyeIcon} from "lucide-react";
 
 type WithIdAndAppIdAndFirmwareId = {
@@ -38,7 +38,7 @@ export function buildViewReportColumn<T extends WithIdAndAppIdAndFirmwareId>(): 
                                 <TooltipTrigger asChild>
                                     <ActionButton
                                         variant="outline"
-                                        onClick={() => void navigate(`${FIRMWARES_URL}/${firmwareId}${APPS_URL}/${appId}${REPORTS_URL}/${scannerName}-${reportId}`)}
+                                        onClick={() => void navigate(`${FIRMWARE_URL}/${firmwareId}${APPS_URL}/${appId}${REPORTS_URL}/${scannerName}-${reportId}`)}
                                     >
                                         <EyeIcon className="size-5"/>
                                     </ActionButton>

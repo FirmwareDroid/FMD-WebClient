@@ -1,0 +1,13 @@
+.nav-active {
+  color: #2563eb;
+  transition: color 120ms ease;
+}
+
+.nav-active[data-active="true"] {
+    color: #facc15; /* yellow */
+}
+
+html.dark .nav-active[data-active="true"],
+.dark .nav-active[data-active="true"] {
+    color: #facc15;
+}

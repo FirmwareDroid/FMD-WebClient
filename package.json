@@ -9,8 +9,8 @@
     "lint": "eslint firmware-droid-client",
     "preview": "vite preview",
     "build_docker_image": "docker ../build ./ -f ./Dockerfile -t firmwaredroid-frontend --platform=\"linux/amd64\"",
-    "dev_deploy": "vite build && rm -R -f ../FirmwareDroid/firmware-droid-client/build/ && cp -v -r ./dist ../FirmwareDroid/firmware-droid-client/build/",
-    "schema:export": "docker compose exec -T web sh -lc 'cd /var/www/source && python manage.py graphql_schema --schema api.v2.schema.FirmwareDroidRootSchema.schema --out /var/www/firmware-droid-client/schema/schema.graphql --indent 2'",
+    "dev_deploy": "vite build && rm -R -f ../FirmwareDroid/firmware-droid-client/build/ && cp -v -r ./build ../FirmwareDroid/firmware-droid-client/build/",
+    "schema:export": "cd ../FirmwareDroid && docker compose exec -T web sh -lc 'cd /var/www/source && python manage.py graphql_schema --schema api.v2.schema.FirmwareDroidRootSchema.schema --out /var/www/firmware-droid-client/schema/schema.graphql --indent 2' && docker cp backend-worker:/var/www/firmware-droid-client/schema/schema.graphql ./firmware-droid-client/schema/schema.graphql",
     "codegen": "graphql-codegen",
     "codegen:all": "yarn schema:export && yarn codegen"
   },
@@ -73,6 +73,6 @@
     "tw-animate-css": "^1.3.6",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
-    "vite": "7.1.5"
+    "vite": "^7.2.4"
   }
 }

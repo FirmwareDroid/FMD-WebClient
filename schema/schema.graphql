@@ -2278,7 +2278,6 @@ type DjangoDebugException {
 type ObtainJSONWebToken {
   payload: GenericScalar!
   refreshExpiresIn: Int!
-  token: String!
 }
 
 type Verify {
@@ -2288,7 +2287,6 @@ type Verify {
 type Refresh {
   payload: GenericScalar!
   refreshExpiresIn: Int!
-  token: String!
 }
 
 type Mutation {

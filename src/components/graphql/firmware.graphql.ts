@@ -84,7 +84,7 @@ export const FIRMWARE_ROW_IMPORTER_PAGE = gql(`
     }
 `);
 
-export const GET_FIRMWARES_IMPORTER_PAGE = gql(`
+export const GET_FIRMWARE_IMPORTER_PAGE = gql(`
     query GetFirmwaresImporterPage($first: Int, $after: String) {
         android_firmware_connection(first: $first, after: $after) {
             edges {

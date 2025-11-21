@@ -118,3 +118,15 @@
     @apply bg-background text-foreground;
   }
 }
+
+.theme-text-color {
+    color: #2563eb; /* light: blue-600 */
+    transition: color 120ms ease;
+}
+
+.dark .theme-text-color,
+html.dark .theme-text {
+    color: #facc15; /* dark: yellow-400 */
+}
+
+

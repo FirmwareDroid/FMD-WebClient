@@ -4,7 +4,7 @@ import {Dropzone} from "@/components/importer/dropzone.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
 import {useQuery} from "@apollo/client";
 import {
-    FIRMWARE_ROW_IMPORTER_PAGE, GET_FIRMWARES_IMPORTER_PAGE, SCAN_APKS_BY_FIRMWARE_OBJECT_IDS,
+    FIRMWARE_ROW_IMPORTER_PAGE, GET_FIRMWARE_IMPORTER_PAGE, SCAN_APKS_BY_FIRMWARE_OBJECT_IDS,
 } from "@/components/graphql/firmware.graphql.ts";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
 import {useFragment} from "@/__generated__";
@@ -15,6 +15,7 @@ import {FirmwareRowImporterPageFragment} from "@/__generated__/graphql.ts";
 import {buildFirmwareActionColumns} from "@/components/data-table-action-columns/firmware-action-columns.tsx";
 import {useEffect, useState} from "react";
 import {CursorPaginationProps} from "@/components/ui/table/cursor-pagination.tsx";
+import {Card, CardContent} from "@/components/ui/card.tsx";
 
 const columns: ColumnDef<FirmwareRowImporterPageFragment>[] = [
     ...buildFirmwareActionColumns<FirmwareRowImporterPageFragment>(SCAN_APKS_BY_FIRMWARE_OBJECT_IDS),
@@ -63,7 +64,7 @@ export function ImporterPage() {
         loading,
         error,
         refetch,
-    } = useQuery(GET_FIRMWARES_IMPORTER_PAGE, {
+    } = useQuery(GET_FIRMWARE_IMPORTER_PAGE, {
         variables: {
             first: pageSize,
             after,
@@ -75,7 +76,7 @@ export function ImporterPage() {
     const pageInfo = data?.android_firmware_connection?.pageInfo;
     const edges = data?.android_firmware_connection?.edges ?? [];
 
-    const firmwares = edges
+    const firmware = edges
         // eslint-disable-next-line react-hooks/rules-of-hooks
         .map(edge => useFragment(FIRMWARE_ROW_IMPORTER_PAGE, edge?.node))
         .filter(isNonNullish);
@@ -110,13 +111,31 @@ export function ImporterPage() {
 
     return (
         <BasePage title="Importer">
-            <TypographyH2>Import Firmwares and APKs</TypographyH2>
+            <Card className="w-full max-w-5xl">
+                <CardContent>
+                    <p className="text-body">
+                        To begin, simply drag and drop an Android firmware package
+                        (such as a compressed ZIP file) or an Android app (APK)
+                        into the upload area. FirmwareDroid will automatically
+                        detect the file type and guide you through the analysis process.
+                    </p>
+                </CardContent>
+            </Card>
             <Dropzone className="max-w-5xl w-full"/>
             <Separator></Separator>
-            <TypographyH2>Extracted Firmwares</TypographyH2>
+            <TypographyH2>Extracted Firmware</TypographyH2>
+            <Card className="w-full max-w-5xl">
+                <CardContent>
+                    <p className="text-body">
+                        Below is a list of all firmware images that have been imported into FirmwareDroid.
+                        You can explore the extracted Android apps, as well as initiate
+                        various security analyses directly from this table.
+                    </p>
+                </CardContent>
+            </Card>
             <StateHandlingScrollableDataTable
                 columns={columns}
-                data={firmwares}
+                data={firmware}
                 dataLoading={loading}
                 dataError={error}
                 cursorPagination={cursorPagination}

@@ -5,7 +5,12 @@ import {CSRF_URL, GRAPHQL_URL} from "@/envconfig.ts";
 let cachedCsrf: string | null = null;
 let inflightCsrf: Promise<string> | null = null;
 
-async function getCsrf(): Promise<string> {
+export function clearCachedCsrf(): void {
+    cachedCsrf = null;
+    inflightCsrf = null;
+}
+
+export async function getCsrf(): Promise<string> {
     if (cachedCsrf) return cachedCsrf;
     if (inflightCsrf) return inflightCsrf;
 
@@ -21,10 +26,24 @@ async function getCsrf(): Promise<string> {
 }
 
 const customFetch: typeof fetch = async (uri, options) => {
-    const csrfToken = await getCsrf();
-    const headers = new Headers(options?.headers);
-    headers.set("X-CSRFToken", csrfToken);
-    return fetch(uri, { ...options, headers, credentials: "include" });
+    let tried = false;
+    while (true) {
+        const csrfToken = await getCsrf();
+        const headers = new Headers(options?.headers);
+        headers.set("X-CSRFToken", csrfToken);
+
+        const res = await fetch(uri, { ...options, headers, credentials: "include" });
+
+        // if server rejected CSRF, clear cached token and retry once
+        if (res.status === 403 && !tried) {
+            cachedCsrf = null;
+            inflightCsrf = null;
+            tried = true;
+            continue;
+        }
+
+        return res;
+    }
 };
 
 const httpLink = new HttpLink({

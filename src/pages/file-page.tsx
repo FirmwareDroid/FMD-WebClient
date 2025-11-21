@@ -10,7 +10,7 @@ import {FileAllFragment} from "@/__generated__/graphql.ts";
 import {EntityTable} from "@/components/entity-table.tsx";
 import {FILE_ALL, GET_FILE_BY_ID} from "@/components/graphql/file.graphql.ts";
 import {Button} from "@/components/ui/button.tsx";
-import {APPS_URL, FIRMWARES_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
+import {APPS_URL, FIRMWARE_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 
 export function FilePage() {
     const {fileId} = useParams<{ fileId: string }>();
@@ -59,7 +59,7 @@ export function FilePage() {
                         hidden={!file.firmwareIdReference?.id || !file.androidAppReference?.id}
                         size="sm"
                         onClick={() => {
-                            void navigate(`${FIRMWARES_URL}/${file.firmwareIdReference?.id ?? ""}${APPS_URL}/${file.androidAppReference?.id ?? ""}`);
+                            void navigate(`${FIRMWARE_URL}/${file.firmwareIdReference?.id ?? ""}${APPS_URL}/${file.androidAppReference?.id ?? ""}`);
                         }}
                     >
                         <FileIcon/> App

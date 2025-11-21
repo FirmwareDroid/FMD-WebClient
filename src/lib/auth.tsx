@@ -2,16 +2,15 @@ import {createContext, type ReactNode, useCallback, useContext, useEffect, useMe
 import {useApolloClient, useMutation, useQuery} from "@apollo/client";
 import {GET_CURRENT_USER_ID} from "@/components/graphql/current-user.graphql.ts";
 import {DELETE_TOKEN_COOKIE} from "@/components/graphql/auth.graphql.ts";
+import { clearCachedCsrf } from "@/lib/graphql/apolloClient.ts";
 
 type AuthContextValue = {
     currentUser: { __typename?: "UserType", id: string } | null | undefined;
     isAuthenticated: boolean;
     initializing: boolean;
     refreshMe: () => Promise<boolean>;
-    logIn: (token?: string) => Promise<boolean>;
+    logIn: () => Promise<boolean>;
     logOut: () => Promise<void>;
-    getToken: () => string | null;
-    setToken: (token: string | null) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -21,14 +20,10 @@ export function AuthProvider({children}: Readonly<{ children: ReactNode }>) {
         fetchPolicy: "network-only",
         errorPolicy: "ignore",
     });
-
     const client = useApolloClient();
     const [doLogout] = useMutation(DELETE_TOKEN_COOKIE);
 
     const [bootstrapped, setBootstrapped] = useState(false);
-    const [jwtToken, setJwtToken] = useState<string | null>(
-        () => localStorage.getItem("jwtToken")
-    );
 
     useEffect(() => {
         if (!loading) setBootstrapped(true);
@@ -48,11 +43,8 @@ export function AuthProvider({children}: Readonly<{ children: ReactNode }>) {
     }, [refetch]);
 
     const logIn = useCallback(
-        async (token?: string) => {
-            if (token) {
-                setJwtToken(token);
-                localStorage.setItem("jwtToken", token);
-            }
+        async (): Promise<boolean> => {
+            clearCachedCsrf();
             return refreshMe();
         },
         [refreshMe]
@@ -64,8 +56,6 @@ export function AuthProvider({children}: Readonly<{ children: ReactNode }>) {
         } catch {
             // ignore
         }
-        setJwtToken(null);
-        localStorage.removeItem("jwtToken");
         await client.clearStore().catch(() => {
         });
         try {
@@ -83,17 +73,11 @@ export function AuthProvider({children}: Readonly<{ children: ReactNode }>) {
             refreshMe,
             logIn,
             logOut,
-            getToken: () => jwtToken,
-            setToken: (token) => {
-                setJwtToken(token);
-                if (token) localStorage.setItem("jwtToken", token);
-                else localStorage.removeItem("jwtToken");
-            },
         }),
-        [currentUser, isAuthenticated, initializing, refreshMe, logIn, logOut, jwtToken]
+        [currentUser, isAuthenticated, initializing, refreshMe, logIn, logOut]
     );
 
-    return <AuthContext value={value}>{children}</AuthContext>;
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

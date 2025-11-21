@@ -2,7 +2,6 @@ import {Dispatch, SetStateAction, useCallback, useState} from "react";
 import {useDropzone} from "react-dropzone";
 import {Card} from "@/components/ui/card.tsx";
 import {cn} from "@/lib/utils.ts";
-import {useAuth} from "@/lib/auth.tsx";
 import {Progress} from "@/components/ui/progress.tsx";
 import {
     CircleCheckBigIcon,
@@ -193,7 +192,6 @@ export function Dropzone(
         storageIndex = 0,
     }: Readonly<DropzoneProps>
 ) {
-    const {getToken} = useAuth();
     const [fileUploads, setFileUploads] = useState<FileUpload[]>([]);
 
     const updateUpload = useCallback((id: string, patch: Partial<FileUpload>) => {
@@ -206,12 +204,6 @@ export function Dropzone(
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         if (acceptedFiles.length === 0) return;
-
-        const token = getToken();
-        if (!token) {
-            console.error("No auth token available.");
-            return;
-        }
 
         setFileUploads(acceptedFiles.map(file => ({
             id: makeUploadId(file),
@@ -231,8 +223,7 @@ export function Dropzone(
 
             const xhr = new XMLHttpRequest();
             xhr.open("POST", "/upload/file");
-            xhr.setRequestHeader("Authorization", `Bearer ${token}`);
-
+            xhr.withCredentials = true;
             xhr.upload.onprogress = (event) => {
                 if (event.lengthComputable) {
                     const percentComplete = Math.round((event.loaded / event.total) * 100);
@@ -260,7 +251,7 @@ export function Dropzone(
             updateUpload(id, {xhr});
             xhr.send(formData);
         });
-    }, [getToken, storageIndex, updateUpload, removeUpload]);
+    }, [storageIndex, updateUpload, removeUpload]);
 
     const {
         getRootProps,

@@ -1,3 +1,5 @@
+// typescript
+import { getCsrf } from "@/lib/graphql/apolloClient.ts";
 import {useAuth} from "@/lib/auth.tsx";
 import {useLocation, useNavigate} from "react-router";
 import React, {FormEvent, useEffect, useState} from "react";
@@ -32,15 +34,24 @@ export default function LoginPage() {
     );
 }
 
-type GetAuthTokenResult = { tokenAuth: { token: string } | null };
+type GetAuthTokenResult = { tokenAuth: { payload: string } | null };
 type GetAuthTokenVars = { username: string; password: string; };
 
 function LoginForm({className, ...props}: React.ComponentProps<"div">) {
+    const [csrfToken, setCsrfToken] = useState<string | null>(null);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const {logIn} = useAuth();
     const navigate = useNavigate();
     const location = useLocation() as any;
+
+    useEffect(() => {
+        let mounted = true;
+        void getCsrf()
+            .then(t => { if (mounted) setCsrfToken(t); })
+            .catch(() => { /* ignore */ });
+        return () => { mounted = false; };
+    }, []);
 
     const [requestToken, {data, loading, error}] = useLazyQuery<
         GetAuthTokenResult,
@@ -48,11 +59,12 @@ function LoginForm({className, ...props}: React.ComponentProps<"div">) {
     >(GET_AUTH_TOKEN, {fetchPolicy: "no-cache"});
 
     useEffect(() => {
-        const token = data?.tokenAuth?.token;
-        if (!token) return;
+        console.log("GET_AUTH_TOKEN result:", data);
+        const tokenAuth = data?.tokenAuth;
+        if (!tokenAuth) return;
 
         void (async () => {
-            await logIn(token);
+            await logIn();
             const dest = location?.state?.from?.pathname ?? "/";
             navigate(dest, {replace: true});
         })();
@@ -61,7 +73,11 @@ function LoginForm({className, ...props}: React.ComponentProps<"div">) {
     const onSubmit = (e: FormEvent) => {
         e.preventDefault();
         if (!username || !password || loading) return;
-        void requestToken({variables: {username: username, password: password}});
+
+        // Rely on Apollo client's customFetch to include the CSRF header and credentials.
+        void requestToken({
+            variables: {username: username, password: password},
+        });
     }
 
     return (
@@ -75,6 +91,7 @@ function LoginForm({className, ...props}: React.ComponentProps<"div">) {
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={onSubmit} noValidate>
+                        <input type="hidden" name="csrf_token" value={csrfToken ?? ""} />
                         <div className="flex flex-col gap-6">
                             <div className="grid gap-3">
                                 <Label htmlFor="username">Username</Label>

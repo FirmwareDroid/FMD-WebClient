@@ -21,7 +21,7 @@ type Documents = {
     "\n    query GetAppById($id: ID!) {\n        android_firmware_connection {\n            edges {\n                node {\n                    androidAppIdList(id: $id) {\n                        edges {\n                            node {\n                                ...AppAll\n                            }\n                        }\n                    }\n                }\n            }\n        }\n    }\n": typeof types.GetAppByIdDocument,
     "\n    query GetScannerModuleNames {\n        scanner_module_name_list\n    }\n": typeof types.GetScannerModuleNamesDocument,
     "\n    mutation ScanApksByObjectIds($objectIds: [String!]!, $scannerName: String!, $queueName: String!) {\n        createApkScanJob(\n            objectIdList: $objectIds,\n            moduleName: $scannerName,\n            queueName: $queueName,\n        ) {\n            jobIdList\n        }\n    }\n": typeof types.ScanApksByObjectIdsDocument,
-    "\n    query GetAuthToken($password: String!, $username: String!) {\n        tokenAuth(password: $password, username: $username) {\n            token\n        }\n    }\n": typeof types.GetAuthTokenDocument,
+    "\n    query GetAuthToken($password: String!, $username: String!) {\n        tokenAuth(password: $password, username: $username) {\n            payload\n        }\n    }\n": typeof types.GetAuthTokenDocument,
     "\n    mutation DeleteTokenCookie {\n        deleteTokenCookie {\n            deleted\n        }\n    }\n": typeof types.DeleteTokenCookieDocument,
     "\n    query GetCurrentUserId {\n        me {\n            id\n        }\n    }\n": typeof types.GetCurrentUserIdDocument,
     "\n    query GetCurrentUserEmailAndUsername {\n        me {\n            email\n            username\n        }\n    }\n": typeof types.GetCurrentUserEmailAndUsernameDocument,
@@ -53,7 +53,7 @@ const documents: Documents = {
     "\n    query GetAppById($id: ID!) {\n        android_firmware_connection {\n            edges {\n                node {\n                    androidAppIdList(id: $id) {\n                        edges {\n                            node {\n                                ...AppAll\n                            }\n                        }\n                    }\n                }\n            }\n        }\n    }\n": types.GetAppByIdDocument,
     "\n    query GetScannerModuleNames {\n        scanner_module_name_list\n    }\n": types.GetScannerModuleNamesDocument,
     "\n    mutation ScanApksByObjectIds($objectIds: [String!]!, $scannerName: String!, $queueName: String!) {\n        createApkScanJob(\n            objectIdList: $objectIds,\n            moduleName: $scannerName,\n            queueName: $queueName,\n        ) {\n            jobIdList\n        }\n    }\n": types.ScanApksByObjectIdsDocument,
-    "\n    query GetAuthToken($password: String!, $username: String!) {\n        tokenAuth(password: $password, username: $username) {\n            token\n        }\n    }\n": types.GetAuthTokenDocument,
+    "\n    query GetAuthToken($password: String!, $username: String!) {\n        tokenAuth(password: $password, username: $username) {\n            payload\n        }\n    }\n": types.GetAuthTokenDocument,
     "\n    mutation DeleteTokenCookie {\n        deleteTokenCookie {\n            deleted\n        }\n    }\n": types.DeleteTokenCookieDocument,
     "\n    query GetCurrentUserId {\n        me {\n            id\n        }\n    }\n": types.GetCurrentUserIdDocument,
     "\n    query GetCurrentUserEmailAndUsername {\n        me {\n            email\n            username\n        }\n    }\n": types.GetCurrentUserEmailAndUsernameDocument,
@@ -123,7 +123,7 @@ export function gql(source: "\n    mutation ScanApksByObjectIds($objectIds: [Str
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n    query GetAuthToken($password: String!, $username: String!) {\n        tokenAuth(password: $password, username: $username) {\n            token\n        }\n    }\n"): (typeof documents)["\n    query GetAuthToken($password: String!, $username: String!) {\n        tokenAuth(password: $password, username: $username) {\n            token\n        }\n    }\n"];
+export function gql(source: "\n    query GetAuthToken($password: String!, $username: String!) {\n        tokenAuth(password: $password, username: $username) {\n            payload\n        }\n    }\n"): (typeof documents)["\n    query GetAuthToken($password: String!, $username: String!) {\n        tokenAuth(password: $password, username: $username) {\n            payload\n        }\n    }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

@@ -12,6 +12,7 @@ import {useFragment} from "@/__generated__";
 import {buildFirmwareActionColumns} from "@/components/data-table-action-columns/firmware-action-columns.tsx";
 import {useEffect, useState} from "react";
 import {CursorPaginationProps} from "@/components/ui/table/cursor-pagination.tsx";
+import {Card, CardContent} from "@/components/ui/card.tsx";
 
 const columns: ColumnDef<FirmwareAllFragment>[] = [
     ...buildFirmwareActionColumns<FirmwareAllFragment>(SCAN_APKS_BY_FIRMWARE_OBJECT_IDS),
@@ -163,7 +164,17 @@ export function FirmwaresPage() {
     }
 
     return (
-        <BasePage title="Firmwares">
+        <BasePage title="Firmware">
+            <Card className="w-full max-w-5xl">
+                <CardContent>
+                    <p className="text-body">
+                        Below is a list of all firmware images that have been imported into FirmwareDroid. You can
+                        analyze these firmware images to extract Android apps and identify potential security
+                        vulnerabilities. Use the action buttons to start an analysis or view detailed information
+                        about each firmware via the "View" button.
+                    </p>
+                </CardContent>
+            </Card>
             <StateHandlingScrollableDataTable
                 columns={columns}
                 data={firmwares}

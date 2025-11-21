@@ -27,7 +27,7 @@ import {GET_CURRENT_USER_EMAIL_AND_USERNAME} from "@/components/graphql/current-
 export const IMPORTER_URL = "/importer";
 export const SCAN_JOBS_URL = "/scan-jobs";
 export const EMULATOR_URL = "/emulator";
-export const FIRMWARES_URL = "/firmwares";
+export const FIRMWARE_URL = "/firmware";
 export const APPS_URL = "/apps";
 export const FILES_URL = "/files";
 export const REPORTS_URL = "/reports";
@@ -52,8 +52,8 @@ const data = {
     ],
     analyses: [
         {
-            name: "Firmwares",
-            url: FIRMWARES_URL,
+            name: "Firmware",
+            url: FIRMWARE_URL,
             icon: CpuIcon,
         },
         {
@@ -95,7 +95,8 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
                                 <div
                                     className="flex aspect-square size-8 items-center justify-center rounded-lg">
                                     <Avatar>
-                                        <AvatarImage src="/Logo1.jpg"/>
+                                        <img src="/logo1.png" alt="Logo (light)" className="block dark:hidden rounded" />
+                                        <img src="/logo.png" alt="Logo (dark)" className="hidden dark:block rounded" />
                                         <AvatarFallback>FMD</AvatarFallback>
                                     </Avatar>
                                 </div>

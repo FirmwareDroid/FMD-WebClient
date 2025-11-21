@@ -8,6 +8,7 @@ import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table
 import {APP_ALL, GET_APPS_BY_FIRMWARE_OBJECT_IDS, SCAN_APKS_BY_OBJECT_IDS} from "@/components/graphql/app.graphql.ts";
 import {useParams} from "react-router";
 import {buildAppActionColumns} from "@/components/data-table-action-columns/app-action-columns.tsx";
+import {Card, CardContent} from "@/components/ui/card.tsx";
 
 const columns: ColumnDef<AppAllFragment>[] = [
     ...buildAppActionColumns<AppAllFragment>(SCAN_APKS_BY_OBJECT_IDS),
@@ -127,6 +128,15 @@ export function AppsPage() {
 
     return (
         <BasePage title="Apps">
+            <Card className="w-full max-w-5xl">
+                <CardContent>
+                    <p className="text-body">
+                        Below is a list of all Android applications (APKs) extracted from the firmware or APKs you have
+                        imported into FirmwareDroid. You can explore detailed information about each app, including
+                        metadata, permissions, and potential security issues identified during the analysis.
+                    </p>
+                </CardContent>
+            </Card>
             <StateHandlingScrollableDataTable
                 columns={columns}
                 data={apps}

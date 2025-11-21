@@ -11,7 +11,7 @@ import {AppAllFragment} from "@/__generated__/graphql.ts";
 import {EntityTable} from "@/components/entity-table.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {ScanAppActionButton} from "@/components/data-table-action-columns/action-buttons.tsx";
-import {APPS_URL, FILES_URL, FIRMWARES_URL, REPORTS_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
+import {APPS_URL, FILES_URL, FIRMWARE_URL, REPORTS_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 
 export function AppPage() {
     const {appId} = useParams<{ appId: string }>();
@@ -60,7 +60,7 @@ export function AppPage() {
                         hidden={!app.firmwareIdReference?.id}
                         size="sm"
                         onClick={() => {
-                            void navigate(`${FIRMWARES_URL}/${app.firmwareIdReference?.id ?? ""}${APPS_URL}/${appId}${REPORTS_URL}`);
+                            void navigate(`${FIRMWARE_URL}/${app.firmwareIdReference?.id ?? ""}${APPS_URL}/${appId}${REPORTS_URL}`);
                         }}
                     >
                         <BookOpenIcon/> Scan Reports
@@ -69,7 +69,7 @@ export function AppPage() {
                         hidden={!app.firmwareIdReference?.id || !app.firmwareFileReference?.id}
                         size="sm"
                         onClick={() => {
-                            void navigate(`${FIRMWARES_URL}/${app.firmwareIdReference?.id ?? ""}${FILES_URL}/${app.firmwareFileReference?.id ?? ""}`);
+                            void navigate(`${FIRMWARE_URL}/${app.firmwareIdReference?.id ?? ""}${FILES_URL}/${app.firmwareFileReference?.id ?? ""}`);
                         }}
                     >
                         <FileIcon/> File ({app.filename})

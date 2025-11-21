@@ -10,7 +10,7 @@ import {
 import {useNavigate} from "react-router";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
 import {ActionButton} from "@/components/data-table-action-columns/action-buttons.tsx";
-import {FIRMWARES_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
+import {FIRMWARE_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 import {EyeIcon} from "lucide-react";
 import {buildScanAppColumn} from "@/components/data-table-action-columns/app-action-columns.tsx";
 
@@ -28,7 +28,7 @@ function buildViewFirmwareColumn<T extends WithId>(): ColumnDef<T> {
                         <TooltipTrigger asChild>
                             <ActionButton
                                 variant="outline"
-                                onClick={() => void navigate(`${FIRMWARES_URL}/${firmwareId}`)}
+                                onClick={() => void navigate(`${FIRMWARE_URL}/${firmwareId}`)}
                             >
                                 <EyeIcon className="size-5"/>
                             </ActionButton>
@@ -53,7 +53,7 @@ export function buildFirmwareActionColumns<T extends WithId>(
     return [
         buildSelectEntityColumn(),
         buildViewFirmwareColumn(),
-        buildScanAppColumn("Scan all apps of this firmware", "Scan all apps of selected firmwares", scanAppMutation),
-        buildDeleteEntityColumn("Delete firmware", "Delete selected firmwares", DELETE_FIRMWARE_BY_OBJECT_ID),
+        buildScanAppColumn("Scan all apps of this firmware", "Scan all apps of selected firmware", scanAppMutation),
+        buildDeleteEntityColumn("Delete firmware", "Delete selected firmware", DELETE_FIRMWARE_BY_OBJECT_ID),
     ];
 }

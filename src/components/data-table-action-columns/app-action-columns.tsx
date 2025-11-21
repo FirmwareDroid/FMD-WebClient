@@ -12,7 +12,7 @@ import {
 import {useNavigate} from "react-router";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
 import {ActionButton, ScanAppActionButton} from "@/components/data-table-action-columns/action-buttons.tsx";
-import {APPS_URL, FIRMWARES_URL, REPORTS_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
+import {APPS_URL, FIRMWARE_URL, REPORTS_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 import {BookOpenIcon, EyeIcon} from "lucide-react";
 
 function buildViewAppColumn<T extends WithIdAndFirmwareIdReference>(): ColumnDef<T> {
@@ -32,7 +32,7 @@ function buildViewAppColumn<T extends WithIdAndFirmwareIdReference>(): ColumnDef
                                 <TooltipTrigger asChild>
                                     <ActionButton
                                         variant="outline"
-                                        onClick={() => void navigate(`${FIRMWARES_URL}/${firmwareId}${APPS_URL}/${appId}`)}
+                                        onClick={() => void navigate(`${FIRMWARE_URL}/${firmwareId}${APPS_URL}/${appId}`)}
                                     >
                                         <EyeIcon className="size-5"/>
                                     </ActionButton>
@@ -66,7 +66,7 @@ function buildViewReportsColumn<T extends WithIdAndFirmwareIdReference>(): Colum
                                 <TooltipTrigger asChild>
                                     <ActionButton
                                         variant="outline"
-                                        onClick={() => void navigate(`${FIRMWARES_URL}/${firmwareId}${APPS_URL}/${appId}${REPORTS_URL}`)}
+                                        onClick={() => void navigate(`${FIRMWARE_URL}/${firmwareId}${APPS_URL}/${appId}${REPORTS_URL}`)}
                                     >
                                         <BookOpenIcon className="size-5"/>
                                     </ActionButton>

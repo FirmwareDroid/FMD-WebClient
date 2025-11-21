@@ -215,7 +215,7 @@ function StateHandlingScrollableDataTable<TData, TValue>(
             {dataError && (
                 <Alert className="max-w-max" variant="destructive">
                     <AlertCircleIcon/>
-                    <AlertTitle>Unable to load firmwares.</AlertTitle>
+                    <AlertTitle>Unable to load firmware.</AlertTitle>
                     <AlertDescription>Error message: "{dataError.message}"</AlertDescription>
                 </Alert>
             )}

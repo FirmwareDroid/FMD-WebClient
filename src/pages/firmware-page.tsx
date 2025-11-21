@@ -15,7 +15,7 @@ import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {EntityTable} from "@/components/entity-table.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {ScanAppActionButton} from "@/components/data-table-action-columns/action-buttons.tsx";
-import {APPS_URL, FILES_URL, FIRMWARES_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
+import {APPS_URL, FILES_URL, FIRMWARE_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 
 export function FirmwarePage() {
     const {firmwareId} = useParams<{ firmwareId: string }>();
@@ -62,7 +62,7 @@ export function FirmwarePage() {
                     <Button
                         size="sm"
                         onClick={() => {
-                            void navigate(`${FIRMWARES_URL}/${firmwareId}${APPS_URL}`);
+                            void navigate(`${FIRMWARE_URL}/${firmwareId}${APPS_URL}`);
                         }}
                     >
                         <SquareIcon/> Apps
@@ -70,7 +70,7 @@ export function FirmwarePage() {
                     <Button
                         size="sm"
                         onClick={() => {
-                            void navigate(`${FIRMWARES_URL}/${firmwareId}${FILES_URL}`);
+                            void navigate(`${FIRMWARE_URL}/${firmwareId}${FILES_URL}`);
                         }}
                     >
                         <FilesIcon/> Files
@@ -91,7 +91,7 @@ export function FirmwarePage() {
             <BasePage title={"Firmware (multiple matches)"}>
                 <Alert variant="destructive">
                     <AlertCircleIcon/>
-                    <AlertTitle>Found multiple firmwares with the same ID.</AlertTitle>
+                    <AlertTitle>Found multiple firmware samples with the same ID.</AlertTitle>
                 </Alert>
             </BasePage>
         );
