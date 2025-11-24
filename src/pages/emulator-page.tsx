@@ -19,13 +19,6 @@ import {
     VolumeX,
 } from "lucide-react";
 import { BasePage } from "@/pages/base-page.tsx";
-
-/* temporary module declaration for missing types */
-declare module "android-emulator-webrtc/emulator" {
-    const Emulator: any;
-    export { Emulator };
-    export default Emulator;
-}
 import { Emulator } from "android-emulator-webrtc/emulator";
 import {Card, CardContent} from "@/components/ui/card.tsx";
 

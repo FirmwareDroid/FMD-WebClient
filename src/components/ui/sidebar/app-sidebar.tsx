@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/sidebar.tsx"
 import {NavOptions} from "@/components/ui/sidebar/nav-options.tsx";
 import {NavOperations} from "@/components/ui/sidebar/nav-operations.tsx";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar.tsx";
+import {Avatar, AvatarFallback} from "@/components/ui/avatar.tsx";
 import {useQuery} from "@apollo/client";
 import {GET_CURRENT_USER_EMAIL_AND_USERNAME} from "@/components/graphql/current-user.graphql.ts";
 
