@@ -1,0 +1,174 @@
+/* css */
+/* Put this into `src/components/ui/styles/emulator.css` (append or replace the relevant parts) */
+
+/* default tokens (fallbacks) */
+:root {
+    --btn-bg: transparent;
+    --btn-border: rgba(0,0,0,0.12);
+    --btn-color: #111;
+    --btn-hover-bg: rgba(0,0,0,0.04);
+    --btn-hover-color: var(--btn-color);
+    --btn-focus-ring: rgba(0,0,0,0.08);
+
+    --input-border: rgba(0,0,0,0.06);
+    --input-focus: rgba(0,0,0,0.12);
+}
+
+/* light / dark tokens (unchanged) */
+.light {
+    --btn-bg: transparent;
+    --btn-border: #000;
+    --btn-color: #000;
+    --btn-hover-bg: rgba(0,0,0,0.06);
+    --btn-hover-color: #000;
+    --btn-focus-ring: rgba(0,0,0,0.12);
+
+    --input-border: rgba(0,0,0,0.12);
+    --input-focus: rgba(0,0,0,0.18);
+}
+
+.dark {
+    --btn-bg: transparent;
+    --btn-border: rgba(255,255,255,0.12);
+    --btn-color: #fff;
+    --btn-hover-bg: rgba(255,255,255,0.04);
+    --btn-hover-color: #fff;
+    --btn-focus-ring: rgba(255,255,255,0.12);
+
+    --input-border: rgba(255,255,255,0.06);
+    --input-focus: rgba(255,255,255,0.18);
+}
+
+/* stronger, theme-prefixed rules to avoid being overridden by Bootstrap/global rules */
+html.light .emulator-page button,
+html.light .emulator-page .btn {
+    background: var(--btn-bg);
+    color: var(--btn-color);
+    border: 1px solid var(--btn-border);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: background 120ms ease, color 120ms ease, transform 80ms ease, box-shadow 120ms ease;
+}
+
+html.light .emulator-page button:hover,
+html.light .emulator-page .btn:hover {
+    background: var(--btn-hover-bg);
+    color: var(--btn-hover-color);
+    border-color: rgba(0,0,0,0.2); /* explicit stronger border on hover */
+    transform: translateY(-1px);
+}
+
+html.light .emulator-page button:focus,
+html.light .emulator-page .btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--btn-focus-ring);
+}
+
+/* dark mode counterpart (higher specificity) */
+html.dark .emulator-page button,
+html.dark .emulator-page .btn {
+    background: var(--btn-bg);
+    color: var(--btn-color);
+    border: 1px solid var(--btn-border);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: background 120ms ease, color 120ms ease, transform 80ms ease, box-shadow 120ms ease;
+}
+
+html.dark .emulator-page button:hover,
+html.dark .emulator-page .btn:hover {
+    background: var(--btn-hover-bg);
+    color: var(--btn-hover-color);
+    border-color: rgba(255,255,255,0.16);
+    transform: translateY(-1px);
+}
+
+html.dark .emulator-page button:focus,
+html.dark .emulator-page .btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--btn-focus-ring);
+}
+
+/* common helpers */
+.emulator-page button > svg,
+.emulator-page .btn > svg {
+    flex-shrink: 0;
+}
+
+.emulator-page .btn-sm,
+.emulator-page button.btn-sm {
+    padding: 4px 8px;
+    font-size: 0.85rem;
+}
+
+.emulator-page .btn-lg,
+.emulator-page button.btn-lg {
+    padding: 10px 14px;
+    font-size: 1rem;
+}
+
+
+html.light .emulator-page .emulator-button-toogle,
+html.dark  .emulator-page .emulator-button-toogle {
+    border: none;
+    background: transparent;
+    padding-left: 8px;
+    padding-right: 8px;
+    transition: background 120ms ease, color 120ms ease, transform 80ms ease, box-shadow 120ms ease;
+}
+
+html.light .emulator-page .emulator-button-toogle.active,
+html.dark  .emulator-page .emulator-button-toogle.active {
+    border: none;
+    background: transparent;
+}
+
+html.light .emulator-page .emulator-button-toogle:hover,
+html.dark  .emulator-page .emulator-button-toogle:hover {
+    background: var(--btn-hover-bg);
+    color: var(--btn-hover-color);
+    transform: translateY(-1px);
+}
+
+html.light .emulator-page .emulator-button-toogle:focus,
+html.dark  .emulator-page .emulator-button-toogle:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--btn-focus-ring);
+}
+
+html.light .emulator-page .emulator-container {
+    border: 1px solid rgba(0,0,0,0.06); /* light-black */
+}
+
+html.dark .emulator-page .emulator-container {
+    border: 1px solid rgba(255,255,255,0.06); /* light-white */
+}
+
+.emulator-page .emu-url-group .emulator-input {
+    display: block;
+    width: 100%;
+    max-width: 800px; /* adjust or remove to change max width */
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--input-border, rgba(0,0,0,0.06));
+    background: transparent;
+    color: inherit;
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.emulator-page .emu-url-group .emulator-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--input-focus, rgba(0,0,0,0.12));
+    border-color: rgba(0,0,0,0.18);
+}
+
+

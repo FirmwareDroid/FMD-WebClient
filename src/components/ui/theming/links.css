@@ -1,0 +1,31 @@
+html.light .ui-link {
+    color: #2563eb;
+    text-decoration: underline;
+    text-decoration-color: currentColor;
+    text-underline-offset: 2px;
+    transition: color 120ms ease, text-decoration-color 120ms ease, transform 80ms ease;
+}
+html.light .ui-link:hover {
+    color: #000000;
+}
+html.light .ui-link:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+    border-radius: 3px;
+}
+
+html.dark .ui-link {
+    color: #facc15;
+    text-decoration: underline;
+    text-decoration-color: currentColor;
+    text-underline-offset: 2px;
+    transition: color 120ms ease, text-decoration-color 120ms ease, transform 80ms ease;
+}
+html.dark .ui-link:hover {
+    color: #ffffff;
+}
+html.dark .ui-link:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(250,204,21,0.12);
+    border-radius: 3px;
+}
