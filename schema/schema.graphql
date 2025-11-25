@@ -1,4 +1,8 @@
 type Query {
+  trueseeing_report_list(objectId: [String], fieldFilter: TrueseeingReportFilter): [TrueseeingReportType]
+  mobsfscan_report_list(objectId: [String], fieldFilter: MobSFScanReportFilter): [MobSFScanReportType]
+  flowdroid_report_list(objectId: [String], fieldFilter: FlowDroidReportFilter): [FlowDroidReportType]
+  apkscan_report_list(objectId: [String], fieldFilter: APKscanReportFilter): [APKscanReportType]
   build_prop_file_id_list(
     objectIdList: [String]
     fieldFilter: ExtendedBuildPropFileFilter
@@ -70,77 +74,30 @@ type Query {
   refreshToken(token: String): Refresh
 }
 
-type BuildPropFileType implements Node {
+type TrueseeingReportType {
   """"""
-  firmwareFileIdReference: FirmwareFileType!
-
-  """"""
-  firmwareIdReference: AndroidFirmwareType
-
-  """The ID of the object"""
-  id: ID!
+  Cls: String
 
   """"""
-  properties: JSONString!
-  pk: String
-  propertyValues: JSONString
-  propertyKeys: [String]
-}
+  androidAppIdReference: AndroidAppType!
 
-"""An object with an ID"""
-interface Node {
-  """The ID of the object"""
-  id: ID!
-}
-
-type FirmwareFileType implements Node {
-  """"""
-  absoluteStorePath: String!
+  """_id"""
+  id: ID
 
   """"""
-  androidAppReference: AndroidAppType
+  reportDate: DateTime!
 
   """"""
-  fileSizeBytes: Int
+  results: JSONString!
 
   """"""
-  firmwareIdReference: AndroidFirmwareType
-
-  """The ID of the object"""
-  id: ID!
+  scanStatus: String!
 
   """"""
-  indexedDate: DateTime
+  scannerName: String!
 
   """"""
-  isDirectory: Boolean!
-
-  """"""
-  isOnDisk: Boolean
-
-  """"""
-  isSymlink: Boolean
-
-  """"""
-  md5: String
-
-  """"""
-  metaDict: JSONString
-
-  """"""
-  name: String!
-
-  """"""
-  parentDir: String!
-
-  """"""
-  partitionName: String
-
-  """"""
-  relativePath: String!
-
-  """"""
-  tlshReference: TlshHashType
+  scannerVersion: String!
 }
 
 type AndroidAppType implements Node {
@@ -163,6 +120,9 @@ type AndroidAppType implements Node {
   apkleaksReportReference: ApkleaksReportType
 
   """"""
+  apkscanReportReference: APKscanReportType
+
+  """"""
   exodusReportReference: ExodusReportType
 
   """"""
@@ -177,6 +137,9 @@ type AndroidAppType implements Node {
   """"""
   firmwareIdReference: AndroidFirmwareType
 
+  """"""
+  flowdroidReportReference: FlowDroidReportType
+
   """The ID of the object"""
   id: ID!
 
@@ -185,6 +148,9 @@ type AndroidAppType implements Node {
 
   """"""
   md5: String!
+
+  """"""
+  mobsfscanReportReference: MobSFScanReportType
 
   """"""
   originalFilename: String
@@ -217,11 +183,20 @@ type AndroidAppType implements Node {
   superReportReference: SuperReportType
 
   """"""
+  trueseeingReportReference: TrueseeingReportType
+
+  """"""
   virustotalReportReference: VirustotalReportType
   pk: String
   appTwinsReferenceList(before: String, after: String, first: Int, last: Int, absoluteStorePath: String, androidManifestDict: JSONString, fileSizeBytes: Int, filename: String, id: ID, indexedDate: DateTime, md5: String, originalFilename: String, packagename: String, partitionName: String, relativeFirmwarePath: String, relativeStorePath: String, sha1: String, sha256: String, androguardReportReference: ID, androwarnReportReference: ID, apkidReportReference: ID, apkleaksReportReference: ID, apkscanReportReference: ID, exodusReportReference: ID, firmwareFileReference: ID, firmwareIdReference: ID, flowdroidReportReference: ID, mobsfscanReportReference: ID, qarkReportReference: ID, quarkEngineReportReference: ID, superReportReference: ID, trueseeingReportReference: ID, virustotalReportReference: ID): AndroidAppTypeConnection
   optFirmwareFileReferenceList(before: String, after: String, first: Int, last: Int, absoluteStorePath: String, fileSizeBytes: Int, id: ID, indexedDate: DateTime, isDirectory: Boolean, isOnDisk: Boolean, isSymlink: Boolean, md5: String, metaDict: JSONString, name: String, parentDir: String, partitionName: String, relativePath: String, androidAppReference: ID, firmwareIdReference: ID, sdhashReference: ID, ssdeepReference: ID, tlshReference: ID): FirmwareFileTypeConnection
   certificateIdList(before: String, after: String, first: Int, last: Int, crlDistributionPointsList: String, deltaCrlDistributionPointsList: String, hashAlgo: String, id: ID, isCa: Boolean, isSelfIssued: Boolean, isSelfSignedStr: String, isValidDomainIp: Boolean, issuer: String, issuerDict: JSONString, issuerSerial: String, keyIdentifier: String, keyIdentifierValue: String, maxPathLengthInt: Int, notValidAfter: DateTime, notValidBefore: DateTime, ocspUrlsList: String, publicKeyAlgorithm: String, publicKeyBitSize: String, publicKeyByteSize: String, publicKeyCurve: String, publicKeyExponent: Int, publicKeyHashAlgoDsa: String, publicKeyModulusN: String, publicKeySha1: String, publicKeySha256: String, serialNumber: String, sha1: String, sha256: String, signature: String, signatureAlgo: String, subject: String, subjectDict: JSONString, validDomainsList: String, validIpsList: String, androidAppIdReference: ID): AppCertificateTypeConnection
+}
+
+"""An object with an ID"""
+interface Node {
+  """The ID of the object"""
+  id: ID!
 }
 
 type AndroGuardReportType implements Node {
@@ -334,6 +309,9 @@ type AndroGuardReportType implements Node {
   reportDate: DateTime!
 
   """"""
+  scanStatus: String!
+
+  """"""
   scannerName: String!
 
   """"""
@@ -366,60 +344,28 @@ scalar DateTime
 
 type AndrowarnReportType {
   """"""
-  PIMDataLeakage: [String]
-
-  """"""
   Cls: String
 
   """"""
   androidAppIdReference: AndroidAppType!
 
-  """"""
-  audioVideoEavesdropping: [String]
-
-  """"""
-  codeExecution: [String]
-
-  """"""
-  connectionInterfacesExfiltration: [String]
-
-  """"""
-  deviceSettingsHarvesting: [String]
-
   """_id"""
   id: ID
-
-  """"""
-  locationLookup: [String]
 
   """"""
   reportDate: DateTime!
 
   """"""
-  reportFileJson: FileFieldType!
+  results: JSONString!
+
+  """"""
+  scanStatus: String!
 
   """"""
   scannerName: String!
 
   """"""
   scannerVersion: String!
-
-  """"""
-  suspiciousConnectionEstablishment: [String]
-
-  """"""
-  telephonyIdentifiersLeakage: [String]
-
-  """"""
-  telephonyServicesAbuse: [String]
-}
-
-type FileFieldType {
-  contentType: String
-  md5: String
-  chunkSize: Int
-  length: Int
-  data: String
 }
 
 type ApkidReportType {
@@ -429,9 +375,6 @@ type ApkidReportType {
   """"""
   androidAppIdReference: AndroidAppType!
 
-  """"""
-  files: [JSONString]
-
   """_id"""
   id: ID
 
@@ -439,10 +382,10 @@ type ApkidReportType {
   reportDate: DateTime!
 
   """"""
-  reportFileJson: FileFieldType!
+  results: JSONString!
 
   """"""
-  rulesSha256: String
+  scanStatus: String!
 
   """"""
   scannerName: String!
@@ -468,6 +411,35 @@ type ApkleaksReportType {
   results: JSONString!
 
   """"""
+  scanStatus: String!
+
+  """"""
+  scannerName: String!
+
+  """"""
+  scannerVersion: String!
+}
+
+type APKscanReportType {
+  """"""
+  Cls: String
+
+  """"""
+  androidAppIdReference: AndroidAppType!
+
+  """_id"""
+  id: ID
+
+  """"""
+  reportDate: DateTime!
+
+  """"""
+  results: JSONString!
+
+  """"""
+  scanStatus: String!
+
+  """"""
   scannerName: String!
 
   """"""
@@ -491,10 +463,63 @@ type ExodusReportType {
   results: JSONString!
 
   """"""
+  scanStatus: String!
+
+  """"""
   scannerName: String!
 
   """"""
   scannerVersion: String!
+}
+
+type FirmwareFileType implements Node {
+  """"""
+  absoluteStorePath: String!
+
+  """"""
+  androidAppReference: AndroidAppType
+
+  """"""
+  fileSizeBytes: Int
+
+  """"""
+  firmwareIdReference: AndroidFirmwareType
+
+  """The ID of the object"""
+  id: ID!
+
+  """"""
+  indexedDate: DateTime
+
+  """"""
+  isDirectory: Boolean!
+
+  """"""
+  isOnDisk: Boolean
+
+  """"""
+  isSymlink: Boolean
+
+  """"""
+  md5: String
+
+  """"""
+  metaDict: JSONString
+
+  """"""
+  name: String!
+
+  """"""
+  parentDir: String!
+
+  """"""
+  partitionName: String
+
+  """"""
+  relativePath: String!
+
+  """"""
+  tlshReference: TlshHashType
 }
 
 type AndroidFirmwareType implements Node {
@@ -620,6 +645,92 @@ type BuildPropFileTypeEdge {
   cursor: String!
 }
 
+type BuildPropFileType implements Node {
+  """"""
+  firmwareFileIdReference: FirmwareFileType!
+
+  """"""
+  firmwareIdReference: AndroidFirmwareType
+
+  """The ID of the object"""
+  id: ID!
+
+  """"""
+  properties: JSONString!
+  pk: String
+  propertyValues: JSONString
+  propertyKeys: [String]
+}
+
+type TlshHashType {
+  """"""
+  digest: String!
+
+  """"""
+  filename: String
+
+  """"""
+  firmwareFileReference: FirmwareFileType!
+
+  """"""
+  firmwareIdReference: AndroidFirmwareType
+
+  """_id"""
+  id: ID
+}
+
+type FlowDroidReportType {
+  """"""
+  Cls: String
+
+  """"""
+  androidAppIdReference: AndroidAppType!
+
+  """_id"""
+  id: ID
+
+  """"""
+  reportDate: DateTime!
+
+  """"""
+  results: JSONString!
+
+  """"""
+  scanStatus: String!
+
+  """"""
+  scannerName: String!
+
+  """"""
+  scannerVersion: String!
+}
+
+type MobSFScanReportType {
+  """"""
+  Cls: String
+
+  """"""
+  androidAppIdReference: AndroidAppType!
+
+  """_id"""
+  id: ID
+
+  """"""
+  reportDate: DateTime!
+
+  """"""
+  results: JSONString!
+
+  """"""
+  scanStatus: String!
+
+  """"""
+  scannerName: String!
+
+  """"""
+  scannerVersion: String!
+}
+
 type QarkReportType {
   """"""
   Cls: String
@@ -637,10 +748,21 @@ type QarkReportType {
   reportFileJson: FileFieldType!
 
   """"""
+  scanStatus: String!
+
+  """"""
   scannerName: String!
 
   """"""
   scannerVersion: String!
+}
+
+type FileFieldType {
+  contentType: String
+  md5: String
+  chunkSize: Int
+  length: Int
+  data: String
 }
 
 type QuarkEngineReportType {
@@ -658,6 +780,9 @@ type QuarkEngineReportType {
 
   """"""
   results: JSONString!
+
+  """"""
+  scanStatus: String!
 
   """"""
   scannerName: String!
@@ -681,6 +806,9 @@ type SuperReportType {
 
   """"""
   results: JSONString!
+
+  """"""
+  scanStatus: String!
 
   """"""
   scannerName: String!
@@ -707,6 +835,9 @@ type VirustotalReportType {
 
   """"""
   reportDate: DateTime!
+
+  """"""
+  scanStatus: String!
 
   """"""
   scannerName: String!
@@ -845,21 +976,96 @@ type AppCertificateType implements Node {
   validIpsList: [String]
 }
 
-type TlshHashType {
-  """"""
-  digest: String!
+input TrueseeingReportFilter {
+  """Filter by report_date"""
+  report_date: String
 
-  """"""
-  filename: String
+  """Filter by android_app_id_reference"""
+  android_app_id_reference: String
 
-  """"""
-  firmwareFileReference: FirmwareFileType!
+  """Filter by scanner_version"""
+  scanner_version: String
 
-  """"""
-  firmwareIdReference: AndroidFirmwareType
+  """Filter by scanner_name"""
+  scanner_name: String
 
-  """_id"""
-  id: ID
+  """Filter by scan_status"""
+  scan_status: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by results"""
+  results: String
+}
+
+input MobSFScanReportFilter {
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by android_app_id_reference"""
+  android_app_id_reference: String
+
+  """Filter by scanner_version"""
+  scanner_version: String
+
+  """Filter by scanner_name"""
+  scanner_name: String
+
+  """Filter by scan_status"""
+  scan_status: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by results"""
+  results: String
+}
+
+input FlowDroidReportFilter {
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by android_app_id_reference"""
+  android_app_id_reference: String
+
+  """Filter by scanner_version"""
+  scanner_version: String
+
+  """Filter by scanner_name"""
+  scanner_name: String
+
+  """Filter by scan_status"""
+  scan_status: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by results"""
+  results: String
+}
+
+input APKscanReportFilter {
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by android_app_id_reference"""
+  android_app_id_reference: String
+
+  """Filter by scanner_version"""
+  scanner_version: String
+
+  """Filter by scanner_name"""
+  scanner_name: String
+
+  """Filter by scan_status"""
+  scan_status: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by results"""
+  results: String
 }
 
 input ExtendedBuildPropFileFilter {
@@ -1201,6 +1407,9 @@ input QuarkEngineReportFilter {
   """Filter by scanner_name"""
   scanner_name: String
 
+  """Filter by scan_status"""
+  scan_status: String
+
   """Filter by id"""
   id: String
 
@@ -1220,6 +1429,9 @@ input SuperReportFilter {
 
   """Filter by scanner_name"""
   scanner_name: String
+
+  """Filter by scan_status"""
+  scan_status: String
 
   """Filter by id"""
   id: String
@@ -1242,6 +1454,9 @@ type ApkScannerReportType {
   reportDate: DateTime!
 
   """"""
+  scanStatus: String!
+
+  """"""
   scannerName: String!
 
   """"""
@@ -1260,6 +1475,9 @@ input ApkScannerReportFilter {
 
   """Filter by scanner_name"""
   scanner_name: String
+
+  """Filter by scan_status"""
+  scan_status: String
 
   """Filter by id"""
   id: String
@@ -1338,6 +1556,9 @@ input ApkleaksReportFilter {
 
   """Filter by scanner_name"""
   scanner_name: String
+
+  """Filter by scan_status"""
+  scan_status: String
 
   """Filter by id"""
   id: String
@@ -1643,6 +1864,9 @@ input VirusTotalReportFilter {
   """Filter by scanner_name"""
   scanner_name: String
 
+  """Filter by scan_status"""
+  scan_status: String
+
   """Filter by id"""
   id: String
 
@@ -1712,6 +1936,9 @@ input QarkReportFilter {
   """Filter by scanner_name"""
   scanner_name: String
 
+  """Filter by scan_status"""
+  scan_status: String
+
   """Filter by id"""
   id: String
 
@@ -1735,6 +1962,9 @@ input ExodusReportFilter {
   """Filter by scanner_name"""
   scanner_name: String
 
+  """Filter by scan_status"""
+  scan_status: String
+
   """Filter by id"""
   id: String
 
@@ -1755,17 +1985,14 @@ input ApkidReportFilter {
   """Filter by scanner_name"""
   scanner_name: String
 
+  """Filter by scan_status"""
+  scan_status: String
+
   """Filter by id"""
   id: String
 
-  """Filter by report_file_json"""
-  report_file_json: String
-
-  """Filter by rules_sha256"""
-  rules_sha256: String
-
-  """Filter by files"""
-  files: [JSONString]
+  """Filter by results"""
+  results: String
 }
 
 input AndroGuardReportFilter {
@@ -1780,6 +2007,9 @@ input AndroGuardReportFilter {
 
   """Filter by scanner_name"""
   scanner_name: String
+
+  """Filter by scan_status"""
+  scan_status: String
 
   """Filter by id"""
   id: String
@@ -1909,38 +2139,14 @@ input AndrowarnReportFilter {
   """Filter by scanner_name"""
   scanner_name: String
 
+  """Filter by scan_status"""
+  scan_status: String
+
   """Filter by id"""
   id: String
 
-  """Filter by report_file_json"""
-  report_file_json: String
-
-  """Filter by telephony_identifiers_leakage"""
-  telephony_identifiers_leakage: [String]
-
-  """Filter by device_settings_harvesting"""
-  device_settings_harvesting: [String]
-
-  """Filter by location_lookup"""
-  location_lookup: [String]
-
-  """Filter by connection_interfaces_exfiltration"""
-  connection_interfaces_exfiltration: [String]
-
-  """Filter by telephony_services_abuse"""
-  telephony_services_abuse: [String]
-
-  """Filter by audio_video_eavesdropping"""
-  audio_video_eavesdropping: [String]
-
-  """Filter by suspicious_connection_establishment"""
-  suspicious_connection_establishment: [String]
-
-  """Filter by PIM_data_leakage"""
-  PIM_data_leakage: [String]
-
-  """Filter by code_execution"""
-  code_execution: [String]
+  """Filter by results"""
+  results: String
 }
 
 input AndroidAppFilter {
@@ -2293,29 +2499,29 @@ type Mutation {
   updateFirmwareImporterSetting(
     """The number of threads to use for the firmware importer."""
     numberOfImporterThreads: Int! = 5
-    queueName: String! = "default-python"
+    queueName: String! = "scanner"
   ): UpdateFirmwareImportSetting
-  createVirustotalScanJob(objectIdList: [String!]!, queueName: String! = "default-python", vtApiKey: String!): CreateVirusTotalScanJob
-  exportFirmwareFile(filenameRegex: String!, firmwareIdList: [String!]!, queueName: String! = "high-python", storeSettingId: String!): ExportFirmwareFileByRegexMutation
-  deleteAndroidFirmware(firmwareIdList: [String!]!, queueName: String! = "default-python"): DeleteAndroidFirmwareMutation
+  createVirustotalScanJob(objectIdList: [String!]!, queueName: String! = "scanner", vtApiKey: String!): CreateVirusTotalScanJob
+  exportFirmwareFile(filenameRegex: String!, firmwareIdList: [String!]!, queueName: String! = "extractor", storeSettingId: String!): ExportFirmwareFileByRegexMutation
+  deleteAndroidFirmware(firmwareIdList: [String!]!, queueName: String! = "scanner"): DeleteAndroidFirmwareMutation
 
   """
   Starts the firmware extractor module. The extractor module is used to import firmware from the "firmware_import"
   directory to the database. Only one instance of the extractor module is allowed to run.
   """
-  createFirmwareExtractorJob(createFuzzyHashes: Boolean!, queueName: String! = "high-python", storageIndex: Int! = 0): CreateFirmwareExtractorJob
+  createFirmwareExtractorJob(createFuzzyHashes: Boolean!, queueName: String! = "extractor", storageIndex: Int! = 0): CreateFirmwareExtractorJob
 
   """
   Starts the fuzzy hasher module. The fuzzy hasher module is used to create fuzzy hashes for all firmware files in
   the given firmware list.
   """
-  createFuzzyHashesJob(firmwareIdList: [String!], queueName: String! = "high-python", storageIndex: Int! = 0): CreateFuzzyHashesJob
+  createFuzzyHashesJob(firmwareIdList: [String!], queueName: String! = "extractor", storageIndex: Int! = 0): CreateFuzzyHashesJob
 
   """
   First, copies the firmware into the importer queue. Second, deletes the firmware from the database and runs
   the importer.
   """
-  createFirmwareReImportJob(createFuzzyHashes: Boolean = false, firmwareIdList: [String!]!, queueName: String! = "high-python"): CreateFirmwareReImportJob
+  createFirmwareReImportJob(createFuzzyHashes: Boolean = false, firmwareIdList: [String!]!, queueName: String! = "extractor"): CreateFirmwareReImportJob
 
   """
   Updates OS vendor information for firmware based on build.prop files.
@@ -2326,7 +2532,7 @@ type Mutation {
     Specific firmware IDs to update. If not provided, updates all firmware with 'Unknown' vendor
     """
     firmwareIdList: [String]
-    queueName: String! = "default-python"
+    queueName: String! = "scanner"
   ): UpdateFirmwareVendorMutation
 
   """
@@ -2334,7 +2540,7 @@ type Mutation {
   job is created the old will be overwritten by the new. The aecs-job is used to store a
   list of firmware ids for further processing by the aecs-service.
   """
-  updateOrCreateAecsJob(acesJobId: String, arch: String, firmwareIdList: [String], queueName: String = "default-python"): UpdateOrCreateAECSJob
+  updateOrCreateAecsJob(acesJobId: String, arch: String, firmwareIdList: [String], queueName: String = "scanner"): UpdateOrCreateAECSJob
 
   """Deletes the aecs-job from the database."""
   deleteAecsJob(acesJobIdList: [String!]!): DeleteAecsJob
@@ -2343,14 +2549,14 @@ type Mutation {
   Starts the service to create app build files ("Android.mk" or "Android.bp") for specific firmware. These build
   files can be used in the Android Open Source Project to create custom firmware that includes the specific apk files.
   """
-  createAecsBuildFilesJob(firmwareIdList: [String!], formatName: String!, queueName: String! = "high-python", skipFileExport: Boolean = false): CreateAECSBuildFilesJob
+  createAecsBuildFilesJob(firmwareIdList: [String!], formatName: String!, queueName: String! = "extractor", skipFileExport: Boolean = false): CreateAECSBuildFilesJob
 
   """
   Create a RQ job for modules that scan apk files (static-analysis). Only module names from the class:'ModuleNames'
   are accepted. Every module uses an own python interpreter and the module is loaded during runtime.
   """
-  createApkScanJob(firmwareIdList: [String!] = [], kwargs: JSONString! = "\"{}\"", moduleName: String!, objectIdList: [String!] = [], queueName: String! = "default-python"): CreateApkScanJob
-  createAppImportJob(queueName: String! = "high-python", storageIndex: Int! = 0): CreateAppImportJob
+  createApkScanJob(firmwareIdList: [String!] = [], kwargs: JSONString! = "\"{}\"", moduleName: String!, objectIdList: [String!] = [], queueName: String! = "scanner"): CreateApkScanJob
+  createAppImportJob(queueName: String! = "extractor", storageIndex: Int! = 0): CreateAppImportJob
   _debug: DjangoDebug
   deleteTokenCookie: DeleteJSONWebTokenCookie
   deleteRefreshTokenCookie: DeleteRefreshTokenCookie

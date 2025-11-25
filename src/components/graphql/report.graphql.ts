@@ -6,6 +6,7 @@ export const BASIC_REPORT_INFO = gql(`
         reportDate
         scannerName
         scannerVersion
+        scanStatus
         androidAppIdReference {
             id
             filename
@@ -112,11 +113,7 @@ export const ANDROGUARD_REPORT = gql(`
 export const APKID_REPORT = gql(`
     fragment ApkidReport on ApkidReportType {
         id
-        files
-        rulesSha256
-        reportFileJson {
-            data
-        }
+        results
         reportDate
         scannerName
         scannerVersion

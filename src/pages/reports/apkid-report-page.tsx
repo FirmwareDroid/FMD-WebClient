@@ -39,10 +39,10 @@ export function ApkidReportPage({reportId}: Readonly<ImplReportPageProps>) {
 
     const report = reports[0];
 
-    if (report.reportFileJson.data) {
+    if (report.results) {
         return (
             <BasePage title={`Report (APKiD)`}>
-                <EntityTable entity={enrichReport(report, report.reportFileJson.data)}/>
+                <EntityTable entity={enrichReport(report, report.results)}/>
             </BasePage>
         );
     }

@@ -35,6 +35,36 @@ export type Scalars = {
   JSONString: { input: any; output: any; }
 };
 
+export type ApKscanReportFilter = {
+  /** Filter by android_app_id_reference */
+  android_app_id_reference?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by id */
+  id?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by report_date */
+  report_date?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by results */
+  results?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scan_status */
+  scan_status?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scanner_name */
+  scanner_name?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scanner_version */
+  scanner_version?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ApKscanReportType = {
+  __typename?: 'APKscanReportType';
+  Cls?: Maybe<Scalars['String']['output']>;
+  androidAppIdReference: AndroidAppType;
+  /** _id */
+  id?: Maybe<Scalars['ID']['output']>;
+  reportDate: Scalars['DateTime']['output'];
+  results: Scalars['JSONString']['output'];
+  scanStatus: Scalars['String']['output'];
+  scannerName: Scalars['String']['output'];
+  scannerVersion: Scalars['String']['output'];
+};
+
 export type AecsJobFilter = {
   /** Filter by arch */
   arch?: InputMaybe<Scalars['String']['input']>;
@@ -151,6 +181,8 @@ export type AndroGuardReportFilter = {
   receivers?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** Filter by report_date */
   report_date?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scan_status */
+  scan_status?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_name */
   scanner_name?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_version */
@@ -204,6 +236,7 @@ export type AndroGuardReportType = Node & {
   providers?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   receivers?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   reportDate: Scalars['DateTime']['output'];
+  scanStatus: Scalars['String']['output'];
   scannerName: Scalars['String']['output'];
   scannerVersion: Scalars['String']['output'];
   services?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
@@ -288,6 +321,7 @@ export type AndroidAppType = Node & {
   androwarnReportReference?: Maybe<AndrowarnReportType>;
   apkidReportReference?: Maybe<ApkidReportType>;
   apkleaksReportReference?: Maybe<ApkleaksReportType>;
+  apkscanReportReference?: Maybe<ApKscanReportType>;
   appTwinsReferenceList?: Maybe<AndroidAppTypeConnection>;
   certificateIdList?: Maybe<AppCertificateTypeConnection>;
   exodusReportReference?: Maybe<ExodusReportType>;
@@ -295,10 +329,12 @@ export type AndroidAppType = Node & {
   filename: Scalars['String']['output'];
   firmwareFileReference?: Maybe<FirmwareFileType>;
   firmwareIdReference?: Maybe<AndroidFirmwareType>;
+  flowdroidReportReference?: Maybe<FlowDroidReportType>;
   /** The ID of the object */
   id: Scalars['ID']['output'];
   indexedDate?: Maybe<Scalars['DateTime']['output']>;
   md5: Scalars['String']['output'];
+  mobsfscanReportReference?: Maybe<MobSfScanReportType>;
   optFirmwareFileReferenceList?: Maybe<FirmwareFileTypeConnection>;
   originalFilename?: Maybe<Scalars['String']['output']>;
   packagename?: Maybe<Scalars['String']['output']>;
@@ -311,6 +347,7 @@ export type AndroidAppType = Node & {
   sha1: Scalars['String']['output'];
   sha256: Scalars['String']['output'];
   superReportReference?: Maybe<SuperReportType>;
+  trueseeingReportReference?: Maybe<TrueseeingReportType>;
   virustotalReportReference?: Maybe<VirustotalReportType>;
 };
 
@@ -617,57 +654,33 @@ export type AndroidFirmwareTypeEdge = {
 };
 
 export type AndrowarnReportFilter = {
-  /** Filter by PIM_data_leakage */
-  PIM_data_leakage?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** Filter by android_app_id_reference */
   android_app_id_reference?: InputMaybe<Scalars['String']['input']>;
-  /** Filter by audio_video_eavesdropping */
-  audio_video_eavesdropping?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  /** Filter by code_execution */
-  code_execution?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  /** Filter by connection_interfaces_exfiltration */
-  connection_interfaces_exfiltration?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  /** Filter by device_settings_harvesting */
-  device_settings_harvesting?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** Filter by id */
   id?: InputMaybe<Scalars['String']['input']>;
-  /** Filter by location_lookup */
-  location_lookup?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** Filter by report_date */
   report_date?: InputMaybe<Scalars['String']['input']>;
-  /** Filter by report_file_json */
-  report_file_json?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by results */
+  results?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scan_status */
+  scan_status?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_name */
   scanner_name?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_version */
   scanner_version?: InputMaybe<Scalars['String']['input']>;
-  /** Filter by suspicious_connection_establishment */
-  suspicious_connection_establishment?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  /** Filter by telephony_identifiers_leakage */
-  telephony_identifiers_leakage?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  /** Filter by telephony_services_abuse */
-  telephony_services_abuse?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
 export type AndrowarnReportType = {
   __typename?: 'AndrowarnReportType';
   Cls?: Maybe<Scalars['String']['output']>;
-  PIMDataLeakage?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   androidAppIdReference: AndroidAppType;
-  audioVideoEavesdropping?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
-  codeExecution?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
-  connectionInterfacesExfiltration?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
-  deviceSettingsHarvesting?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** _id */
   id?: Maybe<Scalars['ID']['output']>;
-  locationLookup?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   reportDate: Scalars['DateTime']['output'];
-  reportFileJson: FileFieldType;
+  results: Scalars['JSONString']['output'];
+  scanStatus: Scalars['String']['output'];
   scannerName: Scalars['String']['output'];
   scannerVersion: Scalars['String']['output'];
-  suspiciousConnectionEstablishment?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
-  telephonyIdentifiersLeakage?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
-  telephonyServicesAbuse?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
 };
 
 export type ApkScannerReportFilter = {
@@ -677,6 +690,8 @@ export type ApkScannerReportFilter = {
   id?: InputMaybe<Scalars['String']['input']>;
   /** Filter by report_date */
   report_date?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scan_status */
+  scan_status?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_name */
   scanner_name?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_version */
@@ -690,6 +705,7 @@ export type ApkScannerReportType = {
   /** _id */
   id?: Maybe<Scalars['ID']['output']>;
   reportDate: Scalars['DateTime']['output'];
+  scanStatus: Scalars['String']['output'];
   scannerName: Scalars['String']['output'];
   scannerVersion: Scalars['String']['output'];
 };
@@ -697,16 +713,14 @@ export type ApkScannerReportType = {
 export type ApkidReportFilter = {
   /** Filter by android_app_id_reference */
   android_app_id_reference?: InputMaybe<Scalars['String']['input']>;
-  /** Filter by files */
-  files?: InputMaybe<Array<InputMaybe<Scalars['JSONString']['input']>>>;
   /** Filter by id */
   id?: InputMaybe<Scalars['String']['input']>;
   /** Filter by report_date */
   report_date?: InputMaybe<Scalars['String']['input']>;
-  /** Filter by report_file_json */
-  report_file_json?: InputMaybe<Scalars['String']['input']>;
-  /** Filter by rules_sha256 */
-  rules_sha256?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by results */
+  results?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scan_status */
+  scan_status?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_name */
   scanner_name?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_version */
@@ -717,12 +731,11 @@ export type ApkidReportType = {
   __typename?: 'ApkidReportType';
   Cls?: Maybe<Scalars['String']['output']>;
   androidAppIdReference: AndroidAppType;
-  files?: Maybe<Array<Maybe<Scalars['JSONString']['output']>>>;
   /** _id */
   id?: Maybe<Scalars['ID']['output']>;
   reportDate: Scalars['DateTime']['output'];
-  reportFileJson: FileFieldType;
-  rulesSha256?: Maybe<Scalars['String']['output']>;
+  results: Scalars['JSONString']['output'];
+  scanStatus: Scalars['String']['output'];
   scannerName: Scalars['String']['output'];
   scannerVersion: Scalars['String']['output'];
 };
@@ -736,6 +749,8 @@ export type ApkleaksReportFilter = {
   report_date?: InputMaybe<Scalars['String']['input']>;
   /** Filter by results */
   results?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scan_status */
+  scan_status?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_name */
   scanner_name?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_version */
@@ -750,6 +765,7 @@ export type ApkleaksReportType = {
   id?: Maybe<Scalars['ID']['output']>;
   reportDate: Scalars['DateTime']['output'];
   results: Scalars['JSONString']['output'];
+  scanStatus: Scalars['String']['output'];
   scannerName: Scalars['String']['output'];
   scannerVersion: Scalars['String']['output'];
 };
@@ -1092,6 +1108,8 @@ export type ExodusReportFilter = {
   report_date?: InputMaybe<Scalars['String']['input']>;
   /** Filter by results */
   results?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scan_status */
+  scan_status?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_name */
   scanner_name?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_version */
@@ -1106,6 +1124,7 @@ export type ExodusReportType = {
   id?: Maybe<Scalars['ID']['output']>;
   reportDate: Scalars['DateTime']['output'];
   results: Scalars['JSONString']['output'];
+  scanStatus: Scalars['String']['output'];
   scannerName: Scalars['String']['output'];
   scannerVersion: Scalars['String']['output'];
 };
@@ -1262,6 +1281,36 @@ export type FirmwareImporterSettingType = {
   numberOfImporterThreads: Scalars['Int']['output'];
 };
 
+export type FlowDroidReportFilter = {
+  /** Filter by android_app_id_reference */
+  android_app_id_reference?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by id */
+  id?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by report_date */
+  report_date?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by results */
+  results?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scan_status */
+  scan_status?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scanner_name */
+  scanner_name?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scanner_version */
+  scanner_version?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type FlowDroidReportType = {
+  __typename?: 'FlowDroidReportType';
+  Cls?: Maybe<Scalars['String']['output']>;
+  androidAppIdReference: AndroidAppType;
+  /** _id */
+  id?: Maybe<Scalars['ID']['output']>;
+  reportDate: Scalars['DateTime']['output'];
+  results: Scalars['JSONString']['output'];
+  scanStatus: Scalars['String']['output'];
+  scannerName: Scalars['String']['output'];
+  scannerVersion: Scalars['String']['output'];
+};
+
 export type ImageFileFilter = {
   /** Filter by file */
   file?: InputMaybe<Scalars['String']['input']>;
@@ -1300,6 +1349,36 @@ export type JsonFileType = {
   /** _id */
   id?: Maybe<Scalars['ID']['output']>;
   reportDate: Scalars['DateTime']['output'];
+};
+
+export type MobSfScanReportFilter = {
+  /** Filter by android_app_id_reference */
+  android_app_id_reference?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by id */
+  id?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by report_date */
+  report_date?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by results */
+  results?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scan_status */
+  scan_status?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scanner_name */
+  scanner_name?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scanner_version */
+  scanner_version?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MobSfScanReportType = {
+  __typename?: 'MobSFScanReportType';
+  Cls?: Maybe<Scalars['String']['output']>;
+  androidAppIdReference: AndroidAppType;
+  /** _id */
+  id?: Maybe<Scalars['ID']['output']>;
+  reportDate: Scalars['DateTime']['output'];
+  results: Scalars['JSONString']['output'];
+  scanStatus: Scalars['String']['output'];
+  scannerName: Scalars['String']['output'];
+  scannerVersion: Scalars['String']['output'];
 };
 
 export type Mutation = {
@@ -1479,6 +1558,8 @@ export type QarkReportFilter = {
   report_date?: InputMaybe<Scalars['String']['input']>;
   /** Filter by report_file_json */
   report_file_json?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scan_status */
+  scan_status?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_name */
   scanner_name?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_version */
@@ -1493,6 +1574,7 @@ export type QarkReportType = {
   id?: Maybe<Scalars['ID']['output']>;
   reportDate: Scalars['DateTime']['output'];
   reportFileJson: FileFieldType;
+  scanStatus: Scalars['String']['output'];
   scannerName: Scalars['String']['output'];
   scannerVersion: Scalars['String']['output'];
 };
@@ -1506,6 +1588,8 @@ export type QuarkEngineReportFilter = {
   report_date?: InputMaybe<Scalars['String']['input']>;
   /** Filter by results */
   results?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scan_status */
+  scan_status?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_name */
   scanner_name?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_version */
@@ -1520,6 +1604,7 @@ export type QuarkEngineReportType = {
   id?: Maybe<Scalars['ID']['output']>;
   reportDate: Scalars['DateTime']['output'];
   results: Scalars['JSONString']['output'];
+  scanStatus: Scalars['String']['output'];
   scannerName: Scalars['String']['output'];
   scannerVersion: Scalars['String']['output'];
 };
@@ -1572,16 +1657,19 @@ export type Query = {
   apkid_report_list?: Maybe<Array<Maybe<ApkidReportType>>>;
   apkleaks_report_list?: Maybe<Array<Maybe<ApkleaksReportType>>>;
   apkleaks_statistics_report_list?: Maybe<Array<Maybe<ApkleaksStatisticsReportType>>>;
+  apkscan_report_list?: Maybe<Array<Maybe<ApKscanReportType>>>;
   app_certificate_list?: Maybe<Array<Maybe<AppCertificateType>>>;
   build_prop_file_id_list?: Maybe<Array<Maybe<BuildPropFileType>>>;
   exodus_report_list?: Maybe<Array<Maybe<ExodusReportType>>>;
   exodus_statistics_report_list?: Maybe<Array<Maybe<ExodusStatisticsReportType>>>;
   firmware_file_list?: Maybe<Array<Maybe<FirmwareFileType>>>;
   firmware_importer_setting_list?: Maybe<Array<Maybe<FirmwareImporterSettingType>>>;
+  flowdroid_report_list?: Maybe<Array<Maybe<FlowDroidReportType>>>;
   image_file_list?: Maybe<Array<Maybe<ImageFileType>>>;
   isApiUp?: Maybe<Scalars['Boolean']['output']>;
   json_file_list?: Maybe<Array<Maybe<JsonFileType>>>;
   me?: Maybe<UserType>;
+  mobsfscan_report_list?: Maybe<Array<Maybe<MobSfScanReportType>>>;
   qark_report_list?: Maybe<Array<Maybe<QarkReportType>>>;
   quark_engine_report_list?: Maybe<Array<Maybe<QuarkEngineReportType>>>;
   quark_engine_statistics_report_list?: Maybe<Array<Maybe<QuarkEngineStatisticsReportType>>>;
@@ -1598,6 +1686,7 @@ export type Query = {
   tlsh_hash_list?: Maybe<Array<Maybe<TlshHashType>>>;
   /** Obtain JSON Web Token mutation */
   tokenAuth?: Maybe<ObtainJsonWebToken>;
+  trueseeing_report_list?: Maybe<Array<Maybe<TrueseeingReportType>>>;
   users?: Maybe<Array<Maybe<UserType>>>;
   verifyToken?: Maybe<Verify>;
   virustotal_report_list?: Maybe<Array<Maybe<VirustotalReportType>>>;
@@ -1680,6 +1769,12 @@ export type QueryApkleaks_Statistics_Report_ListArgs = {
 };
 
 
+export type QueryApkscan_Report_ListArgs = {
+  fieldFilter?: InputMaybe<ApKscanReportFilter>;
+  objectId?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+
 export type QueryApp_Certificate_ListArgs = {
   fieldFilter?: InputMaybe<AppCertificateFilter>;
   objectIdList?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -1711,6 +1806,12 @@ export type QueryFirmware_File_ListArgs = {
 };
 
 
+export type QueryFlowdroid_Report_ListArgs = {
+  fieldFilter?: InputMaybe<FlowDroidReportFilter>;
+  objectId?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+
 export type QueryImage_File_ListArgs = {
   fieldFilter?: InputMaybe<ImageFileFilter>;
   objectIdList?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -1720,6 +1821,12 @@ export type QueryImage_File_ListArgs = {
 export type QueryJson_File_ListArgs = {
   fieldFilter?: InputMaybe<JsonFileFilter>;
   objectIdList?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+
+export type QueryMobsfscan_Report_ListArgs = {
+  fieldFilter?: InputMaybe<MobSfScanReportFilter>;
+  objectId?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
 
@@ -1797,6 +1904,12 @@ export type QueryTlsh_Hash_ListArgs = {
 export type QueryTokenAuthArgs = {
   password: Scalars['String']['input'];
   username: Scalars['String']['input'];
+};
+
+
+export type QueryTrueseeing_Report_ListArgs = {
+  fieldFilter?: InputMaybe<TrueseeingReportFilter>;
+  objectId?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
 
@@ -1949,6 +2062,8 @@ export type SuperReportFilter = {
   report_date?: InputMaybe<Scalars['String']['input']>;
   /** Filter by results */
   results?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scan_status */
+  scan_status?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_name */
   scanner_name?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_version */
@@ -1963,6 +2078,7 @@ export type SuperReportType = {
   id?: Maybe<Scalars['ID']['output']>;
   reportDate: Scalars['DateTime']['output'];
   results: Scalars['JSONString']['output'];
+  scanStatus: Scalars['String']['output'];
   scannerName: Scalars['String']['output'];
   scannerVersion: Scalars['String']['output'];
 };
@@ -2029,6 +2145,36 @@ export type TlshHashType = {
   id?: Maybe<Scalars['ID']['output']>;
 };
 
+export type TrueseeingReportFilter = {
+  /** Filter by android_app_id_reference */
+  android_app_id_reference?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by id */
+  id?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by report_date */
+  report_date?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by results */
+  results?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scan_status */
+  scan_status?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scanner_name */
+  scanner_name?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scanner_version */
+  scanner_version?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type TrueseeingReportType = {
+  __typename?: 'TrueseeingReportType';
+  Cls?: Maybe<Scalars['String']['output']>;
+  androidAppIdReference: AndroidAppType;
+  /** _id */
+  id?: Maybe<Scalars['ID']['output']>;
+  reportDate: Scalars['DateTime']['output'];
+  results: Scalars['JSONString']['output'];
+  scanStatus: Scalars['String']['output'];
+  scannerName: Scalars['String']['output'];
+  scannerVersion: Scalars['String']['output'];
+};
+
 export type UpdateFirmwareImportSetting = {
   __typename?: 'UpdateFirmwareImportSetting';
   jobId?: Maybe<Scalars['String']['output']>;
@@ -2087,6 +2233,8 @@ export type VirusTotalReportFilter = {
   id?: InputMaybe<Scalars['String']['input']>;
   /** Filter by report_date */
   report_date?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by scan_status */
+  scan_status?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_name */
   scanner_name?: InputMaybe<Scalars['String']['input']>;
   /** Filter by scanner_version */
@@ -2104,6 +2252,7 @@ export type VirustotalReportType = {
   /** _id */
   id?: Maybe<Scalars['ID']['output']>;
   reportDate: Scalars['DateTime']['output'];
+  scanStatus: Scalars['String']['output'];
   scannerName: Scalars['String']['output'];
   scannerVersion: Scalars['String']['output'];
   virusTotalAnalysis?: Maybe<Scalars['String']['output']>;
@@ -2264,7 +2413,7 @@ export type DeleteFirmwareByObjectIdMutationVariables = Exact<{
 
 export type DeleteFirmwareByObjectIdMutation = { __typename?: 'Mutation', deleteAndroidFirmware?: { __typename?: 'DeleteAndroidFirmwareMutation', jobId?: string | null } | null };
 
-export type BasicReportInfoFragment = { __typename?: 'ApkScannerReportType', id?: string | null, reportDate: any, scannerName: string, scannerVersion: string, androidAppIdReference: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } } & { ' $fragmentName'?: 'BasicReportInfoFragment' };
+export type BasicReportInfoFragment = { __typename?: 'ApkScannerReportType', id?: string | null, reportDate: any, scannerName: string, scannerVersion: string, scanStatus: string, androidAppIdReference: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } } & { ' $fragmentName'?: 'BasicReportInfoFragment' };
 
 export type GetReportQueryVariables = Exact<{
   reportObjectId?: InputMaybe<Scalars['String']['input']>;
@@ -2303,7 +2452,7 @@ export type GetScannerReportQuery = { __typename?: 'Query', apk_scanner_report_l
 
 export type AndroguardReportFragment = { __typename?: 'AndroGuardReportType', id: string, activities?: Array<string | null> | null, androidVersionCode?: string | null, androidVersionName?: string | null, appName?: string | null, dexNames?: Array<string | null> | null, effectiveTargetVersion?: string | null, fileNameList?: Array<string | null> | null, intentFiltersDict?: any | null, isAndroidtv?: boolean | null, isLeanback?: boolean | null, isMultidex?: boolean | null, isSignedV1?: boolean | null, isSignedV2?: boolean | null, isSignedV3?: boolean | null, isValidApk?: boolean | null, isWearable?: boolean | null, mainActivity?: string | null, mainActivityList?: Array<string | null> | null, manifestFeatures?: Array<string | null> | null, manifestLibraries?: Array<string | null> | null, manifestXml?: string | null, maxSdkVersion?: string | null, minSdkVersion?: string | null, packagename: string, permissionDetails?: any | null, permissions?: Array<string | null> | null, permissionsDeclared?: Array<string | null> | null, permissionsDeclaredDetails?: any | null, permissionsImplied?: Array<string | null> | null, permissionsRequestedThirdParty?: Array<string | null> | null, providers?: Array<string | null> | null, receivers?: Array<string | null> | null, services?: Array<string | null> | null, signatureNames?: Array<string | null> | null, targetSdkVersion?: string | null, reportDate: any, scannerName: string, scannerVersion: string } & { ' $fragmentName'?: 'AndroguardReportFragment' };
 
-export type ApkidReportFragment = { __typename?: 'ApkidReportType', id?: string | null, files?: Array<any | null> | null, rulesSha256?: string | null, reportDate: any, scannerName: string, scannerVersion: string, reportFileJson: { __typename?: 'FileFieldType', data?: string | null } } & { ' $fragmentName'?: 'ApkidReportFragment' };
+export type ApkidReportFragment = { __typename?: 'ApkidReportType', id?: string | null, results: any, reportDate: any, scannerName: string, scannerVersion: string } & { ' $fragmentName'?: 'ApkidReportFragment' };
 
 export type ApkleaksReportFragment = { __typename?: 'ApkleaksReportType', id?: string | null, results: any, reportDate: any, scannerName: string, scannerVersion: string } & { ' $fragmentName'?: 'ApkleaksReportFragment' };
 
@@ -2323,9 +2472,9 @@ export const AppAllFragmentDoc = {"kind":"Document","definitions":[{"kind":"Frag
 export const FileAllFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"FileAll"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"FirmwareFileType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"absoluteStorePath"}},{"kind":"Field","name":{"kind":"Name","value":"fileSizeBytes"}},{"kind":"Field","name":{"kind":"Name","value":"indexedDate"}},{"kind":"Field","name":{"kind":"Name","value":"isDirectory"}},{"kind":"Field","name":{"kind":"Name","value":"isOnDisk"}},{"kind":"Field","name":{"kind":"Name","value":"isSymlink"}},{"kind":"Field","name":{"kind":"Name","value":"md5"}},{"kind":"Field","name":{"kind":"Name","value":"metaDict"}},{"kind":"Field","name":{"kind":"Name","value":"parentDir"}},{"kind":"Field","name":{"kind":"Name","value":"partitionName"}},{"kind":"Field","name":{"kind":"Name","value":"relativePath"}},{"kind":"Field","name":{"kind":"Name","value":"firmwareIdReference"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"androidAppReference"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<FileAllFragment, unknown>;
 export const FirmwareAllFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"FirmwareAll"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AndroidFirmwareType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"absoluteStorePath"}},{"kind":"Field","name":{"kind":"Name","value":"aecsBuildFilePath"}},{"kind":"Field","name":{"kind":"Name","value":"fileSizeBytes"}},{"kind":"Field","name":{"kind":"Name","value":"filename"}},{"kind":"Field","name":{"kind":"Name","value":"hasFileIndex"}},{"kind":"Field","name":{"kind":"Name","value":"hasFuzzyHashIndex"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"indexedDate"}},{"kind":"Field","name":{"kind":"Name","value":"md5"}},{"kind":"Field","name":{"kind":"Name","value":"originalFilename"}},{"kind":"Field","name":{"kind":"Name","value":"osVendor"}},{"kind":"Field","name":{"kind":"Name","value":"partitionInfoDict"}},{"kind":"Field","name":{"kind":"Name","value":"pk"}},{"kind":"Field","name":{"kind":"Name","value":"relativeStorePath"}},{"kind":"Field","name":{"kind":"Name","value":"sha1"}},{"kind":"Field","name":{"kind":"Name","value":"sha256"}},{"kind":"Field","name":{"kind":"Name","value":"tag"}},{"kind":"Field","name":{"kind":"Name","value":"versionDetected"}}]}}]} as unknown as DocumentNode<FirmwareAllFragment, unknown>;
 export const FirmwareRowImporterPageFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"FirmwareRowImporterPage"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AndroidFirmwareType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"indexedDate"}},{"kind":"Field","name":{"kind":"Name","value":"originalFilename"}},{"kind":"Field","name":{"kind":"Name","value":"osVendor"}},{"kind":"Field","name":{"kind":"Name","value":"versionDetected"}}]}}]} as unknown as DocumentNode<FirmwareRowImporterPageFragment, unknown>;
-export const BasicReportInfoFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"BasicReportInfo"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ApkScannerReportType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"reportDate"}},{"kind":"Field","name":{"kind":"Name","value":"scannerName"}},{"kind":"Field","name":{"kind":"Name","value":"scannerVersion"}},{"kind":"Field","name":{"kind":"Name","value":"androidAppIdReference"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"filename"}},{"kind":"Field","name":{"kind":"Name","value":"firmwareIdReference"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]} as unknown as DocumentNode<BasicReportInfoFragment, unknown>;
+export const BasicReportInfoFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"BasicReportInfo"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ApkScannerReportType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"reportDate"}},{"kind":"Field","name":{"kind":"Name","value":"scannerName"}},{"kind":"Field","name":{"kind":"Name","value":"scannerVersion"}},{"kind":"Field","name":{"kind":"Name","value":"scanStatus"}},{"kind":"Field","name":{"kind":"Name","value":"androidAppIdReference"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"filename"}},{"kind":"Field","name":{"kind":"Name","value":"firmwareIdReference"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]} as unknown as DocumentNode<BasicReportInfoFragment, unknown>;
 export const AndroguardReportFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AndroguardReport"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AndroGuardReportType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"activities"}},{"kind":"Field","name":{"kind":"Name","value":"androidVersionCode"}},{"kind":"Field","name":{"kind":"Name","value":"androidVersionName"}},{"kind":"Field","name":{"kind":"Name","value":"appName"}},{"kind":"Field","name":{"kind":"Name","value":"dexNames"}},{"kind":"Field","name":{"kind":"Name","value":"effectiveTargetVersion"}},{"kind":"Field","name":{"kind":"Name","value":"fileNameList"}},{"kind":"Field","name":{"kind":"Name","value":"intentFiltersDict"}},{"kind":"Field","name":{"kind":"Name","value":"isAndroidtv"}},{"kind":"Field","name":{"kind":"Name","value":"isLeanback"}},{"kind":"Field","name":{"kind":"Name","value":"isMultidex"}},{"kind":"Field","name":{"kind":"Name","value":"isSignedV1"}},{"kind":"Field","name":{"kind":"Name","value":"isSignedV2"}},{"kind":"Field","name":{"kind":"Name","value":"isSignedV3"}},{"kind":"Field","name":{"kind":"Name","value":"isValidApk"}},{"kind":"Field","name":{"kind":"Name","value":"isWearable"}},{"kind":"Field","name":{"kind":"Name","value":"mainActivity"}},{"kind":"Field","name":{"kind":"Name","value":"mainActivityList"}},{"kind":"Field","name":{"kind":"Name","value":"manifestFeatures"}},{"kind":"Field","name":{"kind":"Name","value":"manifestLibraries"}},{"kind":"Field","name":{"kind":"Name","value":"manifestXml"}},{"kind":"Field","name":{"kind":"Name","value":"maxSdkVersion"}},{"kind":"Field","name":{"kind":"Name","value":"minSdkVersion"}},{"kind":"Field","name":{"kind":"Name","value":"packagename"}},{"kind":"Field","name":{"kind":"Name","value":"permissionDetails"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}},{"kind":"Field","name":{"kind":"Name","value":"permissionsDeclared"}},{"kind":"Field","name":{"kind":"Name","value":"permissionsDeclaredDetails"}},{"kind":"Field","name":{"kind":"Name","value":"permissionsImplied"}},{"kind":"Field","name":{"kind":"Name","value":"permissionsRequestedThirdParty"}},{"kind":"Field","name":{"kind":"Name","value":"providers"}},{"kind":"Field","name":{"kind":"Name","value":"receivers"}},{"kind":"Field","name":{"kind":"Name","value":"services"}},{"kind":"Field","name":{"kind":"Name","value":"signatureNames"}},{"kind":"Field","name":{"kind":"Name","value":"targetSdkVersion"}},{"kind":"Field","name":{"kind":"Name","value":"reportDate"}},{"kind":"Field","name":{"kind":"Name","value":"scannerName"}},{"kind":"Field","name":{"kind":"Name","value":"scannerVersion"}}]}}]} as unknown as DocumentNode<AndroguardReportFragment, unknown>;
-export const ApkidReportFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ApkidReport"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ApkidReportType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"files"}},{"kind":"Field","name":{"kind":"Name","value":"rulesSha256"}},{"kind":"Field","name":{"kind":"Name","value":"reportFileJson"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"}}]}},{"kind":"Field","name":{"kind":"Name","value":"reportDate"}},{"kind":"Field","name":{"kind":"Name","value":"scannerName"}},{"kind":"Field","name":{"kind":"Name","value":"scannerVersion"}}]}}]} as unknown as DocumentNode<ApkidReportFragment, unknown>;
+export const ApkidReportFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ApkidReport"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ApkidReportType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"results"}},{"kind":"Field","name":{"kind":"Name","value":"reportDate"}},{"kind":"Field","name":{"kind":"Name","value":"scannerName"}},{"kind":"Field","name":{"kind":"Name","value":"scannerVersion"}}]}}]} as unknown as DocumentNode<ApkidReportFragment, unknown>;
 export const ApkleaksReportFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ApkleaksReport"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ApkleaksReportType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"results"}},{"kind":"Field","name":{"kind":"Name","value":"reportDate"}},{"kind":"Field","name":{"kind":"Name","value":"scannerName"}},{"kind":"Field","name":{"kind":"Name","value":"scannerVersion"}}]}}]} as unknown as DocumentNode<ApkleaksReportFragment, unknown>;
 export const ExodusReportFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ExodusReport"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ExodusReportType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"results"}},{"kind":"Field","name":{"kind":"Name","value":"reportDate"}},{"kind":"Field","name":{"kind":"Name","value":"scannerName"}},{"kind":"Field","name":{"kind":"Name","value":"scannerVersion"}}]}}]} as unknown as DocumentNode<ExodusReportFragment, unknown>;
 export const GetApiHealthDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetApiHealth"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"isApiUp"}}]}}]} as unknown as DocumentNode<GetApiHealthQuery, GetApiHealthQueryVariables>;
@@ -2345,7 +2494,7 @@ export const GetFirmwaresByObjectIdsDocument = {"kind":"Document","definitions":
 export const GetFirmwaresImporterPageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFirmwaresImporterPage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"first"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"after"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"android_firmware_connection"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"Variable","name":{"kind":"Name","value":"first"}}},{"kind":"Argument","name":{"kind":"Name","value":"after"},"value":{"kind":"Variable","name":{"kind":"Name","value":"after"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cursor"}},{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"FirmwareRowImporterPage"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}},{"kind":"Field","name":{"kind":"Name","value":"hasPreviousPage"}},{"kind":"Field","name":{"kind":"Name","value":"startCursor"}},{"kind":"Field","name":{"kind":"Name","value":"endCursor"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"FirmwareRowImporterPage"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AndroidFirmwareType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"indexedDate"}},{"kind":"Field","name":{"kind":"Name","value":"originalFilename"}},{"kind":"Field","name":{"kind":"Name","value":"osVendor"}},{"kind":"Field","name":{"kind":"Name","value":"versionDetected"}}]}}]} as unknown as DocumentNode<GetFirmwaresImporterPageQuery, GetFirmwaresImporterPageQueryVariables>;
 export const ScanApksByFirmwareObjectIdsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ScanApksByFirmwareObjectIds"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"objectIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"scannerName"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"queueName"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createApkScanJob"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"firmwareIdList"},"value":{"kind":"Variable","name":{"kind":"Name","value":"objectIds"}}},{"kind":"Argument","name":{"kind":"Name","value":"moduleName"},"value":{"kind":"Variable","name":{"kind":"Name","value":"scannerName"}}},{"kind":"Argument","name":{"kind":"Name","value":"queueName"},"value":{"kind":"Variable","name":{"kind":"Name","value":"queueName"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"jobIdList"}}]}}]}}]} as unknown as DocumentNode<ScanApksByFirmwareObjectIdsMutation, ScanApksByFirmwareObjectIdsMutationVariables>;
 export const DeleteFirmwareByObjectIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteFirmwareByObjectId"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"objectIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteAndroidFirmware"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"firmwareIdList"},"value":{"kind":"Variable","name":{"kind":"Name","value":"objectIds"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"jobId"}}]}}]}}]} as unknown as DocumentNode<DeleteFirmwareByObjectIdMutation, DeleteFirmwareByObjectIdMutationVariables>;
-export const GetReportDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetReport"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"reportObjectId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"appObjectId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"scannerName"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"apk_scanner_report_list"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"fieldFilter"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"reportObjectId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"android_app_id_reference"},"value":{"kind":"Variable","name":{"kind":"Name","value":"appObjectId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"scanner_name"},"value":{"kind":"Variable","name":{"kind":"Name","value":"scannerName"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"BasicReportInfo"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"BasicReportInfo"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ApkScannerReportType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"reportDate"}},{"kind":"Field","name":{"kind":"Name","value":"scannerName"}},{"kind":"Field","name":{"kind":"Name","value":"scannerVersion"}},{"kind":"Field","name":{"kind":"Name","value":"androidAppIdReference"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"filename"}},{"kind":"Field","name":{"kind":"Name","value":"firmwareIdReference"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]} as unknown as DocumentNode<GetReportQuery, GetReportQueryVariables>;
-export const GetScannerReportDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetScannerReport"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"reportObjectId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"wantAndroguard"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}},"defaultValue":{"kind":"BooleanValue","value":false}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"wantApkid"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}},"defaultValue":{"kind":"BooleanValue","value":false}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"wantApkleaks"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}},"defaultValue":{"kind":"BooleanValue","value":false}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"wantExodus"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}},"defaultValue":{"kind":"BooleanValue","value":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"apk_scanner_report_list"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"fieldFilter"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"reportObjectId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"androidAppIdReference"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"filename"}},{"kind":"Field","name":{"kind":"Name","value":"firmwareIdReference"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","alias":{"kind":"Name","value":"androguardReport"},"name":{"kind":"Name","value":"androguardReportReference"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"include"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"if"},"value":{"kind":"Variable","name":{"kind":"Name","value":"wantAndroguard"}}}]}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AndroguardReport"}}]}},{"kind":"Field","alias":{"kind":"Name","value":"apkidReport"},"name":{"kind":"Name","value":"apkidReportReference"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"include"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"if"},"value":{"kind":"Variable","name":{"kind":"Name","value":"wantApkid"}}}]}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ApkidReport"}}]}},{"kind":"Field","alias":{"kind":"Name","value":"apkleaksReport"},"name":{"kind":"Name","value":"apkleaksReportReference"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"include"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"if"},"value":{"kind":"Variable","name":{"kind":"Name","value":"wantApkleaks"}}}]}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ApkleaksReport"}}]}},{"kind":"Field","alias":{"kind":"Name","value":"exodusReport"},"name":{"kind":"Name","value":"exodusReportReference"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"include"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"if"},"value":{"kind":"Variable","name":{"kind":"Name","value":"wantExodus"}}}]}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ExodusReport"}}]}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AndroguardReport"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AndroGuardReportType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"activities"}},{"kind":"Field","name":{"kind":"Name","value":"androidVersionCode"}},{"kind":"Field","name":{"kind":"Name","value":"androidVersionName"}},{"kind":"Field","name":{"kind":"Name","value":"appName"}},{"kind":"Field","name":{"kind":"Name","value":"dexNames"}},{"kind":"Field","name":{"kind":"Name","value":"effectiveTargetVersion"}},{"kind":"Field","name":{"kind":"Name","value":"fileNameList"}},{"kind":"Field","name":{"kind":"Name","value":"intentFiltersDict"}},{"kind":"Field","name":{"kind":"Name","value":"isAndroidtv"}},{"kind":"Field","name":{"kind":"Name","value":"isLeanback"}},{"kind":"Field","name":{"kind":"Name","value":"isMultidex"}},{"kind":"Field","name":{"kind":"Name","value":"isSignedV1"}},{"kind":"Field","name":{"kind":"Name","value":"isSignedV2"}},{"kind":"Field","name":{"kind":"Name","value":"isSignedV3"}},{"kind":"Field","name":{"kind":"Name","value":"isValidApk"}},{"kind":"Field","name":{"kind":"Name","value":"isWearable"}},{"kind":"Field","name":{"kind":"Name","value":"mainActivity"}},{"kind":"Field","name":{"kind":"Name","value":"mainActivityList"}},{"kind":"Field","name":{"kind":"Name","value":"manifestFeatures"}},{"kind":"Field","name":{"kind":"Name","value":"manifestLibraries"}},{"kind":"Field","name":{"kind":"Name","value":"manifestXml"}},{"kind":"Field","name":{"kind":"Name","value":"maxSdkVersion"}},{"kind":"Field","name":{"kind":"Name","value":"minSdkVersion"}},{"kind":"Field","name":{"kind":"Name","value":"packagename"}},{"kind":"Field","name":{"kind":"Name","value":"permissionDetails"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}},{"kind":"Field","name":{"kind":"Name","value":"permissionsDeclared"}},{"kind":"Field","name":{"kind":"Name","value":"permissionsDeclaredDetails"}},{"kind":"Field","name":{"kind":"Name","value":"permissionsImplied"}},{"kind":"Field","name":{"kind":"Name","value":"permissionsRequestedThirdParty"}},{"kind":"Field","name":{"kind":"Name","value":"providers"}},{"kind":"Field","name":{"kind":"Name","value":"receivers"}},{"kind":"Field","name":{"kind":"Name","value":"services"}},{"kind":"Field","name":{"kind":"Name","value":"signatureNames"}},{"kind":"Field","name":{"kind":"Name","value":"targetSdkVersion"}},{"kind":"Field","name":{"kind":"Name","value":"reportDate"}},{"kind":"Field","name":{"kind":"Name","value":"scannerName"}},{"kind":"Field","name":{"kind":"Name","value":"scannerVersion"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ApkidReport"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ApkidReportType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"files"}},{"kind":"Field","name":{"kind":"Name","value":"rulesSha256"}},{"kind":"Field","name":{"kind":"Name","value":"reportFileJson"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"}}]}},{"kind":"Field","name":{"kind":"Name","value":"reportDate"}},{"kind":"Field","name":{"kind":"Name","value":"scannerName"}},{"kind":"Field","name":{"kind":"Name","value":"scannerVersion"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ApkleaksReport"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ApkleaksReportType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"results"}},{"kind":"Field","name":{"kind":"Name","value":"reportDate"}},{"kind":"Field","name":{"kind":"Name","value":"scannerName"}},{"kind":"Field","name":{"kind":"Name","value":"scannerVersion"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ExodusReport"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ExodusReportType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"results"}},{"kind":"Field","name":{"kind":"Name","value":"reportDate"}},{"kind":"Field","name":{"kind":"Name","value":"scannerName"}},{"kind":"Field","name":{"kind":"Name","value":"scannerVersion"}}]}}]} as unknown as DocumentNode<GetScannerReportQuery, GetScannerReportQueryVariables>;
+export const GetReportDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetReport"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"reportObjectId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"appObjectId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"scannerName"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"apk_scanner_report_list"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"fieldFilter"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"reportObjectId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"android_app_id_reference"},"value":{"kind":"Variable","name":{"kind":"Name","value":"appObjectId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"scanner_name"},"value":{"kind":"Variable","name":{"kind":"Name","value":"scannerName"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"BasicReportInfo"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"BasicReportInfo"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ApkScannerReportType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"reportDate"}},{"kind":"Field","name":{"kind":"Name","value":"scannerName"}},{"kind":"Field","name":{"kind":"Name","value":"scannerVersion"}},{"kind":"Field","name":{"kind":"Name","value":"scanStatus"}},{"kind":"Field","name":{"kind":"Name","value":"androidAppIdReference"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"filename"}},{"kind":"Field","name":{"kind":"Name","value":"firmwareIdReference"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]} as unknown as DocumentNode<GetReportQuery, GetReportQueryVariables>;
+export const GetScannerReportDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetScannerReport"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"reportObjectId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"wantAndroguard"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}},"defaultValue":{"kind":"BooleanValue","value":false}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"wantApkid"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}},"defaultValue":{"kind":"BooleanValue","value":false}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"wantApkleaks"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}},"defaultValue":{"kind":"BooleanValue","value":false}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"wantExodus"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}},"defaultValue":{"kind":"BooleanValue","value":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"apk_scanner_report_list"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"fieldFilter"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"reportObjectId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"androidAppIdReference"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"filename"}},{"kind":"Field","name":{"kind":"Name","value":"firmwareIdReference"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","alias":{"kind":"Name","value":"androguardReport"},"name":{"kind":"Name","value":"androguardReportReference"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"include"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"if"},"value":{"kind":"Variable","name":{"kind":"Name","value":"wantAndroguard"}}}]}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AndroguardReport"}}]}},{"kind":"Field","alias":{"kind":"Name","value":"apkidReport"},"name":{"kind":"Name","value":"apkidReportReference"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"include"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"if"},"value":{"kind":"Variable","name":{"kind":"Name","value":"wantApkid"}}}]}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ApkidReport"}}]}},{"kind":"Field","alias":{"kind":"Name","value":"apkleaksReport"},"name":{"kind":"Name","value":"apkleaksReportReference"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"include"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"if"},"value":{"kind":"Variable","name":{"kind":"Name","value":"wantApkleaks"}}}]}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ApkleaksReport"}}]}},{"kind":"Field","alias":{"kind":"Name","value":"exodusReport"},"name":{"kind":"Name","value":"exodusReportReference"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"include"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"if"},"value":{"kind":"Variable","name":{"kind":"Name","value":"wantExodus"}}}]}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ExodusReport"}}]}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AndroguardReport"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AndroGuardReportType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"activities"}},{"kind":"Field","name":{"kind":"Name","value":"androidVersionCode"}},{"kind":"Field","name":{"kind":"Name","value":"androidVersionName"}},{"kind":"Field","name":{"kind":"Name","value":"appName"}},{"kind":"Field","name":{"kind":"Name","value":"dexNames"}},{"kind":"Field","name":{"kind":"Name","value":"effectiveTargetVersion"}},{"kind":"Field","name":{"kind":"Name","value":"fileNameList"}},{"kind":"Field","name":{"kind":"Name","value":"intentFiltersDict"}},{"kind":"Field","name":{"kind":"Name","value":"isAndroidtv"}},{"kind":"Field","name":{"kind":"Name","value":"isLeanback"}},{"kind":"Field","name":{"kind":"Name","value":"isMultidex"}},{"kind":"Field","name":{"kind":"Name","value":"isSignedV1"}},{"kind":"Field","name":{"kind":"Name","value":"isSignedV2"}},{"kind":"Field","name":{"kind":"Name","value":"isSignedV3"}},{"kind":"Field","name":{"kind":"Name","value":"isValidApk"}},{"kind":"Field","name":{"kind":"Name","value":"isWearable"}},{"kind":"Field","name":{"kind":"Name","value":"mainActivity"}},{"kind":"Field","name":{"kind":"Name","value":"mainActivityList"}},{"kind":"Field","name":{"kind":"Name","value":"manifestFeatures"}},{"kind":"Field","name":{"kind":"Name","value":"manifestLibraries"}},{"kind":"Field","name":{"kind":"Name","value":"manifestXml"}},{"kind":"Field","name":{"kind":"Name","value":"maxSdkVersion"}},{"kind":"Field","name":{"kind":"Name","value":"minSdkVersion"}},{"kind":"Field","name":{"kind":"Name","value":"packagename"}},{"kind":"Field","name":{"kind":"Name","value":"permissionDetails"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}},{"kind":"Field","name":{"kind":"Name","value":"permissionsDeclared"}},{"kind":"Field","name":{"kind":"Name","value":"permissionsDeclaredDetails"}},{"kind":"Field","name":{"kind":"Name","value":"permissionsImplied"}},{"kind":"Field","name":{"kind":"Name","value":"permissionsRequestedThirdParty"}},{"kind":"Field","name":{"kind":"Name","value":"providers"}},{"kind":"Field","name":{"kind":"Name","value":"receivers"}},{"kind":"Field","name":{"kind":"Name","value":"services"}},{"kind":"Field","name":{"kind":"Name","value":"signatureNames"}},{"kind":"Field","name":{"kind":"Name","value":"targetSdkVersion"}},{"kind":"Field","name":{"kind":"Name","value":"reportDate"}},{"kind":"Field","name":{"kind":"Name","value":"scannerName"}},{"kind":"Field","name":{"kind":"Name","value":"scannerVersion"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ApkidReport"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ApkidReportType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"results"}},{"kind":"Field","name":{"kind":"Name","value":"reportDate"}},{"kind":"Field","name":{"kind":"Name","value":"scannerName"}},{"kind":"Field","name":{"kind":"Name","value":"scannerVersion"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ApkleaksReport"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ApkleaksReportType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"results"}},{"kind":"Field","name":{"kind":"Name","value":"reportDate"}},{"kind":"Field","name":{"kind":"Name","value":"scannerName"}},{"kind":"Field","name":{"kind":"Name","value":"scannerVersion"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ExodusReport"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ExodusReportType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"results"}},{"kind":"Field","name":{"kind":"Name","value":"reportDate"}},{"kind":"Field","name":{"kind":"Name","value":"scannerName"}},{"kind":"Field","name":{"kind":"Name","value":"scannerVersion"}}]}}]} as unknown as DocumentNode<GetScannerReportQuery, GetScannerReportQueryVariables>;
 export const GetRqJobListDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetRqJobList"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"rq_job_list"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"funcName"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"isFailed"}},{"kind":"Field","name":{"kind":"Name","value":"isFinished"}},{"kind":"Field","name":{"kind":"Name","value":"queueName"}},{"kind":"Field","name":{"kind":"Name","value":"startedAt"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<GetRqJobListQuery, GetRqJobListQueryVariables>;
 export const GetRqJobQueueNamesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetRqJobQueueNames"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"rq_queue_name_list"}}]}}]} as unknown as DocumentNode<GetRqJobQueueNamesQuery, GetRqJobQueueNamesQueryVariables>;

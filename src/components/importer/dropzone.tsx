@@ -158,9 +158,12 @@ function UploadDialog({storageIndex, fileUploads, setFileUploads, removeUpload}:
                             Cancel
                         </Button>
                     </DialogClose>
-                    <RqJobQueuesDropdownMenu onSelect={(queue) => {
-                        setSelectedQueue(queue);
-                    }}/>
+                    <RqJobQueuesDropdownMenu
+                        filterQueue={"extractor"}
+                        onSelect={(queue) => {
+                            setSelectedQueue(queue);
+                        }}
+                    />
                     <Button
                         disabled={
                             !fileUploads.every(upload => upload.serverResponded) ||

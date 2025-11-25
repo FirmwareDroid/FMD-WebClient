@@ -168,7 +168,10 @@ function ScanAppActionButton(
                 <ScannersTable setSelectedScanners={setSelectedScanners}/>
                 <DialogFooter>
                     <>
-                        <RqJobQueuesDropdownMenu onSelect={setSelectedQueue}/>
+                        <RqJobQueuesDropdownMenu
+                            filterQueue={"scanner"}
+                            onSelect={setSelectedQueue}
+                        />
                         <Button
                             disabled={selectedScanners.length <= 0}
                             onClick={() => {
