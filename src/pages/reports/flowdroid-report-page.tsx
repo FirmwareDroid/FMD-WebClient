@@ -14,7 +14,7 @@ export function FlowdroidReportPage({reportId}: Readonly<ImplReportPageProps>) {
         loading: reportsLoading,
         data: reportsData,
     } = useQuery(GET_SCANNER_REPORT, {
-        variables: {reportObjectId: reportId, wantExodus: true},
+        variables: {reportObjectId: reportId, wantFlowDroid: true},
         skip: !reportId,
     });
 

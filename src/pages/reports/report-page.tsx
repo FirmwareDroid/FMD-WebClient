@@ -62,7 +62,7 @@ function SpecificReportPage(
             return (
                 <FlowdroidReportPage reportId={reportId}/>
             );
-        case "MobSFS":
+        case "MobSFScan":
             return (
                 <MobSFSReportPage reportId={reportId}/>
             );

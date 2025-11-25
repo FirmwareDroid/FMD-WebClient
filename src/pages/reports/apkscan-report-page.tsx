@@ -14,7 +14,7 @@ export function APKScanReportPage({reportId}: Readonly<ImplReportPageProps>) {
         loading: reportsLoading,
         data: reportsData,
     } = useQuery(GET_SCANNER_REPORT, {
-        variables: {reportObjectId: reportId, wantExodus: true},
+        variables: {reportObjectId: reportId, wantApkscan: true},
         skip: !reportId,
     });
 
