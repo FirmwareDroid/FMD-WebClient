@@ -43,8 +43,6 @@ yarn install && yarn build
 And then switch back to directory `/FirmwareDroid` and create and start the containers again.
 
 ```shell
- 
-
 docker compose up
 ```
 
