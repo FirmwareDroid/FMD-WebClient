@@ -16,7 +16,7 @@ export function ScanJobsPage() {
                     <p className="text-body">
                         This page displays a list of recent app scan jobs that have been initiated
                         or are currently running. More information about each job, including its status,
-                        start time, and results, can be found as well in the
+                        start time, errors, debug-info, and results, can be found as well in the
                         {' '}<a className="ui-link" href="./django-rq">RQ-Backend</a>.
                     </p>
                 </CardContent>
