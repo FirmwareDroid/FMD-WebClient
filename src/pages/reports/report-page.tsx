@@ -54,7 +54,7 @@ function SpecificReportPage(
             return (
                 <AndrowarnReportPage reportId={reportId}/>
             );
-        case "APKScan":
+        case "APKscan":
             return (
                 <APKScanReportPage reportId={reportId}/>
             );
