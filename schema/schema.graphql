@@ -748,6 +748,9 @@ type QarkReportType {
   reportFileJson: FileFieldType!
 
   """"""
+  results: JSONString!
+
+  """"""
   scanStatus: String!
 
   """"""
@@ -1947,6 +1950,9 @@ input QarkReportFilter {
 
   """Filter by report_file_json"""
   report_file_json: String
+
+  """Filter by results"""
+  results: String
 }
 
 input ExodusReportFilter {
