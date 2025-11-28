@@ -4,16 +4,14 @@ import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table
 import {useQuery} from "@apollo/client";
 import {useFragment} from "@/__generated__";
 import {convertIdToObjectId, isNonNullish} from "@/lib/graphql/graphql-utils.ts";
-import {
-    GET_REPORT,
-    BASIC_REPORT_INFO
-} from "@/components/graphql/report.graphql.ts";
+import {GET_REPORT, META_APK_SCANNER_REPORT} from "@/components/graphql/report.graphql.ts";
 import {useParams} from "react-router";
 import {buildViewReportColumn} from "@/components/data-table-action-columns/report-action-columns.tsx";
-import {BasicReportInfoFragment} from "@/__generated__/graphql.ts";
+import {MetaReportFieldsFragment} from "@/__generated__/graphql.ts";
 
-const columns: ColumnDef<BasicReportInfoFragment>[] = [
-    buildViewReportColumn<BasicReportInfoFragment>(),
+
+const columns: ColumnDef<MetaReportFieldsFragment, unknown>[] = [
+    buildViewReportColumn<MetaReportFieldsFragment>(),
     {
         id: "id",
         accessorKey: "id",
@@ -40,6 +38,11 @@ const columns: ColumnDef<BasicReportInfoFragment>[] = [
         accessorKey: "androidAppIdReference.filename",
         header: "App Filename",
     },
+    {
+        id: "scanStatus",
+        accessorKey: "scanStatus",
+        header: "Scan Status",
+    }
 ];
 
 export function ReportsPage() {
@@ -59,10 +62,20 @@ export function ReportsPage() {
         fetchPolicy: "cache-first",
     });
 
+    //const reports = reportsData?.apk_scanner_report_list ?? []
+    if (reportsData) {
+        console.log(reportsData);
+    }
+
     const reports = (reportsData?.apk_scanner_report_list ?? [])
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map(report => useFragment(BASIC_REPORT_INFO, report))
+        .map(report => {
+            if (!report) return null;
+            return useFragment(META_APK_SCANNER_REPORT, report);
+        })
         .filter(isNonNullish);
+
+    console.log("reports2", reports);
 
     return (
         <BasePage title={"Reports"}>

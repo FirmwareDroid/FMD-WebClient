@@ -7,16 +7,19 @@ import {EyeIcon} from "lucide-react";
 
 type WithIdAndAppIdAndFirmwareId = {
     id?: string | null;
-    scannerName: string;
-    androidAppIdReference: {
-        __typename?: "AndroidAppType"
-        id: string
-        filename: string
+    scannerName?: string | null;
+    androidAppIdReference?: {
+        __typename?: "AndroidAppType";
+        id: string;
+        filename: string;
         firmwareIdReference?: {
-            __typename?: "AndroidFirmwareType"
-            id: string
-        } | null
-    };
+            __typename?: "AndroidFirmwareType";
+            id: string;
+        } | null;
+    } | null;
+    reportDate?: string | null;
+    scannerVersion?: string | null;
+    scanStatus?: string | null;
 };
 
 export function buildViewReportColumn<T extends WithIdAndAppIdAndFirmwareId>(): ColumnDef<T> {
@@ -24,6 +27,9 @@ export function buildViewReportColumn<T extends WithIdAndAppIdAndFirmwareId>(): 
         {
             id: "view",
             cell: ({row}) => {
+                if (!row.original.androidAppIdReference) {
+                    return null;
+                }
                 // eslint-disable-next-line react-hooks/rules-of-hooks
                 const navigate = useNavigate();
                 const reportId = row.original.id;

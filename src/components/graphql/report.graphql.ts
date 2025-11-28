@@ -1,8 +1,8 @@
 import {gql} from "@/__generated__";
 
-export const BASIC_REPORT_INFO = gql(`
-    fragment BasicReportInfo on ApkScannerReportType {
-        id
+
+export const META_APK_SCANNER_REPORT = gql(`
+    fragment MetaReportFields on ApkScannerReportInterface {
         reportDate
         scannerName
         scannerVersion
@@ -17,10 +17,41 @@ export const BASIC_REPORT_INFO = gql(`
     }
 `);
 
+
+export const APK_REPORT = gql(`
+    fragment ApkScannerReport on ApkScannerReportInterface {
+        ...AndroGuardReportType
+        ...ApkidReportType
+        ...ApkleaksReportType
+        ...ExodusReportType
+        ...TrueseeingReportType
+        ...AndrowarnReportType
+        ...QuarkEngineReportType
+        ...QarkReportType
+        ...SuperReportType
+        ...VirusTotalReportType
+        ...MobSFSReportType
+        ...APKscanReportType
+        ...FlowDroidReportType
+    }
+`);
+
 export const GET_REPORT = gql(`
     query GetReport($reportObjectId: String, $appObjectId: String, $scannerName: String) {
         apk_scanner_report_list(fieldFilter: {id: $reportObjectId, android_app_id_reference: $appObjectId, scanner_name: $scannerName}) {
-            ...BasicReportInfo
+            id
+            reportDate
+            scannerName
+            scannerVersion
+            scanStatus
+            androidAppIdReference {
+                id
+                filename
+                firmwareIdReference {
+                    id
+                }
+            }
+            ...MetaReportFields 
         }
     }
 `);
@@ -28,74 +59,29 @@ export const GET_REPORT = gql(`
 export const GET_SCANNER_REPORT = gql(`
     query GetScannerReport(
         $reportObjectId: String
-        $wantAndroguard: Boolean! = false
-        $wantApkid: Boolean! = false
-        $wantApkleaks: Boolean! = false
-        $wantExodus: Boolean! = false
-        $wantTrueseeing: Boolean! = false
-        $wantAndrowarn: Boolean! = false
-        $wantQuarkEngine: Boolean! = false
-        $wantQark: Boolean! = false
-        $wantSuper: Boolean! = false
-        $wantVirusTotal: Boolean! = false
-        $wantMobsfs: Boolean! = false
-        $wantApkscan: Boolean! = false
-        $wantFlowDroid: Boolean! = false
     ) {
         apk_scanner_report_list(fieldFilter: {id: $reportObjectId}) {
-            androidAppIdReference {
-                id
-                filename
-                firmwareIdReference {
-                    id
-                }
-                
-                androguardReport: androguardReportReference @include(if: $wantAndroguard) {
-                    ...AndroguardReport
-                }
-                apkidReport: apkidReportReference @include(if: $wantApkid) {
-                    ...ApkidReport
-                }
-                apkleaksReport: apkleaksReportReference @include(if: $wantApkleaks) {
-                    ...ApkleaksReport
-                }
-                exodusReport: exodusReportReference @include(if: $wantExodus) {
-                    ...ExodusReport
-                }
-                trueseeingReport: trueseeingReportReference @include(if: $wantTrueseeing) {
-                    ...TrueseeingReport
-                }
-                androwarnReport: androwarnReportReference @include(if: $wantAndrowarn) {
-                    ...AndrowarnReport
-                }
-                quarkEngineReport: quarkEngineReportReference @include(if: $wantQuarkEngine) {
-                    ...QuarkEngineReport
-                }
-                qarkReport: qarkReportReference @include(if: $wantQark) {
-                    ...QarkReport
-                }
-                superReport: superReportReference @include(if: $wantSuper) {
-                    ...SuperReport
-                }
-                virustotalReport: virustotalReportReference @include(if: $wantVirusTotal) {
-                    ...VirusTotalReport
-                }
-                mobsfReport: mobsfscanReportReference @include(if: $wantMobsfs) {
-                    ...MobSFSReport
-                }
-                apkscanReport: apkscanReportReference @include(if: $wantApkscan) {
-                    ...APKscanReport
-                }
-                flowdroidReport: flowdroidReportReference @include(if: $wantFlowDroid) {
-                    ...FlowDroidReport
-                }
-            }
+            pk
+            reportDate
+            scanStatus
+            scannerName
+            scannerVersion
+            ...AndroGuardReportType
+            ...ApkidReportType
+            ...ApkleaksReportType
+            ...ExodusReportType
+            ...TrueseeingReportType
+            ...AndrowarnReportType
+            ...QuarkEngineReportType
+            ...QarkReportType
+            ...SuperReportType
+            ...VirusTotalReportType
+            ...MobSFSReportType
+            ...APKscanReportType
+            ...FlowDroidReportType
         }
     }
 `);
-
-
-
 
 
 // ----------------------------------------------------------------------------------------------------
@@ -103,8 +89,7 @@ export const GET_SCANNER_REPORT = gql(`
 // ----------------------------------------------------------------------------------------------------
 
 export const ANDROGUARD_REPORT = gql(`
-    fragment AndroguardReport on AndroGuardReportType {
-        id
+    fragment AndroGuardReportType on AndroGuardReport {
         activities
         androidVersionCode
         androidVersionName
@@ -152,13 +137,8 @@ export const ANDROGUARD_REPORT = gql(`
 // ----------------------------------------------------------------------------------------------------
 
 export const APKID_REPORT = gql(`
-    fragment ApkidReport on ApkidReportType {
-        id
+    fragment ApkidReportType on ApkidReport {
         results
-        reportDate
-        scanStatus
-        scannerName
-        scannerVersion
     }
 `);
 
@@ -167,13 +147,8 @@ export const APKID_REPORT = gql(`
 // ----------------------------------------------------------------------------------------------------
 
 export const APKLEAKS_REPORT = gql(`
-    fragment ApkleaksReport on ApkleaksReportType {
-        id
+    fragment ApkleaksReportType on ApkleaksReport {
         results
-        reportDate
-        scanStatus
-        scannerName
-        scannerVersion
     }
 `);
 
@@ -182,13 +157,8 @@ export const APKLEAKS_REPORT = gql(`
 // ----------------------------------------------------------------------------------------------------
 
 export const EXODUS_REPORT = gql(`
-    fragment ExodusReport on ExodusReportType {
-        id
+    fragment ExodusReportType on ExodusReport {
         results
-        reportDate
-        scanStatus
-        scannerName
-        scannerVersion
     }
 `);
 
@@ -197,13 +167,8 @@ export const EXODUS_REPORT = gql(`
 // ----------------------------------------------------------------------------------------------------
 
 export const TRUESEEING_REPORT = gql(`
-    fragment TrueseeingReport on TrueseeingReportType {
-        id
+    fragment TrueseeingReportType on TrueseeingReport {
         results
-        reportDate
-        scanStatus
-        scannerName
-        scannerVersion
     }
 `);
 
@@ -212,13 +177,8 @@ export const TRUESEEING_REPORT = gql(`
 // ----------------------------------------------------------------------------------------------------
 
 export const ANDROWARN_REPORT = gql(`
-    fragment AndrowarnReport on AndrowarnReportType {
-        id
+    fragment AndrowarnReportType on AndrowarnReport {
         results
-        reportDate
-        scanStatus
-        scannerName
-        scannerVersion
     }
 `);
 
@@ -227,13 +187,8 @@ export const ANDROWARN_REPORT = gql(`
 // ----------------------------------------------------------------------------------------------------
 
 export const QUARK_ENGINE_REPORT = gql(`
-    fragment QuarkEngineReport on QuarkEngineReportType {
-        id
+    fragment QuarkEngineReportType on QuarkEngineReport {
         results
-        reportDate
-        scanStatus
-        scannerName
-        scannerVersion
     }
 `);
 
@@ -242,13 +197,8 @@ export const QUARK_ENGINE_REPORT = gql(`
 // ----------------------------------------------------------------------------------------------------
 
 export const QARK_REPORT = gql(`
-    fragment QarkReport on QarkReportType {
-        id
+    fragment QarkReportType on QarkReport {
         results
-        reportDate
-        scanStatus
-        scannerName
-        scannerVersion
     }
 `);
 
@@ -257,13 +207,8 @@ export const QARK_REPORT = gql(`
 // ----------------------------------------------------------------------------------------------------
 
 export const SUPER_REPORT = gql(`
-    fragment SuperReport on SuperReportType {
-        id
+    fragment SuperReportType on SuperReport {
         results
-        reportDate
-        scanStatus
-        scannerName
-        scannerVersion
     }
 `);
 
@@ -272,15 +217,10 @@ export const SUPER_REPORT = gql(`
 // ----------------------------------------------------------------------------------------------------
 
 export const VIRUSTOTAL_REPORT = gql(`
-    fragment VirusTotalReport on VirustotalReportType {
-        id
+    fragment VirusTotalReportType on VirusTotalReport {
         fileInfo
         analysisId
         virusTotalAnalysis
-        reportDate
-        scanStatus
-        scannerName
-        scannerVersion
     }
 `);
 
@@ -289,13 +229,8 @@ export const VIRUSTOTAL_REPORT = gql(`
 // ----------------------------------------------------------------------------------------------------
 
 export const MOBSFS_REPORT = gql(`
-    fragment MobSFSReport on MobSFScanReportType {
-        id
+    fragment MobSFSReportType on MobSFScanReport {
         results
-        reportDate
-        scanStatus
-        scannerName
-        scannerVersion
     }
 `);
 
@@ -304,13 +239,8 @@ export const MOBSFS_REPORT = gql(`
 // ----------------------------------------------------------------------------------------------------
 
 export const APKSCAN_REPORT = gql(`
-    fragment APKscanReport on APKscanReportType {
-        id
+    fragment APKscanReportType on APKscanReport {
         results
-        reportDate
-        scanStatus
-        scannerName
-        scannerVersion
     }
 `);
 
@@ -319,13 +249,8 @@ export const APKSCAN_REPORT = gql(`
 // ----------------------------------------------------------------------------------------------------
 
 export const FLOWDROID_REPORT = gql(`
-    fragment FlowDroidReport on FlowDroidReportType {
-        id
+    fragment FlowDroidReportType on FlowDroidReport {
         results
-        reportDate
-        scanStatus
-        scannerName
-        scannerVersion
     }
 `);
 
