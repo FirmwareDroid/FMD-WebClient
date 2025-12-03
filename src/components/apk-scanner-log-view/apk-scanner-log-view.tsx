@@ -85,7 +85,10 @@ export function ApkScannerLogView() {
                         enableLineNumbers
                         wrapLines
                         external
+                        enableMultilineHighlight
                         height={520}
+                        extraLines={1}
+                        selectableLines
                         loadingComponent={<div>Loading logs…</div>}
                     />
                 )}
