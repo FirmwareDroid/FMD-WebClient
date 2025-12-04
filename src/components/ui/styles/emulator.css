@@ -152,6 +152,36 @@ html.dark .emulator-page .emulator-container {
     border: 1px solid rgba(255,255,255,0.06); /* light-white */
 }
 
+
+/* Disable text selection / mobile highlight for the emulator stack */
+.emulator-page .emulator-container {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+/* Allow selecting / editing text in inputs, textareas, selects and custom input classes */
+.emulator-page .emulator-container input,
+.emulator-page .emulator-container textarea,
+.emulator-page .emulator-container select,
+.emulator-page .emulator-container .emulator-input {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+}
+
+/* Ensure icons inside emulator buttons don't shrink/wrap */
+.emulator-page .emulator-button > svg,
+.emulator-page .emulator-button-toogle > svg,
+.emulator-page .btn > svg {
+    flex-shrink: 0;
+}
+
 .emulator-page .emu-url-group .emulator-input {
     display: block;
     width: 100%;
