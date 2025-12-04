@@ -19,6 +19,23 @@ const columns: ColumnDef<MetaReportFieldsFragment, unknown>[] = [
         meta: {hidden: true},
     },
     {
+        id: "reportDate",
+        accessorKey: "reportDate",
+        header: "Report Date",
+        cell: ({ getValue }) => {
+            const val = getValue() as string | null | undefined;
+            if (!val) return null;
+            const d = new Date(val);
+            if (Number.isNaN(d.getTime())) return val;
+            return d.toLocaleString();
+        },
+    },
+    {
+        id: "androidAppIdReference.filename",
+        accessorKey: "androidAppIdReference.filename",
+        header: "App Filename",
+    },
+    {
         id: "scannerName",
         accessorKey: "scannerName",
         header: "Scanner Name",
@@ -27,16 +44,6 @@ const columns: ColumnDef<MetaReportFieldsFragment, unknown>[] = [
         id: "scannerVersion",
         accessorKey: "scannerVersion",
         header: "Scanner Version",
-    },
-    {
-        id: "reportDate",
-        accessorKey: "reportDate",
-        header: "Report Date",
-    },
-    {
-        id: "androidAppIdReference.filename",
-        accessorKey: "androidAppIdReference.filename",
-        header: "App Filename",
     },
     {
         id: "scanStatus",

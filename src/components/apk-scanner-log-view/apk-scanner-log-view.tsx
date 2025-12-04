@@ -45,16 +45,14 @@ export function ApkScannerLogView() {
     useEffect(() => {
         if (!logs || logs.length === 0) return;
 
-        // 1) First-time initialization: set initial text (one big string)
         if (!initialized) {
             const fullText = logs.map(formatLogLine).join("\n");
-            setInitialText(fullText); // pass to LazyLog via text prop on next render
+            setInitialText(fullText);
             lastLogIdRef.current = logs[logs.length - 1].id;
             setInitialized(true);
             return;
         }
 
-        // 2) After initialization: append only new log lines
         const lastId = lastLogIdRef.current;
         const lastIndex = lastId ? logs.findIndex((l) => l.id === lastId) : -1;
         const newLogs = lastIndex >= 0 ? logs.slice(lastIndex + 1) : logs;
@@ -62,7 +60,6 @@ export function ApkScannerLogView() {
         if (newLogs.length === 0) return;
         const newLines = newLogs.map(formatLogLine);
 
-        // ensure the LazyLog ref is ready
         if (lazyLogRef.current && typeof lazyLogRef.current.appendLines === "function") {
             lazyLogRef.current.appendLines(newLines);
             lastLogIdRef.current = newLogs[newLogs.length - 1].id;
@@ -78,7 +75,6 @@ export function ApkScannerLogView() {
                         ref={lazyLogRef}
                         follow={follow}
                         onScroll={onScroll}
-                        // only provide `text` for the very first load — omit it afterwards
                         text={initialized ? undefined : initialText}
                         enableSearch
                         enableSearchNavigation

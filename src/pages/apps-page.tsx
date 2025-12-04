@@ -34,6 +34,7 @@ const columns: ColumnDef<AppAllFragment>[] = [
         id: "fileSizeBytes",
         accessorKey: "fileSizeBytes",
         header: "File Size (Bytes)",
+        meta: {hidden: true},
     },
     {
         id: "filename",
@@ -44,6 +45,7 @@ const columns: ColumnDef<AppAllFragment>[] = [
         id: "indexedDate",
         accessorKey: "indexedDate",
         header: "Indexed Date",
+        meta: {hidden: true},
     },
     {
         id: "md5",
@@ -55,6 +57,7 @@ const columns: ColumnDef<AppAllFragment>[] = [
         id: "originalFilename",
         accessorKey: "originalFilename",
         header: "Original Filename",
+        meta: {hidden: true},
     },
     {
         id: "packagename",
@@ -65,11 +68,13 @@ const columns: ColumnDef<AppAllFragment>[] = [
         id: "partitionName",
         accessorKey: "partitionName",
         header: "Partition Name",
+        meta: {hidden: true},
     },
     {
         id: "pk",
         accessorKey: "pk",
         header: "Object ID",
+        meta: {hidden: true},
     },
     {
         id: "relativeFirmwarePath",

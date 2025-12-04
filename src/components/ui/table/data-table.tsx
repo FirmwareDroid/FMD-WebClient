@@ -15,7 +15,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table.tsx"
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import {DataTablePagination} from "@/components/ui/table/data-table-pagination.tsx";
 import {cn} from "@/lib/utils.ts";
 import {AlertCircleIcon} from "lucide-react";
@@ -25,6 +25,8 @@ import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
 import {ApolloError} from "@apollo/client";
 import {DataTableViewOptions} from "@/components/ui/table/data-table-column-visbility.tsx";
 import {CursorPagination, CursorPaginationProps} from "@/components/ui/table/cursor-pagination.tsx";
+import DataTableExport from "@/components/ui/table/data-table-export.tsx";
+import DataTableSearch from "@/components/ui/table/data-table-search.tsx";
 
 declare module "@tanstack/table-core" {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -65,8 +67,21 @@ function DataTable<TData, TValue>(
         pageSize: dataTablePagination ? 25 : Number.MAX_SAFE_INTEGER,
     });
 
+    const [globalFilter, setGlobalFilter] = useState<string>("");
+    const filteredData = useMemo(() => {
+        const q = String(globalFilter ?? "").trim().toLowerCase();
+        if (q === "") return data;
+        return data.filter(item => {
+            try {
+                return JSON.stringify(item).toLowerCase().includes(q);
+            } catch (e) {
+                return false;
+            }
+        });
+    }, [data, globalFilter]);
+
     const table = useReactTable({
-        data,
+        data: filteredData,
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
@@ -98,9 +113,16 @@ function DataTable<TData, TValue>(
 
     return (
         <div className={cn(className)}>
-            <div className="flex items-center p-4">
-                <DataTableViewOptions table={table}/>
+            <div className="flex items-center p-4 gap-4">
+                <DataTableSearch value={globalFilter} onChange={setGlobalFilter} />
+
+                <div className="ml-auto flex items-center gap-2">
+                    <DataTableExport table={table} />
+                    <DataTableViewOptions table={table} />
+                </div>
             </div>
+
+
             <div className="overflow-hidden rounded-xs border">
                 <Table>
                     <TableHeader>
