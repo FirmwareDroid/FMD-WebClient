@@ -12,6 +12,12 @@
 
     --input-border: rgba(0,0,0,0.06);
     --input-focus: rgba(0,0,0,0.12);
+
+    /* defaults for emulator theming */
+    --card-bg: #0b0b0b;
+    --link-color: #ffd965;
+    --text-color: #fff;
+    --card-border: rgba(255,255,255,0.06);
 }
 
 /* light / dark tokens (unchanged) */
@@ -25,6 +31,10 @@
 
     --input-border: rgba(0,0,0,0.12);
     --input-focus: rgba(0,0,0,0.18);
+    /* light theme panel/bg/text tokens */
+    --card-bg: #ffffff;
+    --text-color: #111111;
+    --card-border: rgba(0,0,0,0.12);
 }
 
 .dark {
@@ -37,6 +47,9 @@
 
     --input-border: rgba(255,255,255,0.06);
     --input-focus: rgba(255,255,255,0.18);
+    /* dark theme overrides already default; ensure text & border are set */
+    --text-color: #ffffff;
+    --card-border: rgba(255,255,255,0.06);
 }
 
 /* stronger, theme-prefixed rules to avoid being overridden by Bootstrap/global rules */
@@ -201,4 +214,123 @@ html.dark .emulator-page .emulator-container {
     border-color: rgba(0,0,0,0.18);
 }
 
+/* Layout classes for emulator view */
+.emulator-root {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 16px;
+    gap: 12px;
+    box-sizing: border-box;
+}
 
+.emulator-main {
+    display: flex;
+    gap: 12px;
+    flex: 1 1 auto;
+    color: var(--text-color);
+}
+
+.emulator-left {
+    flex: 1 1 0%;
+    min-width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.emulator-fullscreen {
+    flex: 1 1 auto;
+    min-height: 300px;
+    max-height: 720px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--card-bg, #0b0b0b);
+    border-radius: 8px;
+}
+
+.emulator-canvas {
+    max-height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.emulator-right {
+    width: 360px;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.emulator-panel {
+    background: var(--card-bg, #0b0b0b);
+    border-radius: 8px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-sizing: border-box;
+    border: 1px solid var(--card-border);
+}
+
+/* Tabs */
+.emulator-tablist {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.emulator-tab-button {
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: inherit;
+    padding: 6px 8px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.emulator-tab-button[aria-selected="true"],
+.emulator-tab-button.active {
+    border-bottom-color: var(--link-color, #ffd965);
+}
+
+/* Banner used when no device is present */
+.emulator-banner {
+    width: 100%;
+    text-align: center;
+    color: var(--link-color, #ffd965);
+    background: #4b4b4b;
+    padding: 8px 12px;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+/* helper when controls should be disabled */
+.emulator-disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* Responsive: on narrow screens stack the right pane below the emulator */
+@media (max-width: 980px) {
+    .emulator-main {
+        flex-direction: column;
+    }
+    .emulator-right {
+        width: 100%;
+        min-width: 0;
+        order: 2;
+    }
+    .emulator-left {
+        order: 1;
+    }
+}
