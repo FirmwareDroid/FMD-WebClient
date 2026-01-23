@@ -150,9 +150,31 @@ const DeviceControls: React.FC<Props> = ({ sendEvent, fullscreen, framesRendered
         }
     }, [fullscreen]);
 
+    // helper to send a short key press (Down then Up)
+    const sendKeyPress = useCallback((keyCode: number) => {
+        try {
+            safeSend({ cmd: 'injectKeyCode', payload: { action: AndroidKeyEventAction.Down, keyCode, metaState: 0, repeat: 0 } });
+            safeSend({ cmd: 'injectKeyCode', payload: { action: AndroidKeyEventAction.Up, keyCode, metaState: 0, repeat: 0 } });
+        } catch (e) {
+            try { console.warn('[DeviceControls] sendKeyPress failed', e); } catch {}
+        }
+    }, [safeSend]);
+
+    const handleHome = useCallback(() => sendKeyPress(3), [sendKeyPress]);
+    const handleBack = useCallback(() => sendKeyPress(4), [sendKeyPress]);
+
     return (
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '8px 0' }}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                {/* HOME and BACK quick action buttons */}
+                <button aria-label="Home" title="Home" style={buttonStyle} onClick={handleHome}>
+                    <span style={{ fontSize: 14, fontWeight: 600 }}>Home</span>
+                </button>
+
+                <button aria-label="Back" title="Back" style={buttonStyle} onClick={handleBack}>
+                    <span style={{ fontSize: 14, fontWeight: 600 }}>Back</span>
+                </button>
+
                 <button
                     aria-label="Volume down"
                     title="Volume down"

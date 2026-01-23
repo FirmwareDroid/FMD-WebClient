@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { adbService } from '@/services/adb-streamer/adb/adb-service.ts';
 
 interface Display {
-  id: string;
+  id: number | string;
   resolution: string;
 }
 
@@ -16,7 +16,12 @@ interface Encoder {
 }
 
 interface Device {
-  serial: string;
+  serial?: string;
+  name?: string;
+  displayName?: string;
+  serverKey?: string;
+  serverHost?: string;
+  serverPort?: number;
   displays: Display[];
   encoders: Encoder[];
 }
@@ -24,6 +29,7 @@ interface Device {
 interface AdbState {
   features: string[];
   devices: Device[];
+  // `device` now stores the server 'name' (preferred) but keep tolerant checks elsewhere
   device: string | null;
   display: string | null;
   audioEncoder: string;
@@ -52,36 +58,43 @@ export const useAdbStore = create<AdbState>((set, get) => ({
     const devices = result?.data?.devices || [];
 
     let deviceInitial: Device | undefined;
-    let deviceSerial: string | null = null;
+    let deviceId: string | null = null;
     if (devices.length) {
       deviceInitial = devices[0];
-      deviceSerial = devices[0].serial;
+      // prefer server-provided `name` as unique id, fall back to serial
+      deviceId = (deviceInitial && (deviceInitial.name ?? deviceInitial.serial)) ?? null;
     }
 
     let displayInitial: Display | undefined;
     let displayId: string | null = null;
     if (deviceInitial?.displays?.length) {
       displayInitial = deviceInitial.displays[0];
-      displayId = displayInitial.id;
+      // store display id as string for consistent comparisons across the app
+      displayId =
+        displayInitial.id !== undefined && displayInitial.id !== null
+          ? String(displayInitial.id)
+          : null;
     }
 
     set({
       features,
       devices,
-      device: deviceSerial,
+      device: deviceId,
       display: displayId,
     });
   },
 
   deviceObj: () => {
     const state = get();
-    return state.devices?.find((d) => d.serial === state.device);
+    // tolerate both `name` and `serial` as keys for backwards compatibility
+    return state.devices?.find((d) => d.name === state.device || d.serial === state.device);
   },
 
   displayObj: () => {
     const state = get();
     const deviceObj = state.deviceObj();
-    return deviceObj?.displays.find((d) => d.id === state.display);
+    // compare by stringified ids (server may send number)
+    return deviceObj?.displays.find((d) => String(d.id) === String(state.display));
   },
 
   displaySize: () => {
@@ -100,9 +113,7 @@ export const useAdbStore = create<AdbState>((set, get) => ({
     return [
       { type: 'audio', id: 'off', codec: 'off', name: 'off' },
       { type: 'audio', id: 'raw', codec: 'raw', name: 'raw' },
-      ...(deviceObj?.encoders.filter((e) => e.type === 'audio') || []).map(
-        (e) => ({ ...e, id: e.name })
-      ),
+      ...(deviceObj?.encoders.filter((e) => e.type === 'audio') || []).map((e) => ({ ...e, id: e.name })),
     ];
   },
 
@@ -147,9 +158,7 @@ export const useAdbStore = create<AdbState>((set, get) => ({
     ];
 
     const currentState = get();
-    const defaultVideoEncoder = result.find(
-      (e) => e.codec === 'h264' && e.decoder === 'TinyH264'
-    );
+    const defaultVideoEncoder = result.find((e) => e.codec === 'h264' && e.decoder === 'TinyH264');
     if (defaultVideoEncoder && !currentState.videoEncoder) {
       set({ videoEncoder: defaultVideoEncoder.id });
     }

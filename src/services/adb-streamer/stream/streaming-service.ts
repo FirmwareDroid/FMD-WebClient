@@ -55,7 +55,21 @@ export class StreamingService {
         const wsBase = this.normalizeToWsBase(backendCandidate);
 
         const params: string[] = [`id=${encodeURIComponent(id)}`];
-        params.push(`device=${encodeURIComponent(String(opts.device ?? ""))}`);
+        // Ensure device param is a proper string. If an object is passed (accidentally), try to extract a sensible identifier.
+        const deviceParam = (() => {
+            const d = opts.device as any;
+            if (d === null || d === undefined) return '';
+            if (typeof d === 'string') return d;
+            if (typeof d === 'object') {
+                try {
+                    return d.name ?? d.serverKey ?? d.serial ?? (d.id ?? JSON.stringify(d));
+                } catch (e) {
+                    try { return JSON.stringify(d); } catch { return String(d); }
+                }
+            }
+            return String(d);
+        })();
+        params.push(`device=${encodeURIComponent(String(deviceParam))}`);
         params.push(`audio=${encodeURIComponent(String(Boolean(opts.audio)))}`);
         if (opts.audio) {
             params.push(`audioCodec=${encodeURIComponent(opts.audioCodec ?? "")}`);

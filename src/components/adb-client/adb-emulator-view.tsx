@@ -582,14 +582,33 @@ const AdbEmulatorView: React.FC = () => {
         rendererListenersRef.current = null;
     }, []);
 
-    const start = useCallback(async ({maxFps, bitRate}: { maxFps: number; bitRate: number }) => {
-        await dispose();
+    const start = useCallback(async ({maxFps, bitRate, audioEncoder: overrideAudioEncoder, audioCodec: overrideAudioCodec, videoEncoder: overrideVideoEncoder, videoCodec: overrideVideoCodec, device: overrideDevice}: { maxFps: number; bitRate: number; audioEncoder?: string; audioCodec?: string; videoEncoder?: string; videoCodec?: string; device?: string }) => {
+         await dispose();
+
+        // ensure a device is selected in the store before attempting to start
+        if (!adbStore.device) {
+            toast.error('No device selected. Please select a device before connecting.');
+            return;
+        }
 
         abortControllerRef.current = new AbortController();
         setIsStreaming(true);
 
-        const audioEncoderObj = adbStore.audioEncoderObj();
-        const videoEncoderObj = adbStore.videoEncoderObj();
+        // Prefer explicit overrides from DeviceActions; otherwise use store-derived encoder objects
+        const audioEncoderObj = (() => {
+            if (overrideAudioEncoder) {
+                // find by id/name in available encoders
+                return (adbStore.audioEncoders().find((a: any) => (a.id ?? a.name) === overrideAudioEncoder) || { id: overrideAudioEncoder, name: overrideAudioEncoder, codec: overrideAudioCodec ?? undefined });
+            }
+            return adbStore.audioEncoderObj();
+        })();
+
+        let videoEncoderObj = (() => {
+            if (overrideVideoEncoder) {
+                return (adbStore.videoEncoders().find((v: any) => (v.id ?? v.name) === overrideVideoEncoder) || { id: overrideVideoEncoder, name: overrideVideoEncoder, codec: overrideVideoCodec ?? undefined });
+            }
+            return adbStore.videoEncoderObj();
+        })();
 
         console.log('[adb-emulator] audio encoder:', audioEncoderObj);
 
@@ -603,24 +622,31 @@ const AdbEmulatorView: React.FC = () => {
 
         console.log('[adb-emulator] audioPlayer created:', !!audioPlayerRef.current, audioPlayerRef.current?.constructor?.name);
 
-        if (['off', 'TinyH264'].includes(videoEncoderObj?.decoder || '')) {
+        // Ensure we always have a decoder object; if videoEncoderObj is missing, pick a safe default
+        if (!videoEncoderObj) {
+            // pick TinyH264 as a safe default decoder (will be unused if no video is streamed)
+            videoEncoderObj = { id: 'TinyH264@default', name: 'TinyH264', codec: 'h264', decoder: 'TinyH264' } as any;
+        }
+
+        const vdec = (videoEncoderObj as any)?.decoder ?? '';
+        if (['off', 'TinyH264'].includes(vdec || '')) {
             decoderRef.current = new TinyH264Decoder();
-        } else if (['WebCodecs'].includes(videoEncoderObj?.decoder || '')) {
-            let codec: ScrcpyVideoCodecId | undefined;
-            switch (videoEncoderObj?.codec) {
-                case 'h264': {
-                    codec = ScrcpyVideoCodecId.H264;
-                    break;
-                }
-                case 'h265': {
-                    codec = ScrcpyVideoCodecId.H265;
-                    break;
-                }
-                case 'av1': {
-                    codec = ScrcpyVideoCodecId.AV1;
-                    break;
-                }
-            }
+        } else if (['WebCodecs'].includes(vdec || '')) {
+             let codec: ScrcpyVideoCodecId | undefined;
+             switch (videoEncoderObj?.codec) {
+                 case 'h264': {
+                     codec = ScrcpyVideoCodecId.H264;
+                     break;
+                 }
+                 case 'h265': {
+                     codec = ScrcpyVideoCodecId.H265;
+                     break;
+                 }
+                 case 'av1': {
+                     codec = ScrcpyVideoCodecId.AV1;
+                     break;
+                 }
+             }
 
             const canvas = document.createElement('canvas') as HTMLCanvasElement & {
                 draw?: (frame: VideoFrame) => Promise<void>;
@@ -646,21 +672,64 @@ const AdbEmulatorView: React.FC = () => {
             });
         }
 
-        const renderer = decoderRef.current.renderer;
+        // Ensure decoderRef.current exists; if not, create a safe fallback decoder and renderer
+        if (!decoderRef.current) {
+            try {
+                decoderRef.current = new TinyH264Decoder();
+            } catch (err) {
+                adbLog.warn('[adb-emulator] Could not create TinyH264Decoder fallback:', err);
+                // create a minimal dummy decoder-like object exposing a renderer
+                const fallbackCanvas = document.createElement('canvas');
+                (fallbackCanvas as any).setSize = (w: number, h: number) => {
+                    fallbackCanvas.width = w;
+                    fallbackCanvas.height = h;
+                };
+                decoderRef.current = { renderer: fallbackCanvas } as any;
+            }
+        }
+
+        // Ensure we have a renderer element to attach
+        let renderer = (decoderRef.current as any).renderer as HTMLCanvasElement | null | undefined;
+        if (!renderer) {
+            // create a simple canvas renderer and attach to decoder if possible
+            const canvas = document.createElement('canvas') as HTMLCanvasElement & {
+                draw?: (frame: VideoFrame) => Promise<void>;
+                setSize?: (w: number, h: number) => void;
+            };
+            const ctx = canvas.getContext('2d')!;
+            canvas.setSize = (w: number, h: number) => {
+                canvas.width = w;
+                canvas.height = h;
+            };
+            canvas.draw = async (frame: VideoFrame) => {
+                const bitmap = await createImageBitmap(frame);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+                bitmap.close();
+            };
+            renderer = canvas;
+            try {
+                // attach if decoder supports it
+                (decoderRef.current as any).renderer = canvas;
+            } catch (e) {
+                // ignore
+            }
+        }
+
         // constrain renderer to a reasonable maximum height
-        renderer.style.maxWidth = '100%';
-        renderer.style.maxHeight = `${MAX_RENDER_HEIGHT}px`;
-        renderer.style.touchAction = 'none';
-        renderer.style.outline = 'none';
-        rendererRef.current = renderer;
-        // Ensure the renderer accepts pointer events and can be focused
         try {
+            renderer.style.maxWidth = '100%';
+            renderer.style.maxHeight = `${MAX_RENDER_HEIGHT}px`;
+            renderer.style.touchAction = 'none';
+            renderer.style.outline = 'none';
             renderer.style.pointerEvents = 'auto';
             (renderer as any).tabIndex = 0;
         } catch (e) {
             // ignore
         }
-        containerRef.current?.appendChild(renderer);
+
+        rendererRef.current = renderer as HTMLCanvasElement;
+        containerRef.current?.appendChild(rendererRef.current);
 
         // Attach DOM pointer listeners directly on the renderer to ensure it receives events
         // and forwards them into our existing React-style handlers.
@@ -711,11 +780,13 @@ const AdbEmulatorView: React.FC = () => {
             wheel: handleWheel,
         };
 
-        decoderRef.current.sizeChanged((size: { width: number; height: number }) => {
-            setWidth(size.width);
-            setHeight(size.height);
-            console.log(`RESIZE: width=${size.width}, height=${size.height}`);
-        });
+        if (decoderRef.current && typeof decoderRef.current.sizeChanged === 'function') {
+            decoderRef.current.sizeChanged((size: { width: number; height: number }) => {
+                setWidth(size.width);
+                setHeight(size.height);
+                console.log(`RESIZE: width=${size.width}, height=${size.height}`);
+            });
+        }
 
         if (fullscreenRef.current) {
             fullscreenRef.current.addEventListener('wheel', handleWheel as any, {
@@ -725,23 +796,28 @@ const AdbEmulatorView: React.FC = () => {
         }
         renderer.setAttribute('aria-label', 'Device Screen');
 
-        new ReadableStream({
-            start(controller) {
-                videoControllerRef.current = controller;
-                videoControllerClosedRef.current = false;
-            },
-        })
-            .pipeTo(decoderRef.current.writable, {
-                signal: abortControllerRef.current.signal,
+        // Only pipe to decoder writable if available
+        if (decoderRef.current && (decoderRef.current as any).writable) {
+            new ReadableStream({
+                start(controller) {
+                    videoControllerRef.current = controller;
+                    videoControllerClosedRef.current = false;
+                },
             })
-            .catch(() => {
-                if (abortControllerRef.current?.signal.aborted) {
-                    return;
-                }
-            })
-            .finally(() => {
-                videoControllerClosedRef.current = true;
-            });
+                .pipeTo((decoderRef.current as any).writable, {
+                    signal: abortControllerRef.current.signal,
+                })
+                .catch(() => {
+                    if (abortControllerRef.current?.signal.aborted) {
+                        return;
+                    }
+                })
+                .finally(() => {
+                    videoControllerClosedRef.current = true;
+                });
+        } else {
+            adbLog.warn('[adb-emulator] decoder has no writable stream; video will be disabled for this session');
+        }
 
         if (['off', 'raw'].includes(audioEncoderObj?.codec || '')) {
             new ReadableStream({
@@ -941,18 +1017,19 @@ const AdbEmulatorView: React.FC = () => {
             adbLog.info('[adb-emulator] audioPlayer started, AudioContext state:', playerCtx?.state ?? 'unknown');
         } catch (e) {}
 
+        const deviceToUse = overrideDevice ?? adbStore.device!;
         const returnedWs = await streamingService.init({
-             device: adbStore.device!,
-             audio: audioEncoderObj?.name !== 'off',
+             device: deviceToUse,
+             audio: (audioEncoderObj?.name ?? '') !== 'off' && !!audioEncoderObj,
              audioCodec:
-                 audioEncoderObj?.codec === 'off' ? undefined : audioEncoderObj?.codec,
+                 (overrideAudioCodec ?? audioEncoderObj?.codec) === 'off' ? undefined : (overrideAudioCodec ?? audioEncoderObj?.codec),
              audioEncoder:
-                 audioEncoderObj?.encoder === 'off' ? undefined : audioEncoderObj?.name,
-             video: videoEncoderObj?.name !== 'off',
+                 (overrideAudioEncoder ?? audioEncoderObj?.name) === 'off' ? undefined : (overrideAudioEncoder ?? audioEncoderObj?.name),
+             video: (videoEncoderObj?.name ?? '') !== 'off' && !!videoEncoderObj,
              videoCodec:
-                 videoEncoderObj?.codec === 'off' ? undefined : videoEncoderObj?.codec,
+                 (overrideVideoCodec ?? videoEncoderObj?.codec) === 'off' ? undefined : (overrideVideoCodec ?? videoEncoderObj?.codec),
              videoEncoder:
-                 videoEncoderObj?.encoder === 'off' ? undefined : videoEncoderObj?.name,
+                 (overrideVideoEncoder ?? videoEncoderObj?.name) === 'off' ? undefined : (overrideVideoEncoder ?? videoEncoderObj?.name),
              videoBitRate: bitRate,
              maxFps: maxFps,
              // include user-specified backend and credentials so the websocket upgrade can be authenticated
@@ -1031,8 +1108,14 @@ const AdbEmulatorView: React.FC = () => {
 
         framesIntervalRef.current = window.setInterval(() => {
             if (decoderRef.current) {
-                setFramesRendered(decoderRef.current.framesRendered);
-                setFramesSkipped(decoderRef.current.framesSkipped);
+                try {
+                    const fr = (decoderRef.current as any).framesRendered;
+                    const fs = (decoderRef.current as any).framesSkipped;
+                    if (typeof fr === 'number') setFramesRendered(fr);
+                    if (typeof fs === 'number') setFramesSkipped(fs);
+                } catch (e) {
+                    // decoder doesn't expose frame counters; ignore
+                }
             }
         }, 1000);
     }, [adbStore, dispose]);
@@ -1167,9 +1250,6 @@ const AdbEmulatorView: React.FC = () => {
         if (!screenW || screenW <= 0) screenW = Math.max(1, Math.round(clientRect.width));
         if (!screenH || screenH <= 0) screenH = Math.max(1, Math.round(clientRect.height));
 
-        try {
-            adbLog.debug('[adb-emulator] decoderSize', { decoderSize, rendererWidth: (renderer as any)?.width, clientRectWidth: Math.round(clientRect.width), screenW, screenH });
-        } catch (e) {}
 
         const {x, y} = mapClientToDevicePosition({
             clientX: e.clientX,
