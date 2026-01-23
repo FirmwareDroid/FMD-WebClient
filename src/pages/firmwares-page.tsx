@@ -56,6 +56,13 @@ const columns: ColumnDef<FirmwareAllFragment>[] = [
         id: "indexedDate",
         accessorKey: "indexedDate",
         header: "Indexed Date",
+        cell: ({ getValue }) => {
+            const val = getValue() as string | null | undefined;
+            if (!val) return null;
+            const d = new Date(val);
+            if (Number.isNaN(d.getTime())) return val;
+            return d.toLocaleString();
+        },
     },
     {
         id: "md5",
@@ -95,6 +102,7 @@ const columns: ColumnDef<FirmwareAllFragment>[] = [
         id: "tag",
         accessorKey: "tag",
         header: "Tag",
+        meta: {hidden: true},
     },
     {
         id: "versionDetected",
@@ -105,6 +113,7 @@ const columns: ColumnDef<FirmwareAllFragment>[] = [
         id: "pk",
         accessorKey: "pk",
         header: "Object ID",
+        meta: {hidden: true},
     },
 ];
 

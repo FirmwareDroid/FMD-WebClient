@@ -1,4 +1,5 @@
 type Query {
+  apk_scanner_log_list(objectId: [String], fieldFilter: ApkScannerLogFilter): [ApkScannerLogType]
   trueseeing_report_list(objectId: [String], fieldFilter: TrueseeingReportFilter): [TrueseeingReport]
   mobsfscan_report_list(objectId: [String], fieldFilter: MobSFScanReportFilter): [MobSFScanReport]
   flowdroid_report_list(objectId: [String], fieldFilter: FlowDroidReportFilter): [FlowDroidReport]
@@ -74,31 +75,51 @@ type Query {
   refreshToken(token: String): Refresh
 }
 
-type TrueseeingReport implements ApkScannerReportInterface & Node {
-  Cls: String
-  androidAppIdReference: AndroidAppType
+type ApkScannerLogType implements Node {
+  """"""
+  androidAppId: AndroidAppType
+
+  """"""
+  details: JSONString
+
+  """"""
+  fileName: String
 
   """The ID of the object"""
   id: ID!
-  reportDate: DateTime
 
   """"""
-  results: JSONString!
-  scanStatus: String
-  scannerName: String
-  scannerVersion: String
-  pk: String
-}
+  level: String!
 
-interface ApkScannerReportInterface implements Node {
-  Cls: String
-  id: ID!
-  pk: String
-  reportDate: DateTime
-  scanStatus: String
-  scannerName: String
-  scannerVersion: String
-  androidAppIdReference: AndroidAppType
+  """"""
+  lineNumber: Int
+
+  """"""
+  loggerName: String
+
+  """"""
+  message: String!
+
+  """"""
+  method: String
+
+  """"""
+  module: String
+
+  """"""
+  tag: String
+
+  """"""
+  tags: [String]
+
+  """"""
+  thread: String
+
+  """"""
+  threadName: String
+
+  """"""
+  timestamp: DateTime!
 }
 
 """An object with an ID"""
@@ -106,13 +127,6 @@ interface Node {
   """The ID of the object"""
   id: ID!
 }
-
-"""
-The `DateTime` scalar type represents a DateTime
-value as specified by
-[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-"""
-scalar DateTime
 
 type AndroidAppType implements Node {
   """"""
@@ -314,6 +328,13 @@ type AndroidAppTypeEdge {
   cursor: String!
 }
 
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
 type FirmwareFileTypeConnection {
   """Pagination data for this connection."""
   pageInfo: PageInfo!
@@ -507,6 +528,80 @@ type AppCertificateType implements Node {
 
   """"""
   validIpsList: [String]
+}
+
+input ApkScannerLogFilter {
+  """Filter by timestamp"""
+  timestamp: String
+
+  """Filter by level"""
+  level: String
+
+  """Filter by message"""
+  message: String
+
+  """Filter by module"""
+  module: String
+
+  """Filter by details"""
+  details: String
+
+  """Filter by tags"""
+  tags: [String]
+
+  """Filter by thread"""
+  thread: String
+
+  """Filter by threadName"""
+  threadName: String
+
+  """Filter by loggerName"""
+  loggerName: String
+
+  """Filter by fileName"""
+  fileName: String
+
+  """Filter by method"""
+  method: String
+
+  """Filter by lineNumber"""
+  lineNumber: String
+
+  """Filter by tag"""
+  tag: String
+
+  """Filter by android_app_id"""
+  android_app_id: String
+
+  """Filter by id"""
+  id: String
+}
+
+type TrueseeingReport implements ApkScannerReportInterface & Node {
+  Cls: String
+  androidAppIdReference: AndroidAppType
+
+  """The ID of the object"""
+  id: ID!
+  reportDate: DateTime
+
+  """"""
+  results: JSONString!
+  scanStatus: String
+  scannerName: String
+  scannerVersion: String
+  pk: String
+}
+
+interface ApkScannerReportInterface implements Node {
+  Cls: String
+  id: ID!
+  pk: String
+  reportDate: DateTime
+  scanStatus: String
+  scannerName: String
+  scannerVersion: String
+  androidAppIdReference: AndroidAppType
 }
 
 input TrueseeingReportFilter {

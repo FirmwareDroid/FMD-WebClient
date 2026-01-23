@@ -15,6 +15,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  */
 type Documents = {
     "\n    query GetApiHealth {\n        isApiUp\n    }\n": typeof types.GetApiHealthDocument,
+    "\n    query GetApkScannerLogs{\n        apk_scanner_log_list {\n            id\n            level\n            message\n            module\n            tags\n            timestamp\n            threadName\n            thread\n            method\n            loggerName\n            lineNumber\n            fileName\n            details\n        }\n    }\n": typeof types.GetApkScannerLogsDocument,
     "\n    mutation CreateAppImportJob($queueName: String!, $storageIndex: Int!) {\n        createAppImportJob(\n            queueName: $queueName,\n            storageIndex: $storageIndex\n        ) {\n            jobId\n        }\n    }\n": typeof types.CreateAppImportJobDocument,
     "\n    fragment AppAll on AndroidAppType {\n        absoluteStorePath\n        androidManifestDict\n        fileSizeBytes\n        filename\n        id\n        indexedDate\n        md5\n        originalFilename\n        packagename\n        partitionName\n        pk\n        relativeFirmwarePath\n        relativeStorePath\n        sha1\n        sha256\n        firmwareIdReference {\n            id\n        }\n        firmwareFileReference {\n            id\n        }\n    }\n": typeof types.AppAllFragmentDoc,
     "\n    query GetAppsByFirmwareObjectIds($objectIds: [String!]) {\n        android_firmware_connection(objectIdList: $objectIds) {\n            edges {\n                node {\n                    androidAppIdList {\n                        edges {\n                            node {\n                                ...AppAll\n                            }\n                        }\n                    }\n                }\n            }\n        }\n    }\n": typeof types.GetAppsByFirmwareObjectIdsDocument,
@@ -57,6 +58,7 @@ type Documents = {
 };
 const documents: Documents = {
     "\n    query GetApiHealth {\n        isApiUp\n    }\n": types.GetApiHealthDocument,
+    "\n    query GetApkScannerLogs{\n        apk_scanner_log_list {\n            id\n            level\n            message\n            module\n            tags\n            timestamp\n            threadName\n            thread\n            method\n            loggerName\n            lineNumber\n            fileName\n            details\n        }\n    }\n": types.GetApkScannerLogsDocument,
     "\n    mutation CreateAppImportJob($queueName: String!, $storageIndex: Int!) {\n        createAppImportJob(\n            queueName: $queueName,\n            storageIndex: $storageIndex\n        ) {\n            jobId\n        }\n    }\n": types.CreateAppImportJobDocument,
     "\n    fragment AppAll on AndroidAppType {\n        absoluteStorePath\n        androidManifestDict\n        fileSizeBytes\n        filename\n        id\n        indexedDate\n        md5\n        originalFilename\n        packagename\n        partitionName\n        pk\n        relativeFirmwarePath\n        relativeStorePath\n        sha1\n        sha256\n        firmwareIdReference {\n            id\n        }\n        firmwareFileReference {\n            id\n        }\n    }\n": types.AppAllFragmentDoc,
     "\n    query GetAppsByFirmwareObjectIds($objectIds: [String!]) {\n        android_firmware_connection(objectIdList: $objectIds) {\n            edges {\n                node {\n                    androidAppIdList {\n                        edges {\n                            node {\n                                ...AppAll\n                            }\n                        }\n                    }\n                }\n            }\n        }\n    }\n": types.GetAppsByFirmwareObjectIdsDocument,
@@ -116,6 +118,10 @@ export function gql(source: string): unknown;
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n    query GetApiHealth {\n        isApiUp\n    }\n"): (typeof documents)["\n    query GetApiHealth {\n        isApiUp\n    }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    query GetApkScannerLogs{\n        apk_scanner_log_list {\n            id\n            level\n            message\n            module\n            tags\n            timestamp\n            threadName\n            thread\n            method\n            loggerName\n            lineNumber\n            fileName\n            details\n        }\n    }\n"): (typeof documents)["\n    query GetApkScannerLogs{\n        apk_scanner_log_list {\n            id\n            level\n            message\n            module\n            tags\n            timestamp\n            threadName\n            thread\n            method\n            loggerName\n            lineNumber\n            fileName\n            details\n        }\n    }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
