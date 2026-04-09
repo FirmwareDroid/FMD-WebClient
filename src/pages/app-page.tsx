@@ -1,6 +1,6 @@
 import {useNavigate, useParams} from "react-router";
 import {BasePage} from "@/pages/base-page.tsx";
-import {useQuery} from "@apollo/client";
+import { useQuery } from "@/lib/apollo-hooks";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {APP_ALL, GET_APP_BY_ID, SCAN_APKS_BY_OBJECT_IDS} from "@/components/graphql/app.graphql.ts";
 import {useFragment} from "@/__generated__";
@@ -45,9 +45,9 @@ export function AppPage() {
     }
 
     const apps = (appsData?.android_firmware_connection?.edges ?? [])
-        .flatMap(firmwareEdge => (firmwareEdge?.node?.androidAppIdList?.edges ?? []))
+        .flatMap((firmwareEdge: any) => (firmwareEdge?.node?.androidAppIdList?.edges ?? []))
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map(edge => useFragment(APP_ALL, edge?.node))
+        .map((edge: any) => useFragment(APP_ALL, edge?.node))
         .filter(isNonNullish);
 
     if (apps.length === 1) {

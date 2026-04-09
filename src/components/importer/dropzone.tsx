@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
-import {useMutation} from "@apollo/client";
+import { useMutation } from "@/lib/apollo-hooks";
 import {
     CREATE_FIRMWARE_EXTRACTOR_JOB,
 } from "@/components/graphql/firmware.graphql.ts";

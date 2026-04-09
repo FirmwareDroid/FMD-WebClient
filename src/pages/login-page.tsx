@@ -3,7 +3,7 @@ import { getCsrf } from "@/lib/graphql/apolloClient.ts";
 import {useAuth} from "@/lib/auth.tsx";
 import {useLocation, useNavigate} from "react-router";
 import React, {FormEvent, useEffect, useState} from "react";
-import {useLazyQuery} from "@apollo/client";
+import { useLazyQuery } from "@/lib/apollo-hooks";
 import {GET_AUTH_TOKEN} from "@/components/graphql/auth.graphql.ts";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {Label} from "@/components/ui/label.tsx";
@@ -59,7 +59,7 @@ function LoginForm({className, ...props}: React.ComponentProps<"div">) {
     >(GET_AUTH_TOKEN, {fetchPolicy: "no-cache"});
 
     useEffect(() => {
-        console.log("GET_AUTH_TOKEN result:", data);
+        //console.log("GET_AUTH_TOKEN result:", data);
         const tokenAuth = data?.tokenAuth;
         if (!tokenAuth) return;
 

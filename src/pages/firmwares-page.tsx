@@ -2,7 +2,7 @@ import {BasePage} from "@/pages/base-page.tsx";
 import {ColumnDef} from "@tanstack/react-table";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
 import {FirmwareAllFragment} from "@/__generated__/graphql.ts";
-import {useQuery} from "@apollo/client";
+import { useQuery } from "@/lib/apollo-hooks";
 import {
     FIRMWARE_ALL,
     GET_FIRMWARES_BY_OBJECT_IDS, SCAN_APKS_BY_FIRMWARE_OBJECT_IDS,
@@ -141,7 +141,7 @@ export function FirmwaresPage() {
 
     const firmwares = edges
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map(edge => useFragment(FIRMWARE_ALL, edge?.node))
+        .map((edge: any) => useFragment(FIRMWARE_ALL, edge?.node))
         .filter(isNonNullish);
 
     const goNext = () => {

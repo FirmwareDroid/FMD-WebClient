@@ -2,7 +2,7 @@ import {TypographyH2} from "@/components/typography/headings.tsx";
 import {BasePage} from "@/pages/base-page.tsx";
 import {Dropzone} from "@/components/importer/dropzone.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
-import {useQuery} from "@apollo/client";
+import { useQuery } from "@/lib/apollo-hooks";
 import {
     FIRMWARE_ROW_IMPORTER_PAGE, GET_FIRMWARE_IMPORTER_PAGE, SCAN_APKS_BY_FIRMWARE_OBJECT_IDS,
 } from "@/components/graphql/firmware.graphql.ts";
@@ -78,7 +78,7 @@ export function ImporterPage() {
 
     const firmware = edges
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map(edge => useFragment(FIRMWARE_ROW_IMPORTER_PAGE, edge?.node))
+        .map((edge: any) => useFragment(FIRMWARE_ROW_IMPORTER_PAGE, edge?.node))
         .filter(isNonNullish);
 
     const goNext = () => {

@@ -1,6 +1,6 @@
 import {ColumnDef} from "@tanstack/react-table";
 import {AppAllFragment} from "@/__generated__/graphql.ts";
-import {useQuery} from "@apollo/client";
+import { useQuery } from "@/lib/apollo-hooks";
 import {useFragment} from "@/__generated__";
 import {convertIdToObjectId, isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {BasePage} from "@/pages/base-page.tsx";
@@ -126,9 +126,9 @@ export function AppsPage() {
     });
 
     const apps = (appsData?.android_firmware_connection?.edges ?? [])
-        .flatMap(firmwareEdge => (firmwareEdge?.node?.androidAppIdList?.edges ?? []))
+        .flatMap((firmwareEdge: any) => (firmwareEdge?.node?.androidAppIdList?.edges ?? []))
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map(edge => useFragment(APP_ALL, edge?.node))
+        .map((edge: any) => useFragment(APP_ALL, edge?.node))
         .filter(isNonNullish);
 
     return (

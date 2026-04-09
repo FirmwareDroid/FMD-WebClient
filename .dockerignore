@@ -9,3 +9,31 @@ venv
 .idea
 __pycache__
 node_modules/*
+
+# Dockerignore for frontend build context (firmware-droid-client)
+# Exclude node artifacts and build outputs
+node_modules
+dist
+npm-debug.log
+yarn-error.log
+.pnp
+.pnp.js
+
+# Environment / secrets
+.env
+.env.*
+*.pem
+*.key
+*.p12
+
+# Editor / OS
+.DS_Store
+.vscode
+
+# Cache/lock files
+package-lock.json
+yarn.lock
+
+# Ensure we don't accidentally include the repo root .git metadata when building from this subcontext
+.git
+.git/**

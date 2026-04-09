@@ -1,6 +1,6 @@
 import {BasePage} from "@/pages/base-page.tsx";
 import {useNavigate, useParams} from "react-router";
-import {useQuery} from "@apollo/client";
+import { useQuery } from "@/lib/apollo-hooks";
 import {Alert, AlertTitle} from "@/components/ui/alert.tsx";
 import {AlertCircleIcon, FileIcon} from "lucide-react";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
@@ -44,9 +44,9 @@ export function FilePage() {
     }
 
     const files = (filesData?.android_firmware_connection?.edges ?? [])
-        .flatMap(firmwareEdge => (firmwareEdge?.node?.firmwareFileIdList?.edges ?? []))
+        .flatMap((firmwareEdge: any) => (firmwareEdge?.node?.firmwareFileIdList?.edges ?? []))
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map(edge => useFragment(FILE_ALL, edge?.node))
+        .map((edge: any) => useFragment(FILE_ALL, edge?.node))
         .filter(isNonNullish)
 
     if (files.length === 1) {

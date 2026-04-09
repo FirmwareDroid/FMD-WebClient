@@ -8,7 +8,7 @@ import {
 import {useEffect, useState} from "react";
 import {Button} from "@/components/ui/button.tsx";
 import {ChevronDownIcon} from "lucide-react";
-import {useQuery} from "@apollo/client";
+import { useQuery } from "@/lib/apollo-hooks";
 import {GET_RQ_QUEUE_NAMES} from "@/components/graphql/rq-job.graphql.ts";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 
@@ -22,10 +22,10 @@ export function RqJobQueuesDropdownMenu(
     }) {
     const {data} = useQuery(GET_RQ_QUEUE_NAMES);
     const queues = (data?.rq_queue_name_list ?? [])
-        .filter(isNonNullish);
+        .filter(isNonNullish as (v: any) => v is string);
 
     const filteredQueues = filterQueue
-        ? queues.filter(q => q.toLowerCase().includes(filterQueue))
+        ? queues.filter((q: string) => q.toLowerCase().includes(filterQueue))
         : queues;
 
     const [rqJobQueue, setRqJobQueue] = useState<string>("");
@@ -72,7 +72,7 @@ export function RqJobQueuesDropdownMenu(
                 <DropdownMenuLabel>RQ Job Queues</DropdownMenuLabel>
                 <DropdownMenuSeparator/>
                 <DropdownMenuRadioGroup value={rqJobQueue} onValueChange={handleSelect}>
-                    {filteredQueues.map((queue) => (
+                    {filteredQueues.map((queue: string) => (
                         <DropdownMenuRadioItem key={queue} value={queue}>{queue}</DropdownMenuRadioItem>
                     ))}
                 </DropdownMenuRadioGroup>

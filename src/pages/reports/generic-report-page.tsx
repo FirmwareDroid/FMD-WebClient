@@ -1,4 +1,4 @@
-import { useQuery } from "@apollo/client";
+import { useQuery } from "@/lib/apollo-hooks";
 import { BasePage } from "@/pages/base-page.tsx";
 import { Alert, AlertTitle } from "@/components/ui/alert.tsx";
 import { AlertCircleIcon } from "lucide-react";

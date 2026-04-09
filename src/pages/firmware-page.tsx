@@ -1,6 +1,6 @@
 import {BasePage} from "@/pages/base-page.tsx";
 import {useNavigate, useParams} from "react-router";
-import {useQuery} from "@apollo/client";
+import { useQuery } from "@/lib/apollo-hooks";
 import {
     FIRMWARE_ALL,
     GET_FIRMWARES_BY_OBJECT_IDS,
@@ -50,7 +50,7 @@ export function FirmwarePage() {
 
     const firmwares = (firmwaresData?.android_firmware_connection?.edges ?? [])
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map(edge => useFragment(FIRMWARE_ALL, edge?.node))
+        .map((edge: any) => useFragment(FIRMWARE_ALL, edge?.node))
         .filter(isNonNullish)
 
     if (firmwares.length === 1) {

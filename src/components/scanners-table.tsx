@@ -2,7 +2,7 @@ import {ColumnDef} from "@tanstack/react-table";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
 import {buildSelectEntityColumn} from "@/components/data-table-action-columns/entity-action-columns.tsx";
 import React from "react";
-import {useQuery} from "@apollo/client";
+import { useQuery } from "@/lib/apollo-hooks";
 import {GET_SCANNER_MODULE_NAMES} from "@/components/graphql/app.graphql.ts";
 
 export type Scanner = {
@@ -30,7 +30,7 @@ export function ScannersTable(
 ) {
     const {data} = useQuery(GET_SCANNER_MODULE_NAMES);
     const scanners: Scanner[] = (
-        data?.scanner_module_name_list?.filter((moduleName): moduleName is string => moduleName != null) ?? []
+        data?.scanner_module_name_list?.filter((moduleName: any): moduleName is string => moduleName != null) ?? []
     ).map((moduleName: string) => ({id: moduleName}));
 
     return (

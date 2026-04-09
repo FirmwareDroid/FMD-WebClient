@@ -7,7 +7,7 @@ import {
 } from "@/__generated__/graphql.ts";
 import {useState} from "react";
 import {Scanner, ScannersTable} from "@/components/scanners-table.tsx";
-import {useLazyQuery, useMutation} from "@apollo/client";
+import { useLazyQuery, useMutation } from "@/lib/apollo-hooks";
 import {useNavigate} from "react-router";
 import {
     Dialog,
