@@ -11,6 +11,18 @@ export default defineConfig({
             "@": path.resolve(__dirname, "./src"),
         },
     },
+    test: {
+        environment: 'jsdom',
+        globals: true,
+        setupFiles: ['./src/test/setup.ts'],
+        include: ['src/**/*.{test,spec}.{ts,tsx,js,jsx}'],
+        coverage: {
+            provider: 'v8',
+            reporter: ['text', 'lcov'],
+            include: ['src/**/*.{ts,tsx,js,jsx}'],
+            exclude: ['src/__generated__/**', 'src/test/**', 'src/main.tsx', 'src/vite-env.d.ts'],
+        },
+    },
     build: {
         outDir: 'build',
     },
