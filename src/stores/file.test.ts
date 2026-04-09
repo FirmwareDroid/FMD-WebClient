@@ -65,7 +65,7 @@ describe('useFileStore.upload', () => {
     });
 });
 
-describe('useFileStore.getUplaods', () => {
+describe('useFileStore.getUplaods (getUploads)', () => {
     it('updates files from API response', async () => {
         mockedGetUploads.mockResolvedValue({ data: ['remote.apk'] } as any);
 
