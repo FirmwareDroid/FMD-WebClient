@@ -1,6 +1,6 @@
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {CircleAlertIcon, CircleCheckBigIcon, LoaderCircleIcon} from "lucide-react";
-import {useQuery} from "@apollo/client";
+import { useQuery } from "@/lib/apollo-hooks";
 import {GET_RQ_JOB_LIST} from "@/components/graphql/rq-job.graphql.ts";
 import {cn} from "@/lib/utils.ts";
 
@@ -44,8 +44,8 @@ export function RqJobsTable(
     });
 
     const importJobs = rqJobListData?.rq_job_list
-        ?.filter(job => funcNames.some(funcName => funcName === job?.funcName))
-        .sort((a, b) => new Date(b?.startedAt).getTime() - new Date(a?.startedAt).getTime());
+        ?.filter((job: any) => funcNames.some((funcName: string) => funcName === job?.funcName))
+        .sort((a: any, b: any) => new Date(b?.startedAt).getTime() - new Date(a?.startedAt).getTime());
 
     return (
         <Table className={cn(className)}>
@@ -58,7 +58,7 @@ export function RqJobsTable(
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {importJobs?.map((job) => {
+                {importJobs?.map((job: any) => {
                     if (job) {
                         return (
                             <TableRow key={job.id}>

@@ -21,7 +21,7 @@ import {
 import {NavOptions} from "@/components/ui/sidebar/nav-options.tsx";
 import {NavOperations} from "@/components/ui/sidebar/nav-operations.tsx";
 import {Avatar, AvatarFallback} from "@/components/ui/avatar.tsx";
-import {useQuery} from "@apollo/client";
+import { useQuery } from "@/lib/apollo-hooks";
 import {GET_CURRENT_USER_EMAIL_AND_USERNAME} from "@/components/graphql/current-user.graphql.ts";
 
 export const IMPORTER_URL = "/importer";

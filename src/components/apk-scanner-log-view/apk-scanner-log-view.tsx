@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery } from "@/lib/apollo-hooks";
+import { gql } from "@apollo/client";
 import { LazyLog, ScrollFollow } from "@melloware/react-logviewer";
 
 const GET_APK_SCANNER_LOGS = gql`

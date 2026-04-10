@@ -1,5 +1,5 @@
 import {createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState} from "react";
-import {useApolloClient, useMutation, useQuery} from "@apollo/client";
+import { useApolloClient, useMutation, useQuery } from "@/lib/apollo-hooks";
 import {GET_CURRENT_USER_ID} from "@/components/graphql/current-user.graphql.ts";
 import {DELETE_TOKEN_COOKIE} from "@/components/graphql/auth.graphql.ts";
 import { clearCachedCsrf } from "@/lib/graphql/apolloClient.ts";

@@ -22,7 +22,10 @@ import {AlertCircleIcon} from "lucide-react";
 import {ScrollArea, ScrollBar} from "@/components/ui/scroll-area.tsx";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
-import {ApolloError} from "@apollo/client";
+// Avoid depending on the build-time entrypoint for Apollo types which can
+// sometimes be resolved to a runtime-only bundle that doesn't export types.
+// Use a small local shape for errors we display here.
+type ApolloErrorLike = { message: string };
 import {DataTableViewOptions} from "@/components/ui/table/data-table-column-visbility.tsx";
 import {CursorPagination, CursorPaginationProps} from "@/components/ui/table/cursor-pagination.tsx";
 import DataTableExport from "@/components/ui/table/data-table-export.tsx";
@@ -216,8 +219,8 @@ function StateHandlingScrollableDataTable<TData, TValue>(
     }: Readonly<DataTableProps<TData, TValue>> & {
         idsLoading?: boolean,
         dataLoading?: boolean,
-        idsError?: ApolloError,
-        dataError?: ApolloError,
+        idsError?: ApolloErrorLike,
+        dataError?: ApolloErrorLike,
     }
 ) {
     return (
