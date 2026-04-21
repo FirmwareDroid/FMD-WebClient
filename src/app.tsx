@@ -14,6 +14,7 @@ import {FilesPage} from "@/pages/files-page.tsx";
 import {NotFoundPage} from "@/pages/not-found-page.tsx";
 import {ReportsPage} from "@/pages/reports/reports-page.tsx";
 import {ReportPage} from "@/pages/reports/report-page.tsx";
+import {StatisticsPage} from "@/pages/statistics-page.tsx";
 import {
     APPS_URL,
     EMULATOR_URL,
@@ -21,7 +22,8 @@ import {
     FIRMWARE_URL,
     IMPORTER_URL,
     REPORTS_URL,
-    SCAN_JOBS_URL
+    SCAN_JOBS_URL,
+    STATISTICS_URL,
 } from "@/components/ui/sidebar/app-sidebar.tsx";
 //import EmulatorPage from "@/pages/EmulatorPage";
 import {EmulatorPage} from "@/pages/emulator-page.tsx";
@@ -48,6 +50,7 @@ function App() {
                 <Route path={`${FIRMWARE_URL}/:firmwareId${FILES_URL}/:fileId`} element={<FilePage/>}/>
                 <Route path={APPS_URL} element={<AppsPage/>}/>
                 <Route path={REPORTS_URL} element={<ReportsPage/>}/>
+                <Route path={STATISTICS_URL} element={<StatisticsPage/>}/>
                 <Route path="*" element={<NotFoundPage/>}/>
             </Route>
         </Routes>

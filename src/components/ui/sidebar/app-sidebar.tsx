@@ -1,5 +1,6 @@
 import * as React from "react"
 import {
+    BarChart2Icon,
     BookOpenIcon,
     BugIcon,
     CpuIcon,
@@ -31,6 +32,7 @@ export const FIRMWARE_URL = "/firmware";
 export const APPS_URL = "/apps";
 export const FILES_URL = "/files";
 export const REPORTS_URL = "/reports";
+export const STATISTICS_URL = "/statistics";
 
 const data = {
     operations: [
@@ -65,6 +67,11 @@ const data = {
             name: "Scan Reports",
             url: REPORTS_URL,
             icon: BookOpenIcon,
+        },
+        {
+            name: "Statistics",
+            url: STATISTICS_URL,
+            icon: BarChart2Icon,
         },
     ],
     options: [
