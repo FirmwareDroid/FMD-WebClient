@@ -4,7 +4,9 @@
   "version": "0.2.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "build": "tsc -b && vite build",
     "lint": "eslint firmware-droid-client",
     "preview": "vite preview",
