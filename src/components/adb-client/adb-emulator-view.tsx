@@ -37,6 +37,11 @@ import {
 } from '@/services/adb-streamer/utils/constants';
 import {Card, CardContent} from "@/components/ui/card.tsx";
 import * as Tabs from '@radix-ui/react-tabs';
+import { DisconnectionBanner, DisconnectionInfo } from '@/components/webrtc-client/emulator-error';
+
+const INITIAL_BACKOFF_MS = 1000;
+const MAX_BACKOFF_MS = 30000;
+const MAX_RECONNECT_ATTEMPTS = 5;
 
 // Silent logger for adb-emulator diagnostics (disabled by default).
 // To re-enable debugging set DEBUG_ADB_EMULATOR = true and the logger will forward to console.
@@ -182,6 +187,18 @@ const AdbEmulatorView: React.FC = () => {
     const framesIntervalRef = useRef<number | null>(null);
     const hoverHelperRef = useRef(new LocalScrcpyHoverHelper());
     const audioFramesFedRef = useRef<number>(0);
+
+    // Reconnect state refs
+    const userDisconnectRef = useRef(false);
+    const reconnectAttemptsRef = useRef(0);
+    const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    // Stores params from the last successful start() call so reconnect can replay them
+    const lastStartParamsRef = useRef<{ maxFps: number; bitRate: number; audioEncoder?: string; audioCodec?: string; videoEncoder?: string; videoCodec?: string; device?: string } | null>(null);
+    type StartParams = NonNullable<typeof lastStartParamsRef.current>;
+    // Keep a ref to the latest start() to avoid stale closures inside timer callbacks
+    const startRef = useRef<(params: StartParams) => Promise<void>>(async () => {});
+    const handleUnexpectedDisconnectRef = useRef<() => void>(() => {});
 
     // Safe enqueue that checks controller ref and closed flag. Avoids throwing when stream closed.
     const safeEnqueueRef = (controllerRefObj: React.MutableRefObject<any>, closedRefObj: React.MutableRefObject<boolean>, chunk: any, name = '') => {
@@ -376,6 +393,8 @@ const AdbEmulatorView: React.FC = () => {
     const [framesSkipped, setFramesSkipped] = useState(0);
     const [isStreaming, setIsStreaming] = useState(false);
     const [isWsOpen, setIsWsOpen] = useState(false);
+    const [reconnectInfo, setReconnectInfo] = useState<DisconnectionInfo | null>(null);
+    const [hasAttemptedConnect, setHasAttemptedConnect] = useState(false);
 
     const [controlLeft, setControlLeft] = useState(false);
     const [controlRight, setControlRight] = useState(false);
@@ -583,6 +602,11 @@ const AdbEmulatorView: React.FC = () => {
     }, []);
 
     const start = useCallback(async ({maxFps, bitRate, audioEncoder: overrideAudioEncoder, audioCodec: overrideAudioCodec, videoEncoder: overrideVideoEncoder, videoCodec: overrideVideoCodec, device: overrideDevice}: { maxFps: number; bitRate: number; audioEncoder?: string; audioCodec?: string; videoEncoder?: string; videoCodec?: string; device?: string }) => {
+        // Save params for potential auto-reconnect
+        lastStartParamsRef.current = { maxFps, bitRate, audioEncoder: overrideAudioEncoder, audioCodec: overrideAudioCodec, videoEncoder: overrideVideoEncoder, videoCodec: overrideVideoCodec, device: overrideDevice };
+        // A new explicit start always resets the user-disconnect flag
+        userDisconnectRef.current = false;
+
          await dispose();
 
         // ensure a device is selected in the store before attempting to start
@@ -1054,6 +1078,10 @@ const AdbEmulatorView: React.FC = () => {
                  audioControllerRef.current = null;
                  setIsWsOpen(false);
                  wsRef.current = null;
+                 // Trigger auto-reconnect if this was not a user-initiated disconnect
+                 if (!userDisconnectRef.current) {
+                     handleUnexpectedDisconnectRef.current();
+                 }
              },
              onmessage: (...args: any[]) => {
                  const evt = args[args.length - 1];
@@ -1119,6 +1147,60 @@ const AdbEmulatorView: React.FC = () => {
             }
         }, 1000);
     }, [adbStore, dispose]);
+
+    // Keep startRef pointing to the latest start() to avoid stale closures in reconnect timers
+    useEffect(() => { startRef.current = start as any; }, [start]);
+
+    // Backoff reconnect handler for unexpected disconnections – uses only refs to avoid stale closures
+    const handleUnexpectedDisconnect = useCallback(() => {
+        if (userDisconnectRef.current) return;
+
+        const attempt = reconnectAttemptsRef.current + 1;
+        reconnectAttemptsRef.current = attempt;
+
+        if (attempt > MAX_RECONNECT_ATTEMPTS) {
+            setReconnectInfo({ countdown: 0, attempt, maxAttempts: MAX_RECONNECT_ATTEMPTS, failed: true });
+            setIsStreaming(false);
+            return;
+        }
+
+        const delayMs = Math.min(INITIAL_BACKOFF_MS * Math.pow(2, attempt - 1), MAX_BACKOFF_MS);
+        // Math.pow is safe here because MAX_RECONNECT_ATTEMPTS caps the exponent at 4 (max delay ≤ 16s before the 30s ceiling)
+        let remainingSecs = Math.ceil(delayMs / 1000);
+
+        setReconnectInfo({ countdown: remainingSecs, attempt, maxAttempts: MAX_RECONNECT_ATTEMPTS, failed: false });
+
+        const interval = setInterval(() => {
+            remainingSecs = Math.max(0, remainingSecs - 1);
+            setReconnectInfo((prev: DisconnectionInfo | null) => (prev && !prev.failed ? { ...prev, countdown: remainingSecs } : prev));
+        }, 1000);
+        countdownIntervalRef.current = interval;
+
+        reconnectTimerRef.current = setTimeout(() => {
+            clearInterval(interval);
+            countdownIntervalRef.current = null;
+            if (userDisconnectRef.current || !lastStartParamsRef.current) {
+                setReconnectInfo(null);
+                return;
+            }
+            setReconnectInfo((prev: DisconnectionInfo | null) => (prev ? { ...prev, countdown: 0 } : null));
+            startRef.current(lastStartParamsRef.current!).then(() => {
+                reconnectAttemptsRef.current = 0;
+                setReconnectInfo(null);
+            }).catch(() => {
+                setReconnectInfo(null);
+                handleUnexpectedDisconnectRef.current();
+            });
+        }, delayMs);
+    }, []); // all external state accessed via refs or stable setters
+
+    useEffect(() => { handleUnexpectedDisconnectRef.current = handleUnexpectedDisconnect; }, [handleUnexpectedDisconnect]);
+
+    // Clean up pending reconnect timers on unmount
+    useEffect(() => () => {
+        if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+        if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    }, []);
 
 
 
@@ -1375,6 +1457,13 @@ const AdbEmulatorView: React.FC = () => {
     }, []);
 
     const disconnect = useCallback(async () => {
+        // Mark as user-initiated so auto-reconnect doesn't trigger
+        userDisconnectRef.current = true;
+        // Cancel any pending reconnect timers
+        if (reconnectTimerRef.current) { clearTimeout(reconnectTimerRef.current); reconnectTimerRef.current = null; }
+        if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
+        reconnectAttemptsRef.current = 0;
+        setReconnectInfo(null);
         try {
             await dispose();
         } finally {
@@ -1523,6 +1612,7 @@ const AdbEmulatorView: React.FC = () => {
             toast.error(`Failed to load metadata: ${msg}`);
         } finally {
             setIsLoadingMeta(false);
+            setHasAttemptedConnect(true);
         }
     }, [adbStore, fileStore, toast]);
 
@@ -1590,7 +1680,9 @@ const AdbEmulatorView: React.FC = () => {
 
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8, flexWrap: 'wrap' }}>
                         <button className="btn" onClick={connect} disabled={isLoadingMeta} aria-label="Connect">
-                            {isLoadingMeta ? 'Loading metadata...' : 'Connect'}
+                            {isLoadingMeta ? (
+                                <><span className="emu-spinner" aria-hidden="true" style={{ marginRight: 6 }} />Loading metadata…</>
+                            ) : 'Connect'}
                         </button>
                         <div style={{ color: 'var(--muted-foreground)', fontSize: 13 }}>{adbStore.devices?.length ? `${adbStore.devices.length} device(s) available` : 'No devices loaded'}</div>
                     </div>
@@ -1599,10 +1691,40 @@ const AdbEmulatorView: React.FC = () => {
                 </CardContent>
             </Card>
 
-            {/** Optional banner when no device is present */}
+            {/** Reconnect banner shown when streaming connection drops unexpectedly */}
+            {reconnectInfo && (
+                <DisconnectionBanner
+                    info={reconnectInfo}
+                    onReconnectNow={() => {
+                        if (reconnectTimerRef.current) { clearTimeout(reconnectTimerRef.current); reconnectTimerRef.current = null; }
+                        if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
+                        setReconnectInfo(null);
+                        reconnectAttemptsRef.current = 0;
+                        if (lastStartParamsRef.current) {
+                            startRef.current(lastStartParamsRef.current).catch(() => {
+                                handleUnexpectedDisconnectRef.current();
+                            });
+                        }
+                    }}
+                    onDismiss={() => {
+                        userDisconnectRef.current = true;
+                        if (reconnectTimerRef.current) { clearTimeout(reconnectTimerRef.current); reconnectTimerRef.current = null; }
+                        if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
+                        reconnectAttemptsRef.current = 0;
+                        setReconnectInfo(null);
+                    }}
+                />
+            )}
+
+            {/** Banner shown when no device is present */}
             {!hasDevice && (
                 <div className="emulator-banner" role="status" aria-live="polite">
-                    No devices available. Connect a device to enable streaming.
+                    {isLoadingMeta
+                        ? 'Loading device metadata…'
+                        : hasAttemptedConnect
+                            ? 'No devices found. Check that the emulator URL is correct and the backend server is running.'
+                            : 'No devices loaded. Enter the connection URL above and click Connect to load device metadata.'
+                    }
                 </div>
             )}
 
