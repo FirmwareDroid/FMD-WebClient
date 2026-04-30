@@ -1,10 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { storage } from '@/services/adb-streamer/storage';
 import "../ui/styles/emulator.css";
 import { Card, CardContent } from "@/components/ui/card.tsx";
 import { Alert, AlertTitle } from "@/components/ui/alert.tsx";
 import { Emulator } from "android-emulator-webrtc/emulator";
-import { useEmulatorError, EmulatorErrorBanner } from "./emulator-error";
+import { useEmulatorError, EmulatorErrorBanner, DisconnectionBanner, DisconnectionInfo } from "./emulator-error";
+
+const INITIAL_BACKOFF_MS = 1000;
+const MAX_BACKOFF_MS = 30000;
+const MAX_RECONNECT_ATTEMPTS = 5;
 
 type Props = {
     emuUrl?: string;
@@ -56,6 +60,16 @@ export default function WebRtcEmulatorView({ emuUrl: propEmuUrl = "", storageKey
     const { hasEmulatorError, emulatorErrorMessage, onEmulatorError: reportEmulatorError, dismiss, retry } =
         useEmulatorError();
 
+    // Reconnect state
+    const [reconnectInfo, setReconnectInfo] = useState<DisconnectionInfo | null>(null);
+    const userDisconnectRef = useRef(false);
+    const reconnectAttemptsRef = useRef(0);
+    const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    // Keep a ref to the current connect function to avoid stale closures inside timers
+    const connectRef = useRef<() => void>(() => {});
+    const handleUnexpectedDisconnectRef = useRef<() => void>(() => {});
+
     useEffect(() => {
         if (propEmuUrl && propEmuUrl !== emuUrl) {
             setEmuUrl(propEmuUrl);
@@ -71,6 +85,7 @@ export default function WebRtcEmulatorView({ emuUrl: propEmuUrl = "", storageKey
 
     const handleStateChange = (s?: string) => {
         const low = (s ?? "").toLowerCase();
+        const prevStatus = status;
         if (!s) {
             setStatus("idle");
             return;
@@ -81,7 +96,13 @@ export default function WebRtcEmulatorView({ emuUrl: propEmuUrl = "", storageKey
         else setStatus("idle");
 
         if (low === "connecting") setShowEmulator(true);
-        if (low === "disconnected") setShowEmulator(false);
+        if (low === "disconnected") {
+            setShowEmulator(false);
+            // Trigger backoff reconnect only for unexpected disconnections
+            if (!userDisconnectRef.current && (prevStatus === "connected" || prevStatus === "connecting")) {
+                handleUnexpectedDisconnectRef.current();
+            }
+        }
     };
 
     const handleEmulatorError = (err: any) => {
@@ -112,6 +133,11 @@ export default function WebRtcEmulatorView({ emuUrl: propEmuUrl = "", storageKey
             return;
         }
 
+        // Reset reconnect state on explicit connect
+        userDisconnectRef.current = false;
+        reconnectAttemptsRef.current = 0;
+        setReconnectInfo(null);
+
         setErrorMessage(null);
         setShowEmulator(true);
         setStatus("connecting");
@@ -135,6 +161,12 @@ export default function WebRtcEmulatorView({ emuUrl: propEmuUrl = "", storageKey
     };
 
     const disconnect = () => {
+        userDisconnectRef.current = true;
+        // Cancel any pending reconnect
+        if (reconnectTimerRef.current) { clearTimeout(reconnectTimerRef.current); reconnectTimerRef.current = null; }
+        if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
+        reconnectAttemptsRef.current = 0;
+        setReconnectInfo(null);
         setShowEmulator(false);
         setEmuProps(null);
         setStatus("idle");
@@ -146,6 +178,54 @@ export default function WebRtcEmulatorView({ emuUrl: propEmuUrl = "", storageKey
         disconnect();
         setTimeout(() => connect(), 50);
     };
+
+    // Keep refs current so timer callbacks always have the latest functions
+    useEffect(() => { connectRef.current = connect; });
+
+    // Backoff reconnect for unexpected disconnections – uses only refs to avoid stale closures
+    const handleUnexpectedDisconnect = useCallback(() => {
+        if (userDisconnectRef.current) return;
+
+        const attempt = reconnectAttemptsRef.current + 1;
+        reconnectAttemptsRef.current = attempt;
+
+        if (attempt > MAX_RECONNECT_ATTEMPTS) {
+            setReconnectInfo({ countdown: 0, attempt, maxAttempts: MAX_RECONNECT_ATTEMPTS, failed: true });
+            return;
+        }
+
+        const delayMs = Math.min(INITIAL_BACKOFF_MS * Math.pow(2, attempt - 1), MAX_BACKOFF_MS);
+        let remainingSecs = Math.ceil(delayMs / 1000);
+
+        setReconnectInfo({ countdown: remainingSecs, attempt, maxAttempts: MAX_RECONNECT_ATTEMPTS, failed: false });
+
+        const interval = setInterval(() => {
+            remainingSecs = Math.max(0, remainingSecs - 1);
+            setReconnectInfo((prev: DisconnectionInfo | null) => (prev && !prev.failed ? { ...prev, countdown: remainingSecs } : prev));
+        }, 1000);
+        countdownIntervalRef.current = interval;
+
+        reconnectTimerRef.current = setTimeout(() => {
+            clearInterval(interval);
+            countdownIntervalRef.current = null;
+            if (userDisconnectRef.current) { setReconnectInfo(null); return; }
+            // Attempt reconnect
+            try {
+                connectRef.current();
+            } catch {
+                setReconnectInfo(null);
+                handleUnexpectedDisconnectRef.current();
+            }
+        }, delayMs);
+    }, []); // all external state accessed via refs
+
+    useEffect(() => { handleUnexpectedDisconnectRef.current = handleUnexpectedDisconnect; }, [handleUnexpectedDisconnect]);
+
+    // Clean up any pending reconnect timers on unmount
+    useEffect(() => () => {
+        if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+        if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    }, []);
 
     useEffect(() => {
         if (!emuProps) return;
@@ -187,7 +267,9 @@ export default function WebRtcEmulatorView({ emuUrl: propEmuUrl = "", storageKey
 
                     <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
                         <button onClick={connect} style={{ padding: "6px 10px" }} aria-label="Connect">
-                            Connect
+                            {status === "connecting" ? (
+                                <><span className="emu-spinner" aria-hidden="true" style={{ marginRight: 6 }} />Connecting…</>
+                            ) : "Connect"}
                         </button>
                         <button onClick={disconnect} style={{ padding: "6px 10px" }} aria-label="Disconnect">
                             Disconnect
@@ -249,9 +331,35 @@ export default function WebRtcEmulatorView({ emuUrl: propEmuUrl = "", storageKey
             )}
 
             <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                <div style={{ color: "rgba(255,255,255,0.8)" }}>Status: {status}</div>
+                <div style={{ color: "rgba(255,255,255,0.8)" }}>
+                    Status:{" "}
+                    {status === "connecting" && (
+                        <span className="emu-spinner" aria-hidden="true" style={{ marginRight: 4 }} />
+                    )}
+                    {status}
+                </div>
                 <div style={{ color: "rgba(255,255,255,0.7)" }}>Audio: {hasEmulatorAudio ? "available" : "none"}</div>
             </div>
+
+            {reconnectInfo && (
+                <DisconnectionBanner
+                    info={reconnectInfo}
+                    onReconnectNow={() => {
+                        if (reconnectTimerRef.current) { clearTimeout(reconnectTimerRef.current); reconnectTimerRef.current = null; }
+                        if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
+                        setReconnectInfo(null);
+                        reconnectAttemptsRef.current = 0;
+                        connectRef.current();
+                    }}
+                    onDismiss={() => {
+                        userDisconnectRef.current = true;
+                        if (reconnectTimerRef.current) { clearTimeout(reconnectTimerRef.current); reconnectTimerRef.current = null; }
+                        if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
+                        reconnectAttemptsRef.current = 0;
+                        setReconnectInfo(null);
+                    }}
+                />
+            )}
 
             <div style={{ marginTop: 8 }}>
                 <div
@@ -272,6 +380,11 @@ export default function WebRtcEmulatorView({ emuUrl: propEmuUrl = "", storageKey
                 >
                     {showEmulator && emuProps ? (
                         <Emulator {...emuProps} />
+                    ) : status === "connecting" ? (
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "100%", color: "rgba(255,255,255,0.8)", gap: 12 }}>
+                            <span className="emu-spinner" aria-hidden="true" style={{ width: 28, height: 28, borderWidth: 3 }} />
+                            <div>Connecting to emulator…</div>
+                        </div>
                     ) : (
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", color: "rgba(255,255,255,0.6)" }}>
                             <div>No emulator running. Click Connect to start.</div>
