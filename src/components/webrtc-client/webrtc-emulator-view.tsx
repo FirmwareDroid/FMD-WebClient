@@ -70,6 +70,11 @@ export default function WebRtcEmulatorView({ emuUrl: propEmuUrl = "", storageKey
     const connectRef = useRef<() => void>(() => {});
     const handleUnexpectedDisconnectRef = useRef<() => void>(() => {});
 
+    const clearReconnectTimers = useCallback(() => {
+        if (reconnectTimerRef.current) { clearTimeout(reconnectTimerRef.current); reconnectTimerRef.current = null; }
+        if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
+    }, []);
+
     useEffect(() => {
         if (propEmuUrl && propEmuUrl !== emuUrl) {
             setEmuUrl(propEmuUrl);
@@ -163,8 +168,7 @@ export default function WebRtcEmulatorView({ emuUrl: propEmuUrl = "", storageKey
     const disconnect = () => {
         userDisconnectRef.current = true;
         // Cancel any pending reconnect
-        if (reconnectTimerRef.current) { clearTimeout(reconnectTimerRef.current); reconnectTimerRef.current = null; }
-        if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
+        clearReconnectTimers();
         reconnectAttemptsRef.current = 0;
         setReconnectInfo(null);
         setShowEmulator(false);
@@ -195,6 +199,7 @@ export default function WebRtcEmulatorView({ emuUrl: propEmuUrl = "", storageKey
         }
 
         const delayMs = Math.min(INITIAL_BACKOFF_MS * Math.pow(2, attempt - 1), MAX_BACKOFF_MS);
+        // Math.pow is safe here because MAX_RECONNECT_ATTEMPTS caps the exponent at 4 (max delay ≤ 16s before the 30s ceiling)
         let remainingSecs = Math.ceil(delayMs / 1000);
 
         setReconnectInfo({ countdown: remainingSecs, attempt, maxAttempts: MAX_RECONNECT_ATTEMPTS, failed: false });
@@ -222,10 +227,7 @@ export default function WebRtcEmulatorView({ emuUrl: propEmuUrl = "", storageKey
     useEffect(() => { handleUnexpectedDisconnectRef.current = handleUnexpectedDisconnect; }, [handleUnexpectedDisconnect]);
 
     // Clean up any pending reconnect timers on unmount
-    useEffect(() => () => {
-        if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
-        if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
-    }, []);
+    useEffect(() => () => { clearReconnectTimers(); }, [clearReconnectTimers]);
 
     useEffect(() => {
         if (!emuProps) return;
@@ -345,16 +347,14 @@ export default function WebRtcEmulatorView({ emuUrl: propEmuUrl = "", storageKey
                 <DisconnectionBanner
                     info={reconnectInfo}
                     onReconnectNow={() => {
-                        if (reconnectTimerRef.current) { clearTimeout(reconnectTimerRef.current); reconnectTimerRef.current = null; }
-                        if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
+                        clearReconnectTimers();
                         setReconnectInfo(null);
                         reconnectAttemptsRef.current = 0;
                         connectRef.current();
                     }}
                     onDismiss={() => {
                         userDisconnectRef.current = true;
-                        if (reconnectTimerRef.current) { clearTimeout(reconnectTimerRef.current); reconnectTimerRef.current = null; }
-                        if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
+                        clearReconnectTimers();
                         reconnectAttemptsRef.current = 0;
                         setReconnectInfo(null);
                     }}

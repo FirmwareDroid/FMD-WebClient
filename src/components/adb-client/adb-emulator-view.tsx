@@ -195,8 +195,9 @@ const AdbEmulatorView: React.FC = () => {
     const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     // Stores params from the last successful start() call so reconnect can replay them
     const lastStartParamsRef = useRef<{ maxFps: number; bitRate: number; audioEncoder?: string; audioCodec?: string; videoEncoder?: string; videoCodec?: string; device?: string } | null>(null);
+    type StartParams = NonNullable<typeof lastStartParamsRef.current>;
     // Keep a ref to the latest start() to avoid stale closures inside timer callbacks
-    const startRef = useRef<(params: typeof lastStartParamsRef extends React.MutableRefObject<infer T> ? NonNullable<T> : never) => Promise<void>>(async () => {});
+    const startRef = useRef<(params: StartParams) => Promise<void>>(async () => {});
     const handleUnexpectedDisconnectRef = useRef<() => void>(() => {});
 
     // Safe enqueue that checks controller ref and closed flag. Avoids throwing when stream closed.
@@ -1164,6 +1165,7 @@ const AdbEmulatorView: React.FC = () => {
         }
 
         const delayMs = Math.min(INITIAL_BACKOFF_MS * Math.pow(2, attempt - 1), MAX_BACKOFF_MS);
+        // Math.pow is safe here because MAX_RECONNECT_ATTEMPTS caps the exponent at 4 (max delay ≤ 16s before the 30s ceiling)
         let remainingSecs = Math.ceil(delayMs / 1000);
 
         setReconnectInfo({ countdown: remainingSecs, attempt, maxAttempts: MAX_RECONNECT_ATTEMPTS, failed: false });
@@ -1699,7 +1701,7 @@ const AdbEmulatorView: React.FC = () => {
                         setReconnectInfo(null);
                         reconnectAttemptsRef.current = 0;
                         if (lastStartParamsRef.current) {
-                            startRef.current(lastStartParamsRef.current!).catch(() => {
+                            startRef.current(lastStartParamsRef.current).catch(() => {
                                 handleUnexpectedDisconnectRef.current();
                             });
                         }
