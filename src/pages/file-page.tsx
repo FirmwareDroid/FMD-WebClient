@@ -4,7 +4,7 @@ import { useQuery } from "@/lib/apollo-hooks";
 import {Alert, AlertTitle} from "@/components/ui/alert.tsx";
 import {AlertCircleIcon, FileIcon} from "lucide-react";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
-import {useFragment} from "@/__generated__";
+import {useFragment as readFragment} from "@/__generated__";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {FileAllFragment} from "@/__generated__/graphql.ts";
 import {EntityTable} from "@/components/entity-table.tsx";
@@ -19,6 +19,7 @@ export function FilePage() {
     const {
         loading: filesLoading,
         data: filesData,
+        error: filesError,
     } = useQuery(GET_FILE_BY_ID, {
         variables: {id: fileId as string},
         skip: !fileId,
@@ -43,10 +44,13 @@ export function FilePage() {
         );
     }
 
+    if (filesError) {
+        return <BasePage title="File"><Alert variant="destructive" role="alert"><AlertCircleIcon/><AlertTitle>Unable to load this file. Please try again.</AlertTitle></Alert></BasePage>;
+    }
+
     const files = (filesData?.android_firmware_connection?.edges ?? [])
         .flatMap((firmwareEdge: any) => (firmwareEdge?.node?.firmwareFileIdList?.edges ?? []))
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map((edge: any) => useFragment(FILE_ALL, edge?.node))
+        .map((edge) => readFragment(FILE_ALL, edge?.node))
         .filter(isNonNullish)
 
     if (files.length === 1) {
@@ -75,7 +79,7 @@ export function FilePage() {
             <BasePage title={"File (no match)"}>
                 <Alert variant="destructive">
                     <AlertCircleIcon/>
-                    <AlertTitle>Could not find an file with ID '{fileId}'.</AlertTitle>
+                    <AlertTitle>Could not find a file with ID '{fileId}'.</AlertTitle>
                 </Alert>
             </BasePage>
         );

@@ -116,10 +116,10 @@ function DataTable<TData, TValue>(
 
     return (
         <div className={cn(className)}>
-            <div className="flex items-center p-4 gap-4">
+            <div className="flex flex-col items-stretch gap-3 p-3 sm:flex-row sm:items-center sm:p-4">
                 <DataTableSearch value={globalFilter} onChange={setGlobalFilter} />
 
-                <div className="ml-auto flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
                     <DataTableExport table={table} />
                     <DataTableViewOptions table={table} />
                 </div>
@@ -162,15 +162,15 @@ function DataTable<TData, TValue>(
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="text-center">
-                                    No results.
+                                <TableCell colSpan={columns.length} className="h-32 text-center text-muted-foreground">
+                                    {globalFilter ? "No matching results." : "No data available."}
                                 </TableCell>
                             </TableRow>
                         )}
                     </TableBody>
                 </Table>
             </div>
-            <div className="flex items-center justify-between space-x-2 py-4">
+            <div className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="text-muted-foreground flex-1 text-sm px-2">
                     {table.getFilteredSelectedRowModel().rows.length} of{" "}
                     {table.getFilteredRowModel().rows.length} row(s) selected.
@@ -226,14 +226,17 @@ function StateHandlingScrollableDataTable<TData, TValue>(
     return (
         <>
             {(idsLoading || dataLoading) && (
-                <Skeleton className="w-full h-[400px]"/>
+                <div className="w-full" role="status" aria-live="polite">
+                    <span className="sr-only">Loading data…</span>
+                    <Skeleton className="h-[400px] w-full"/>
+                </div>
             )}
 
             {idsError && (
                 <Alert className="max-w-max" variant="destructive">
                     <AlertCircleIcon/>
                     <AlertTitle>Unable to load firmware IDs.</AlertTitle>
-                    <AlertDescription>Error message: "{idsError.message}"</AlertDescription>
+                    <AlertDescription>Please try again. If the problem continues, contact an administrator.</AlertDescription>
                 </Alert>
             )}
 
@@ -241,7 +244,7 @@ function StateHandlingScrollableDataTable<TData, TValue>(
                 <Alert className="max-w-max" variant="destructive">
                     <AlertCircleIcon/>
                     <AlertTitle>Unable to load firmware.</AlertTitle>
-                    <AlertDescription>Error message: "{dataError.message}"</AlertDescription>
+                    <AlertDescription>Please try again. If the problem continues, contact an administrator.</AlertDescription>
                 </Alert>
             )}
 

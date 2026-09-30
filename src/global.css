@@ -117,6 +117,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
 }
 
 .theme-text-color {
@@ -128,5 +131,4 @@
 html.dark .theme-text {
     color: #facc15; /* dark: yellow-400 */
 }
-
 

@@ -4,7 +4,7 @@ import {FileAllFragment} from "@/__generated__/graphql.ts";
 import {useParams} from "react-router";
 import {convertIdToObjectId, isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import { useQuery } from "@/lib/apollo-hooks";
-import {useFragment} from "@/__generated__";
+import {useFragment as readFragment} from "@/__generated__";
 import {FILE_ALL, GET_FILES_BY_FIRMWARE_OBJECT_IDS} from "@/components/graphql/file.graphql.ts";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
 import {buildFileActionColumns} from "@/components/data-table-action-columns/file-action-columns.tsx";
@@ -109,8 +109,7 @@ export function FilesPage() {
 
     const files = (filesData?.android_firmware_connection?.edges ?? [])
         .flatMap((firmwareEdge: any) => (firmwareEdge?.node?.firmwareFileIdList?.edges ?? []))
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map((edge: any) => useFragment(FILE_ALL, edge?.node))
+        .map((edge) => readFragment(FILE_ALL, edge?.node))
         .filter(isNonNullish);
 
     return (

@@ -23,7 +23,7 @@ export function NavOptions({items, ...props}: {
                     {items.map((item) => (
                         <SidebarMenuItem key={item.title}>
                             <SidebarMenuButton asChild size="sm">
-                                <a href={item.url}>
+                                <a href={item.url} target="_blank" rel="noreferrer noopener">
                                     <item.icon/>
                                     <span>{item.title}</span>
                                 </a>

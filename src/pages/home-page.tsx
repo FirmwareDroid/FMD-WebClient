@@ -4,6 +4,7 @@ import {
 } from "@/components/ui/card.tsx";
 import {TypographyH1} from "@/components/typography/headings.tsx";
 import "../components/ui/theming/links.css"
+import {Link} from "react-router";
 
 function HomePage() {
     return (
@@ -30,9 +31,9 @@ function HomePage() {
                         <h3 className="text-lg font-semibold mb-2 theme-text-color">Getting started</h3>
                         <p className="text-body">
                             Get started by uploading a firmware image or an Android app via the
-                            {' '}<a className="ui-link" href="./importer">Importer</a> operation. Once imported, you can start analyzing the
+                            {' '}<Link className="ui-link" to="/importer">Importer</Link> operation. Once imported, you can start analyzing the
                             extracted Android apps using a set of security-focused tools available in the
-                            {' '}<a className="ui-link" href="./firmware">Analysis</a> section.
+                            {' '}<Link className="ui-link" to="/firmware">Analysis</Link> section.
                         </p>
                     </CardContent>
                 </Card>

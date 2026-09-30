@@ -7,7 +7,7 @@ export class AacDecodeStream extends TransformStream {
       start(controller) {
         decoder = new AudioDecoder({
           error(error) {
-            console.log('audio decoder error: ', error)
+            console.warn('Audio decoder failed.')
             controller.error(error)
           },
           output(output) {
@@ -66,7 +66,7 @@ export class OpusDecodeStream extends TransformStream {
       start(controller) {
         decoder = new AudioDecoder({
           error(error) {
-            console.log('audio decoder error: ', error)
+            console.warn('Audio decoder failed.')
             controller.error(error)
           },
           output(output) {

@@ -2,7 +2,7 @@ import {BasePage} from "@/pages/base-page.tsx";
 import {ColumnDef} from "@tanstack/react-table";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
 import { useQuery } from "@/lib/apollo-hooks";
-import {useFragment} from "@/__generated__";
+import {useFragment as readFragment} from "@/__generated__";
 import {convertIdToObjectId, isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {GET_REPORT, META_APK_SCANNER_REPORT} from "@/components/graphql/report.graphql.ts";
 import {useParams} from "react-router";
@@ -69,20 +69,12 @@ export function ReportsPage() {
         fetchPolicy: "cache-first",
     });
 
-    //const reports = reportsData?.apk_scanner_report_list ?? []
-    if (reportsData) {
-        console.log(reportsData);
-    }
-
     const reports = (reportsData?.apk_scanner_report_list ?? [])
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map((report: any) => {
+        .map((report) => {
             if (!report) return null;
-            return useFragment(META_APK_SCANNER_REPORT, report);
+            return readFragment(META_APK_SCANNER_REPORT, report);
         })
         .filter(isNonNullish);
-
-    console.log("reports2", reports);
 
     return (
         <BasePage title={"Reports"}>

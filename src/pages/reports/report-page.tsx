@@ -21,10 +21,21 @@ export function ReportPage() {
         );
     }
 
-    const [scannerName, reportId] = scannerNameAndReportId.split("-");
-
-
+    const separatorIndex = scannerNameAndReportId.lastIndexOf("-");
+    const scannerName = scannerNameAndReportId.slice(0, separatorIndex);
+    const reportId = scannerNameAndReportId.slice(separatorIndex + 1);
     const objectId = convertIdToObjectId(reportId);
+
+    if (separatorIndex <= 0 || !/^[a-zA-Z0-9_.-]{1,100}$/.test(scannerName) || !objectId) {
+        return (
+            <BasePage title="Invalid report">
+                <Alert variant="destructive" role="alert">
+                    <AlertCircleIcon/>
+                    <AlertTitle>The requested report identifier is invalid.</AlertTitle>
+                </Alert>
+            </BasePage>
+        );
+    }
 
     return (
         <GenericReportPage reportId={objectId} scannerName={scannerName}/>

@@ -6,6 +6,7 @@ import {client} from "./lib/graphql/apolloClient.ts";
 import {BrowserRouter} from "react-router";
 import {ThemeProvider} from "@/components/ui/theming/theme-provider.tsx";
 import {AuthProvider} from "@/lib/auth.tsx";
+import {ToastRegion} from "@/components/ui/toast-region.tsx";
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 createRoot(document.getElementById('root')!).render(
@@ -15,6 +16,7 @@ createRoot(document.getElementById('root')!).render(
                 <ThemeProvider defaultTheme="dark" storageKey="theme">
                     <BrowserRouter>
                         <App/>
+                        <ToastRegion/>
                     </BrowserRouter>
                 </ThemeProvider>
             </AuthProvider>

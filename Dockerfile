@@ -5,4 +5,4 @@ FROM node:22-slim AS firmwaredroid-frontend
 RUN mkdir -p /usr/src/app/build
 COPY . /usr/src/app
 WORKDIR /usr/src/app
-RUN yarn && yarn build
+RUN yarn install --frozen-lockfile && yarn build

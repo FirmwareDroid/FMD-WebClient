@@ -31,6 +31,7 @@ export function SiteHeader() {
                         variant="ghost"
                         size="icon"
                         onClick={toggleSidebar}
+                        aria-label="Toggle navigation sidebar"
                     >
                         <SidebarIcon/>
                     </Button>
@@ -41,10 +42,10 @@ export function SiteHeader() {
                         <BreadcrumbList>
                             {isFirmwaresOrAppsPath && splitPathname
                                 .map((item, index) => (
-                                    <BreadcrumbItem key={item}>
+                                    <BreadcrumbItem key={`${item}-${index.toString()}`}>
                                         <BreadcrumbLink asChild>
                                             <Link
-                                                to={`/${splitPathname.slice(0, splitPathname.indexOf(item) + 1).join("/")}`}>
+                                                to={`/${splitPathname.slice(0, index + 1).join("/")}`}>
                                                 {item}
                                             </Link>
                                         </BreadcrumbLink>

@@ -3,7 +3,7 @@ import {BasePage} from "@/pages/base-page.tsx";
 import { useQuery } from "@/lib/apollo-hooks";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {APP_ALL, GET_APP_BY_ID, SCAN_APKS_BY_OBJECT_IDS} from "@/components/graphql/app.graphql.ts";
-import {useFragment} from "@/__generated__";
+import {useFragment as readFragment} from "@/__generated__";
 import {Alert, AlertTitle} from "@/components/ui/alert.tsx";
 import {AlertCircleIcon, BookOpenIcon, FileIcon} from "lucide-react";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
@@ -20,6 +20,7 @@ export function AppPage() {
     const {
         loading: appsLoading,
         data: appsData,
+        error: appsError,
     } = useQuery(GET_APP_BY_ID, {
         variables: {id: appId as string},
         skip: !appId,
@@ -44,10 +45,13 @@ export function AppPage() {
         );
     }
 
+    if (appsError) {
+        return <BasePage title="App"><Alert variant="destructive" role="alert"><AlertCircleIcon/><AlertTitle>Unable to load this app. Please try again.</AlertTitle></Alert></BasePage>;
+    }
+
     const apps = (appsData?.android_firmware_connection?.edges ?? [])
         .flatMap((firmwareEdge: any) => (firmwareEdge?.node?.androidAppIdList?.edges ?? []))
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map((edge: any) => useFragment(APP_ALL, edge?.node))
+        .map((edge) => readFragment(APP_ALL, edge?.node))
         .filter(isNonNullish);
 
     if (apps.length === 1) {

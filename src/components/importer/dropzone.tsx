@@ -1,4 +1,4 @@
-import {Dispatch, SetStateAction, useCallback, useState} from "react";
+import {Dispatch, SetStateAction, useCallback, useEffect, useRef, useState} from "react";
 import {useDropzone} from "react-dropzone";
 import {Card} from "@/components/ui/card.tsx";
 import {cn} from "@/lib/utils.ts";
@@ -21,6 +21,7 @@ import {Button} from "@/components/ui/button.tsx";
 import {CREATE_APP_IMPORT_JOB} from "@/components/graphql/app.graphql.ts";
 import {RqJobsTable} from "@/components/rq-jobs-table.tsx";
 import {RqJobQueuesDropdownMenu} from "@/components/rq-jobs/rq-job-queues-dropdown-menu.tsx";
+import {getCsrf} from "@/lib/graphql/apolloClient.ts";
 
 type DropzoneProps = {
     className?: string;
@@ -74,6 +75,8 @@ function UploadDialog({storageIndex, fileUploads, setFileUploads, removeUpload}:
     const [createAppImportJob] = useMutation(CREATE_APP_IMPORT_JOB);
 
     const [selectedQueue, setSelectedQueue] = useState<string>("");
+    const [importStarting, setImportStarting] = useState(false);
+    const [importError, setImportError] = useState<string | null>(null);
 
     return (
         <Dialog open={fileUploads.length > 0 && !fileUploads.every(u => u.importStarted)} modal={true}>
@@ -105,12 +108,15 @@ function UploadDialog({storageIndex, fileUploads, setFileUploads, removeUpload}:
                                                     <>
                                                         <LoaderCircleIcon className="animate-spin"/>
                                                         <Progress value={upload.percentComplete}/>
-                                                        <XIcon
-                                                            onClick={() => {
-                                                                cancelUpload(upload);
-                                                            }}
-                                                            className="cursor-pointer"
-                                                        />
+                                                        <Button
+                                                            type="button"
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            onClick={() => cancelUpload(upload)}
+                                                            aria-label={`Cancel upload of ${upload.file.name}`}
+                                                        >
+                                                            <XIcon/>
+                                                        </Button>
                                                     </>
                                                 )}
                                                 {upload.percentComplete >= 100 &&
@@ -148,6 +154,13 @@ function UploadDialog({storageIndex, fileUploads, setFileUploads, removeUpload}:
                         })}
                     </TableBody>
                 </Table>
+                {importError && (
+                    <Alert variant="destructive" role="alert">
+                        <CloudAlertIcon/>
+                        <AlertTitle>Unable to start import</AlertTitle>
+                        <AlertDescription>{importError}</AlertDescription>
+                    </Alert>
+                )}
                 <DialogFooter>
                     <DialogClose asChild>
                         <Button variant="destructive" onClick={() => {
@@ -166,21 +179,28 @@ function UploadDialog({storageIndex, fileUploads, setFileUploads, removeUpload}:
                     />
                     <Button
                         disabled={
+                            !selectedQueue ||
+                            importStarting ||
                             !fileUploads.every(upload => upload.serverResponded) ||
                             fileUploads.every(upload => upload.error)
                         }
+                        aria-busy={importStarting}
                         onClick={() => {
+                            setImportStarting(true);
+                            setImportError(null);
+                            const jobs: Promise<unknown>[] = [];
                             if (fileUploads.some(upload => upload.type === "firmware")) {
-                                void createFirmwareExtractorJob({variables: {queueName: selectedQueue, storageIndex}});
+                                jobs.push(createFirmwareExtractorJob({variables: {queueName: selectedQueue, storageIndex}}));
                             }
-
                             if (fileUploads.some(upload => upload.type === "apk")) {
-                                void createAppImportJob({variables: {queueName: selectedQueue, storageIndex}});
+                                jobs.push(createAppImportJob({variables: {queueName: selectedQueue, storageIndex}}));
                             }
-
-                            setFileUploads(prev => prev.map(upload => ({...upload, importStarted: true})));
+                            void Promise.all(jobs)
+                                .then(() => setFileUploads(prev => prev.map(upload => ({...upload, importStarted: true}))))
+                                .catch(() => setImportError("The server could not start the selected import jobs. Please try again."))
+                                .finally(() => setImportStarting(false));
                         }}>
-                        Import
+                        {importStarting ? "Starting import…" : "Import"}
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -196,19 +216,32 @@ export function Dropzone(
     }: Readonly<DropzoneProps>
 ) {
     const [fileUploads, setFileUploads] = useState<FileUpload[]>([]);
+    const [dropError, setDropError] = useState<string | null>(null);
+    const activeRequests = useRef(new Map<string, XMLHttpRequest>());
+
+    useEffect(() => () => {
+        activeRequests.current.forEach(request => request.abort());
+        activeRequests.current.clear();
+    }, []);
 
     const updateUpload = useCallback((id: string, patch: Partial<FileUpload>) => {
         setFileUploads(prev => prev.map(upload => (upload.id === id ? {...upload, ...patch} : upload)));
     }, []);
 
     const removeUpload = useCallback((id: string) => {
+        activeRequests.current.delete(id);
         setFileUploads(prev => prev.filter(upload => upload.id !== id));
     }, []);
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         if (acceptedFiles.length === 0) return;
 
-        setFileUploads(acceptedFiles.map(file => ({
+        setDropError(null);
+        const uniqueFiles = acceptedFiles.filter((file, index, files) =>
+            files.findIndex(candidate => makeUploadId(candidate) === makeUploadId(file)) === index
+        );
+
+        setFileUploads(uniqueFiles.map(file => ({
             id: makeUploadId(file),
             file: file,
             type: getUploadType(file),
@@ -216,7 +249,7 @@ export function Dropzone(
             serverResponded: false,
         })));
 
-        acceptedFiles.forEach((file) => {
+        void getCsrf().then(csrfToken => uniqueFiles.forEach((file) => {
             const id = makeUploadId(file);
 
             const formData = new FormData();
@@ -227,6 +260,7 @@ export function Dropzone(
             const xhr = new XMLHttpRequest();
             xhr.open("POST", "/upload/file");
             xhr.withCredentials = true;
+            xhr.setRequestHeader("X-CSRFToken", csrfToken);
             xhr.upload.onprogress = (event) => {
                 if (event.lengthComputable) {
                     const percentComplete = Math.round((event.loaded / event.total) * 100);
@@ -237,14 +271,17 @@ export function Dropzone(
             xhr.onload = () => {
                 if (xhr.status >= 200 && xhr.status < 300) {
                     updateUpload(id, {serverResponded: true});
+                    activeRequests.current.delete(id);
                     return;
                 }
 
-                updateUpload(id, {serverResponded: true, error: xhr.responseText})
+                updateUpload(id, {serverResponded: true, error: "The server could not accept this file."});
+                activeRequests.current.delete(id);
             };
 
             xhr.onerror = () => {
-                updateUpload(id, {serverResponded: true, error: xhr.statusText});
+                updateUpload(id, {serverResponded: true, error: "The upload failed because of a network error."});
+                activeRequests.current.delete(id);
             };
 
             xhr.onabort = () => {
@@ -252,7 +289,10 @@ export function Dropzone(
             };
 
             updateUpload(id, {xhr});
+            activeRequests.current.set(id, xhr);
             xhr.send(formData);
+        })).catch(() => {
+            setDropError("Unable to initialize a secure upload. Refresh the page and try again.");
         });
     }, [storageIndex, updateUpload, removeUpload]);
 
@@ -267,12 +307,20 @@ export function Dropzone(
         },
         multiple: true,
         onDrop,
+        onDropRejected: () => setDropError("Choose ZIP firmware packages or APK files only."),
     });
 
     return (
         <div className={cn(className, "flex flex-col gap-4 items-center")}>
+            {dropError && (
+                <Alert variant="destructive" role="alert" className="w-full">
+                    <CloudAlertIcon/>
+                    <AlertTitle>Upload unavailable</AlertTitle>
+                    <AlertDescription>{dropError}</AlertDescription>
+                </Alert>
+            )}
             <div {...getRootProps({className: "dropzone w-full rounded-xl cursor-pointer"})}>
-                <Card className="flex justify-center text-center min-h-48 p-4 border-2 border-dashed">
+                <Card className="flex min-h-48 justify-center border-2 border-dashed p-4 text-center transition-colors focus-within:ring-2 focus-within:ring-ring">
                     <input {...getInputProps()} />
                     <p>{message}</p>
                 </Card>

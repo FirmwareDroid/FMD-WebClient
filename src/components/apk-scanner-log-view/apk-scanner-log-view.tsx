@@ -1,24 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@/lib/apollo-hooks";
-import { gql } from "@apollo/client";
 import { LazyLog, ScrollFollow } from "@melloware/react-logviewer";
-
-const GET_APK_SCANNER_LOGS = gql`
-    query GetApkScannerLogs {
-        apk_scanner_log_list {
-            id
-            level
-            message
-            timestamp
-        }
-    }
-`;
+import {GET_APK_SCANNER_LOGS} from "@/components/graphql/apk-scanner-logs.graphql.ts";
 
 type ApkLog = {
     id: string;
     level?: string;
     message?: string;
-    timestamp?: string;
+    timestamp?: unknown;
 };
 
 export function ApkScannerLogView() {
@@ -34,10 +23,10 @@ export function ApkScannerLogView() {
     const [initialText, setInitialText] = useState<string>("");
     const [initialized, setInitialized] = useState(false);
 
-    const logs: ApkLog[] = data?.apk_scanner_log_list ?? [];
+    const logs: ApkLog[] = (data?.apk_scanner_log_list ?? []).filter((log): log is NonNullable<typeof log> => log !== null);
 
     const formatLogLine = (l: ApkLog): string => {
-        const ts = l.timestamp ?? "";
+        const ts = typeof l.timestamp === "string" || typeof l.timestamp === "number" ? l.timestamp : "";
         const localTime = ts ? new Date(ts).toLocaleString() : "";
         const lvl = l.level ?? "INFO";
         return `${localTime} - ${lvl}: ${l.message ?? ""}`;

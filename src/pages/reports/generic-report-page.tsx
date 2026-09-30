@@ -13,7 +13,7 @@ import {
     GET_SCANNER_REPORT, MOBSFS_REPORT, QARK_REPORT, QUARK_ENGINE_REPORT,
     TRUESEEING_REPORT, VIRUSTOTAL_REPORT
 } from "@/components/graphql/report.graphql.ts";
-import {useFragment} from "@/__generated__";
+import {useFragment as readFragment} from "@/__generated__";
 
 type GenericReportPageProps = {
     reportId: string;
@@ -59,40 +59,40 @@ export function GenericReportPage({
         let fragmentData;
         switch (report.__typename){
             case "ApkidReport":
-                fragmentData = useFragment(APKID_REPORT, report)
+                fragmentData = readFragment(APKID_REPORT, report)
                 break;
             case "ApkleaksReport":
-                fragmentData = useFragment(APKLEAKS_REPORT, report)
+                fragmentData = readFragment(APKLEAKS_REPORT, report)
                 break;
             case "ExodusReport":
-                fragmentData = useFragment(EXODUS_REPORT, report)
+                fragmentData = readFragment(EXODUS_REPORT, report)
                 break;
             case "TrueseeingReport":
-                fragmentData = useFragment(TRUESEEING_REPORT, report)
+                fragmentData = readFragment(TRUESEEING_REPORT, report)
                 break;
             case "VirusTotalReport":
-                fragmentData = useFragment(VIRUSTOTAL_REPORT, report)
+                fragmentData = readFragment(VIRUSTOTAL_REPORT, report)
                 break;
             case "APKscanReport":
-                fragmentData = useFragment(APKSCAN_REPORT, report)
+                fragmentData = readFragment(APKSCAN_REPORT, report)
                 break;
             case "AndrowarnReport":
-                fragmentData = useFragment(ANDROWARN_REPORT, report)
+                fragmentData = readFragment(ANDROWARN_REPORT, report)
                 break;
             case "AndroGuardReport":
-                fragmentData = useFragment(ANDROGUARD_REPORT, report)
+                fragmentData = readFragment(ANDROGUARD_REPORT, report)
                 break;
             case "MobSFScanReport":
-                fragmentData = useFragment(MOBSFS_REPORT, report)
+                fragmentData = readFragment(MOBSFS_REPORT, report)
                 break;
             case "QarkReport":
-                fragmentData = useFragment(QARK_REPORT, report)
+                fragmentData = readFragment(QARK_REPORT, report)
                 break;
             case "QuarkEngineReport":
-                fragmentData = useFragment(QUARK_ENGINE_REPORT, report)
+                fragmentData = readFragment(QUARK_ENGINE_REPORT, report)
                 break;
             case "FlowDroidReport":
-                fragmentData = useFragment(FLOWDROID_REPORT, report)
+                fragmentData = readFragment(FLOWDROID_REPORT, report)
                 break;
             default:
                 return (

@@ -9,6 +9,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx"
+import {NavLink} from "react-router";
 
 export function NavOperations({items,}: Readonly<{
     items: {
@@ -24,10 +25,10 @@ export function NavOperations({items,}: Readonly<{
                 {items.map((item) => (
                     <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton asChild>
-                            <a href={item.url}>
+                            <NavLink to={item.url} className={({isActive}) => isActive ? "bg-sidebar-accent" : undefined}>
                                 <item.icon/>
                                 <span>{item.title}</span>
-                            </a>
+                            </NavLink>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 ))}

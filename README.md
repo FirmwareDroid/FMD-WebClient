@@ -37,7 +37,7 @@ Then, open directory `/firmware-droid-client` and install the web frontend's dep
 ```shell
 cd firmware-droid-client
 
-yarn install && yarn build
+yarn install --frozen-lockfile && yarn build
 ```
 
 And then switch back to directory `/FirmwareDroid` and create and start the containers again.
@@ -53,5 +53,27 @@ If it is running, you are set to make changes to the frontend's source code in `
 ```shell
 yarn build
 ```
+
+## Quality checks
+
+Run the complete frontend verification suite before opening a pull request:
+
+```shell
+yarn typecheck
+yarn lint
+yarn test
+yarn build
+yarn audit --groups dependencies
+```
+
+Yarn Classic and `yarn.lock` are the project's package-management source of truth.
+
+## Deployment security
+
+The web server that serves the generated `build` directory should set a restrictive Content Security Policy,
+`X-Content-Type-Options: nosniff`, an appropriate `Referrer-Policy`, and frame-embedding protection. Configure these
+headers in the production reverse proxy so they also cover redirects and error responses. Emulator endpoints must use
+HTTPS/WSS except for localhost development. Credentials must never be placed in frontend environment variables,
+browser storage, query strings, or WebSocket URLs; use same-origin secure cookies or a backend-issued short-lived ticket.
 
 Finally, if you refresh the page you should see your changes.

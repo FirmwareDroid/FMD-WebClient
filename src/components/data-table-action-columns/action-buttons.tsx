@@ -28,6 +28,7 @@ import {GET_RQ_JOB_LIST} from "@/components/graphql/rq-job.graphql.ts";
 import {WithTypenameMutation} from "@/components/data-table-action-columns/entity-action-columns.tsx";
 import {SCAN_JOBS_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 import {RqJobQueuesDropdownMenu} from "@/components/rq-jobs/rq-job-queues-dropdown-menu.tsx";
+import {useToastStore} from "@/stores/toast.ts";
 
 const DELETION_JOB_FUNC_NAME = "api.v2.types.GenericDeletion.delete_queryset_background";
 
@@ -64,11 +65,9 @@ function isDeletionOngoing(objectIds: string[], rqJobListData: GetRqJobListQuery
             The job description contains the affected elements in the following format:
             "api.v2.types.GenericDeletion.delete_queryset_background(['68d2c1f78773bc31564c1dab', '68d2c2008773bc31564c1dac'], <class 'model.AndroidFirmware.AndroidFirmware'>)",
              */
-            const start = job.description.indexOf("['");
-            const end = job.description.indexOf("']");
-            const deletedObjectIdsSubstring = job.description.substring(start, end + 2);
-            // We parse the substring to a string array. But first, we need to replace both ' with ".
-            const deletedObjectIds = JSON.parse(deletedObjectIdsSubstring.replace(/'/g, '"')) as string[];
+            const match = job.description.match(/\[(?:'[a-f\d]{24}'(?:,\s*)?)*\]/i);
+            if (!match) return false;
+            const deletedObjectIds: string[] = match[0].match(/[a-f\d]{24}/gi) ?? [];
             return objectIds.some((id) => deletedObjectIds.includes(id));
         });
 
@@ -89,6 +88,7 @@ function DeleteEntityButton<T extends WithTypenameMutation>(
     }>,
 ) {
     const objectIds = ids.map(id => convertIdToObjectId(id));
+    const toast = useToastStore();
     const [deleteEntities] = useMutation(deleteMutation, {
         variables: {objectIds: objectIds},
     });
@@ -112,9 +112,15 @@ function DeleteEntityButton<T extends WithTypenameMutation>(
                 <ActionButton
                     variant="destructive"
                     disabled={objectIds.length <= 0}
+                    aria-label={tooltip}
                     onClick={() => {
-                        void deleteEntities();
-                        void getRqJobList();
+                        if (!window.confirm(`Delete ${objectIds.length.toString()} selected item(s)? This action cannot be undone.`)) return;
+                        void deleteEntities()
+                            .then(() => {
+                                toast.success("Deletion job started.");
+                                return getRqJobList();
+                            })
+                            .catch(() => toast.error("Unable to start deletion. Please try again."));
                     }}
                 >
                     <TrashIcon/>
@@ -173,7 +179,7 @@ function ScanAppActionButton(
                             onSelect={setSelectedQueue}
                         />
                         <Button
-                            disabled={selectedScanners.length <= 0}
+                            disabled={selectedScanners.length <= 0 || !selectedQueue}
                             onClick={() => {
                                 selectedScanners.forEach((scanner) => void scanApk({
                                     variables: {

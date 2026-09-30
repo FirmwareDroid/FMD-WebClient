@@ -1,19 +1,7 @@
+import {lazy, Suspense} from "react";
 import {Route, Routes} from "react-router";
-import LoginPage from "@/pages/login-page.tsx";
 import PublicOnlyRoute from "@/routes/public-only-route.tsx";
 import ProtectedLayout from "@/routes/protected-layout.tsx";
-import HomePage from "@/pages/home-page.tsx";
-import {ImporterPage} from "@/pages/importer-page.tsx";
-import {ScanJobsPage} from "@/pages/scan-jobs-page.tsx";
-import {FirmwaresPage} from "@/pages/firmwares-page.tsx";
-import {FirmwarePage} from "@/pages/firmware-page.tsx";
-import {AppsPage} from "@/pages/apps-page.tsx";
-import {AppPage} from "@/pages/app-page.tsx";
-import {FilePage} from "@/pages/file-page.tsx";
-import {FilesPage} from "@/pages/files-page.tsx";
-import {NotFoundPage} from "@/pages/not-found-page.tsx";
-import {ReportsPage} from "@/pages/reports/reports-page.tsx";
-import {ReportPage} from "@/pages/reports/report-page.tsx";
 import {
     APPS_URL,
     EMULATOR_URL,
@@ -23,12 +11,30 @@ import {
     REPORTS_URL,
     SCAN_JOBS_URL
 } from "@/components/ui/sidebar/app-sidebar.tsx";
-//import EmulatorPage from "@/pages/EmulatorPage";
-import {EmulatorPage} from "@/pages/emulator-page.tsx";
+
+const LoginPage = lazy(() => import("@/pages/login-page.tsx"));
+const HomePage = lazy(() => import("@/pages/home-page.tsx"));
+const ImporterPage = lazy(() => import("@/pages/importer-page.tsx").then(module => ({default: module.ImporterPage})));
+const ScanJobsPage = lazy(() => import("@/pages/scan-jobs-page.tsx").then(module => ({default: module.ScanJobsPage})));
+const FirmwaresPage = lazy(() => import("@/pages/firmwares-page.tsx").then(module => ({default: module.FirmwaresPage})));
+const FirmwarePage = lazy(() => import("@/pages/firmware-page.tsx").then(module => ({default: module.FirmwarePage})));
+const AppsPage = lazy(() => import("@/pages/apps-page.tsx").then(module => ({default: module.AppsPage})));
+const AppPage = lazy(() => import("@/pages/app-page.tsx").then(module => ({default: module.AppPage})));
+const FilePage = lazy(() => import("@/pages/file-page.tsx").then(module => ({default: module.FilePage})));
+const FilesPage = lazy(() => import("@/pages/files-page.tsx").then(module => ({default: module.FilesPage})));
+const NotFoundPage = lazy(() => import("@/pages/not-found-page.tsx").then(module => ({default: module.NotFoundPage})));
+const ReportsPage = lazy(() => import("@/pages/reports/reports-page.tsx").then(module => ({default: module.ReportsPage})));
+const ReportPage = lazy(() => import("@/pages/reports/report-page.tsx").then(module => ({default: module.ReportPage})));
+const EmulatorPage = lazy(() => import("@/pages/emulator-page.tsx").then(module => ({default: module.EmulatorPage})));
+
+function RouteFallback() {
+    return <div className="flex min-h-64 items-center justify-center p-6" role="status" aria-live="polite">Loading page…</div>;
+}
 
 function App() {
     return (
-        <Routes>
+        <Suspense fallback={<RouteFallback/>}>
+            <Routes>
             <Route element={<PublicOnlyRoute/>}>
                 <Route path="/login" element={<LoginPage/>}/>
             </Route>
@@ -50,7 +56,8 @@ function App() {
                 <Route path={REPORTS_URL} element={<ReportsPage/>}/>
                 <Route path="*" element={<NotFoundPage/>}/>
             </Route>
-        </Routes>
+            </Routes>
+        </Suspense>
     );
 }
 

@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
-export type InputMaybe<T> = Maybe<T>;
+export type InputMaybe<T> = T | null | undefined;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
@@ -2429,7 +2429,21 @@ type MetaReportFields_TrueseeingReport_Fragment = { __typename?: 'TrueseeingRepo
 
 type MetaReportFields_VirusTotalReport_Fragment = { __typename?: 'VirusTotalReport', reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null } & { ' $fragmentName'?: 'MetaReportFields_VirusTotalReport_Fragment' };
 
-export type MetaReportFieldsFragment = MetaReportFields_ApKscanReport_Fragment | MetaReportFields_AndroGuardReport_Fragment | MetaReportFields_AndrowarnReport_Fragment | MetaReportFields_ApkidReport_Fragment | MetaReportFields_ApkleaksReport_Fragment | MetaReportFields_ExodusReport_Fragment | MetaReportFields_FlowDroidReport_Fragment | MetaReportFields_MobSfScanReport_Fragment | MetaReportFields_QarkReport_Fragment | MetaReportFields_QuarkEngineReport_Fragment | MetaReportFields_SuperReport_Fragment | MetaReportFields_TrueseeingReport_Fragment | MetaReportFields_VirusTotalReport_Fragment;
+export type MetaReportFieldsFragment =
+  | MetaReportFields_ApKscanReport_Fragment
+  | MetaReportFields_AndroGuardReport_Fragment
+  | MetaReportFields_AndrowarnReport_Fragment
+  | MetaReportFields_ApkidReport_Fragment
+  | MetaReportFields_ApkleaksReport_Fragment
+  | MetaReportFields_ExodusReport_Fragment
+  | MetaReportFields_FlowDroidReport_Fragment
+  | MetaReportFields_MobSfScanReport_Fragment
+  | MetaReportFields_QarkReport_Fragment
+  | MetaReportFields_QuarkEngineReport_Fragment
+  | MetaReportFields_SuperReport_Fragment
+  | MetaReportFields_TrueseeingReport_Fragment
+  | MetaReportFields_VirusTotalReport_Fragment
+;
 
 type ApkScannerReport_ApKscanReport_Fragment = (
   { __typename?: 'APKscanReport' }
@@ -2496,7 +2510,21 @@ type ApkScannerReport_VirusTotalReport_Fragment = (
   & { ' $fragmentRefs'?: { 'VirusTotalReportTypeFragment': VirusTotalReportTypeFragment } }
 ) & { ' $fragmentName'?: 'ApkScannerReport_VirusTotalReport_Fragment' };
 
-export type ApkScannerReportFragment = ApkScannerReport_ApKscanReport_Fragment | ApkScannerReport_AndroGuardReport_Fragment | ApkScannerReport_AndrowarnReport_Fragment | ApkScannerReport_ApkidReport_Fragment | ApkScannerReport_ApkleaksReport_Fragment | ApkScannerReport_ExodusReport_Fragment | ApkScannerReport_FlowDroidReport_Fragment | ApkScannerReport_MobSfScanReport_Fragment | ApkScannerReport_QarkReport_Fragment | ApkScannerReport_QuarkEngineReport_Fragment | ApkScannerReport_SuperReport_Fragment | ApkScannerReport_TrueseeingReport_Fragment | ApkScannerReport_VirusTotalReport_Fragment;
+export type ApkScannerReportFragment =
+  | ApkScannerReport_ApKscanReport_Fragment
+  | ApkScannerReport_AndroGuardReport_Fragment
+  | ApkScannerReport_AndrowarnReport_Fragment
+  | ApkScannerReport_ApkidReport_Fragment
+  | ApkScannerReport_ApkleaksReport_Fragment
+  | ApkScannerReport_ExodusReport_Fragment
+  | ApkScannerReport_FlowDroidReport_Fragment
+  | ApkScannerReport_MobSfScanReport_Fragment
+  | ApkScannerReport_QarkReport_Fragment
+  | ApkScannerReport_QuarkEngineReport_Fragment
+  | ApkScannerReport_SuperReport_Fragment
+  | ApkScannerReport_TrueseeingReport_Fragment
+  | ApkScannerReport_VirusTotalReport_Fragment
+;
 
 export type GetReportQueryVariables = Exact<{
   reportObjectId?: InputMaybe<Scalars['String']['input']>;
@@ -2505,92 +2533,120 @@ export type GetReportQueryVariables = Exact<{
 }>;
 
 
-export type GetReportQuery = { __typename?: 'Query', apk_scanner_report_list?: Array<(
-    { __typename?: 'APKscanReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
-    & { ' $fragmentRefs'?: { 'MetaReportFields_ApKscanReport_Fragment': MetaReportFields_ApKscanReport_Fragment } }
-  ) | (
-    { __typename?: 'AndroGuardReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
-    & { ' $fragmentRefs'?: { 'MetaReportFields_AndroGuardReport_Fragment': MetaReportFields_AndroGuardReport_Fragment } }
-  ) | (
-    { __typename?: 'AndrowarnReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
-    & { ' $fragmentRefs'?: { 'MetaReportFields_AndrowarnReport_Fragment': MetaReportFields_AndrowarnReport_Fragment } }
-  ) | (
-    { __typename?: 'ApkidReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
-    & { ' $fragmentRefs'?: { 'MetaReportFields_ApkidReport_Fragment': MetaReportFields_ApkidReport_Fragment } }
-  ) | (
-    { __typename?: 'ApkleaksReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
-    & { ' $fragmentRefs'?: { 'MetaReportFields_ApkleaksReport_Fragment': MetaReportFields_ApkleaksReport_Fragment } }
-  ) | (
-    { __typename?: 'ExodusReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
-    & { ' $fragmentRefs'?: { 'MetaReportFields_ExodusReport_Fragment': MetaReportFields_ExodusReport_Fragment } }
-  ) | (
-    { __typename?: 'FlowDroidReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
-    & { ' $fragmentRefs'?: { 'MetaReportFields_FlowDroidReport_Fragment': MetaReportFields_FlowDroidReport_Fragment } }
-  ) | (
-    { __typename?: 'MobSFScanReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
-    & { ' $fragmentRefs'?: { 'MetaReportFields_MobSfScanReport_Fragment': MetaReportFields_MobSfScanReport_Fragment } }
-  ) | (
-    { __typename?: 'QarkReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
-    & { ' $fragmentRefs'?: { 'MetaReportFields_QarkReport_Fragment': MetaReportFields_QarkReport_Fragment } }
-  ) | (
-    { __typename?: 'QuarkEngineReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
-    & { ' $fragmentRefs'?: { 'MetaReportFields_QuarkEngineReport_Fragment': MetaReportFields_QuarkEngineReport_Fragment } }
-  ) | (
-    { __typename?: 'SuperReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
-    & { ' $fragmentRefs'?: { 'MetaReportFields_SuperReport_Fragment': MetaReportFields_SuperReport_Fragment } }
-  ) | (
-    { __typename?: 'TrueseeingReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
-    & { ' $fragmentRefs'?: { 'MetaReportFields_TrueseeingReport_Fragment': MetaReportFields_TrueseeingReport_Fragment } }
-  ) | (
-    { __typename?: 'VirusTotalReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
-    & { ' $fragmentRefs'?: { 'MetaReportFields_VirusTotalReport_Fragment': MetaReportFields_VirusTotalReport_Fragment } }
-  ) | null> | null };
+export type GetReportQuery = { __typename?: 'Query', apk_scanner_report_list?: Array<
+    | (
+      { __typename?: 'APKscanReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
+      & { ' $fragmentRefs'?: { 'MetaReportFields_ApKscanReport_Fragment': MetaReportFields_ApKscanReport_Fragment } }
+    )
+    | (
+      { __typename?: 'AndroGuardReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
+      & { ' $fragmentRefs'?: { 'MetaReportFields_AndroGuardReport_Fragment': MetaReportFields_AndroGuardReport_Fragment } }
+    )
+    | (
+      { __typename?: 'AndrowarnReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
+      & { ' $fragmentRefs'?: { 'MetaReportFields_AndrowarnReport_Fragment': MetaReportFields_AndrowarnReport_Fragment } }
+    )
+    | (
+      { __typename?: 'ApkidReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
+      & { ' $fragmentRefs'?: { 'MetaReportFields_ApkidReport_Fragment': MetaReportFields_ApkidReport_Fragment } }
+    )
+    | (
+      { __typename?: 'ApkleaksReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
+      & { ' $fragmentRefs'?: { 'MetaReportFields_ApkleaksReport_Fragment': MetaReportFields_ApkleaksReport_Fragment } }
+    )
+    | (
+      { __typename?: 'ExodusReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
+      & { ' $fragmentRefs'?: { 'MetaReportFields_ExodusReport_Fragment': MetaReportFields_ExodusReport_Fragment } }
+    )
+    | (
+      { __typename?: 'FlowDroidReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
+      & { ' $fragmentRefs'?: { 'MetaReportFields_FlowDroidReport_Fragment': MetaReportFields_FlowDroidReport_Fragment } }
+    )
+    | (
+      { __typename?: 'MobSFScanReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
+      & { ' $fragmentRefs'?: { 'MetaReportFields_MobSfScanReport_Fragment': MetaReportFields_MobSfScanReport_Fragment } }
+    )
+    | (
+      { __typename?: 'QarkReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
+      & { ' $fragmentRefs'?: { 'MetaReportFields_QarkReport_Fragment': MetaReportFields_QarkReport_Fragment } }
+    )
+    | (
+      { __typename?: 'QuarkEngineReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
+      & { ' $fragmentRefs'?: { 'MetaReportFields_QuarkEngineReport_Fragment': MetaReportFields_QuarkEngineReport_Fragment } }
+    )
+    | (
+      { __typename?: 'SuperReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
+      & { ' $fragmentRefs'?: { 'MetaReportFields_SuperReport_Fragment': MetaReportFields_SuperReport_Fragment } }
+    )
+    | (
+      { __typename?: 'TrueseeingReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
+      & { ' $fragmentRefs'?: { 'MetaReportFields_TrueseeingReport_Fragment': MetaReportFields_TrueseeingReport_Fragment } }
+    )
+    | (
+      { __typename?: 'VirusTotalReport', id: string, reportDate?: any | null, scannerName?: string | null, scannerVersion?: string | null, scanStatus?: string | null, androidAppIdReference?: { __typename?: 'AndroidAppType', id: string, filename: string, firmwareIdReference?: { __typename?: 'AndroidFirmwareType', id: string } | null } | null }
+      & { ' $fragmentRefs'?: { 'MetaReportFields_VirusTotalReport_Fragment': MetaReportFields_VirusTotalReport_Fragment } }
+    )
+   | null> | null };
 
 export type GetScannerReportQueryVariables = Exact<{
   reportObjectId?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type GetScannerReportQuery = { __typename?: 'Query', apk_scanner_report_list?: Array<(
-    { __typename?: 'APKscanReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
-    & { ' $fragmentRefs'?: { 'ApKscanReportTypeFragment': ApKscanReportTypeFragment } }
-  ) | (
-    { __typename?: 'AndroGuardReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
-    & { ' $fragmentRefs'?: { 'AndroGuardReportTypeFragment': AndroGuardReportTypeFragment } }
-  ) | (
-    { __typename?: 'AndrowarnReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
-    & { ' $fragmentRefs'?: { 'AndrowarnReportTypeFragment': AndrowarnReportTypeFragment } }
-  ) | (
-    { __typename?: 'ApkidReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
-    & { ' $fragmentRefs'?: { 'ApkidReportTypeFragment': ApkidReportTypeFragment } }
-  ) | (
-    { __typename?: 'ApkleaksReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
-    & { ' $fragmentRefs'?: { 'ApkleaksReportTypeFragment': ApkleaksReportTypeFragment } }
-  ) | (
-    { __typename?: 'ExodusReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
-    & { ' $fragmentRefs'?: { 'ExodusReportTypeFragment': ExodusReportTypeFragment } }
-  ) | (
-    { __typename?: 'FlowDroidReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
-    & { ' $fragmentRefs'?: { 'FlowDroidReportTypeFragment': FlowDroidReportTypeFragment } }
-  ) | (
-    { __typename?: 'MobSFScanReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
-    & { ' $fragmentRefs'?: { 'MobSfsReportTypeFragment': MobSfsReportTypeFragment } }
-  ) | (
-    { __typename?: 'QarkReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
-    & { ' $fragmentRefs'?: { 'QarkReportTypeFragment': QarkReportTypeFragment } }
-  ) | (
-    { __typename?: 'QuarkEngineReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
-    & { ' $fragmentRefs'?: { 'QuarkEngineReportTypeFragment': QuarkEngineReportTypeFragment } }
-  ) | (
-    { __typename?: 'SuperReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
-    & { ' $fragmentRefs'?: { 'SuperReportTypeFragment': SuperReportTypeFragment } }
-  ) | (
-    { __typename?: 'TrueseeingReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
-    & { ' $fragmentRefs'?: { 'TrueseeingReportTypeFragment': TrueseeingReportTypeFragment } }
-  ) | (
-    { __typename?: 'VirusTotalReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
-    & { ' $fragmentRefs'?: { 'VirusTotalReportTypeFragment': VirusTotalReportTypeFragment } }
-  ) | null> | null };
+export type GetScannerReportQuery = { __typename?: 'Query', apk_scanner_report_list?: Array<
+    | (
+      { __typename?: 'APKscanReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
+      & { ' $fragmentRefs'?: { 'ApKscanReportTypeFragment': ApKscanReportTypeFragment } }
+    )
+    | (
+      { __typename?: 'AndroGuardReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
+      & { ' $fragmentRefs'?: { 'AndroGuardReportTypeFragment': AndroGuardReportTypeFragment } }
+    )
+    | (
+      { __typename?: 'AndrowarnReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
+      & { ' $fragmentRefs'?: { 'AndrowarnReportTypeFragment': AndrowarnReportTypeFragment } }
+    )
+    | (
+      { __typename?: 'ApkidReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
+      & { ' $fragmentRefs'?: { 'ApkidReportTypeFragment': ApkidReportTypeFragment } }
+    )
+    | (
+      { __typename?: 'ApkleaksReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
+      & { ' $fragmentRefs'?: { 'ApkleaksReportTypeFragment': ApkleaksReportTypeFragment } }
+    )
+    | (
+      { __typename?: 'ExodusReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
+      & { ' $fragmentRefs'?: { 'ExodusReportTypeFragment': ExodusReportTypeFragment } }
+    )
+    | (
+      { __typename?: 'FlowDroidReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
+      & { ' $fragmentRefs'?: { 'FlowDroidReportTypeFragment': FlowDroidReportTypeFragment } }
+    )
+    | (
+      { __typename?: 'MobSFScanReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
+      & { ' $fragmentRefs'?: { 'MobSfsReportTypeFragment': MobSfsReportTypeFragment } }
+    )
+    | (
+      { __typename?: 'QarkReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
+      & { ' $fragmentRefs'?: { 'QarkReportTypeFragment': QarkReportTypeFragment } }
+    )
+    | (
+      { __typename?: 'QuarkEngineReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
+      & { ' $fragmentRefs'?: { 'QuarkEngineReportTypeFragment': QuarkEngineReportTypeFragment } }
+    )
+    | (
+      { __typename?: 'SuperReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
+      & { ' $fragmentRefs'?: { 'SuperReportTypeFragment': SuperReportTypeFragment } }
+    )
+    | (
+      { __typename?: 'TrueseeingReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
+      & { ' $fragmentRefs'?: { 'TrueseeingReportTypeFragment': TrueseeingReportTypeFragment } }
+    )
+    | (
+      { __typename?: 'VirusTotalReport', pk?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null }
+      & { ' $fragmentRefs'?: { 'VirusTotalReportTypeFragment': VirusTotalReportTypeFragment } }
+    )
+   | null> | null };
 
 export type AndroGuardReportTypeFragment = { __typename?: 'AndroGuardReport', activities?: Array<string | null> | null, androidVersionCode?: string | null, androidVersionName?: string | null, appName?: string | null, dexNames?: Array<string | null> | null, effectiveTargetVersion?: string | null, fileNameList?: Array<string | null> | null, intentFiltersDict?: any | null, isAndroidtv?: boolean | null, isLeanback?: boolean | null, isMultidex?: boolean | null, isSignedV1?: boolean | null, isSignedV2?: boolean | null, isSignedV3?: boolean | null, isValidApk?: boolean | null, isWearable?: boolean | null, mainActivity?: string | null, mainActivityList?: Array<string | null> | null, manifestFeatures?: Array<string | null> | null, manifestLibraries?: Array<string | null> | null, manifestXml?: string | null, maxSdkVersion?: string | null, minSdkVersion?: string | null, packagename: string, permissionDetails?: any | null, permissions?: Array<string | null> | null, permissionsDeclared?: Array<string | null> | null, permissionsDeclaredDetails?: any | null, permissionsImplied?: Array<string | null> | null, permissionsRequestedThirdParty?: Array<string | null> | null, providers?: Array<string | null> | null, receivers?: Array<string | null> | null, services?: Array<string | null> | null, signatureNames?: Array<string | null> | null, targetSdkVersion?: string | null, reportDate?: any | null, scanStatus?: string | null, scannerName?: string | null, scannerVersion?: string | null } & { ' $fragmentName'?: 'AndroGuardReportTypeFragment' };
 

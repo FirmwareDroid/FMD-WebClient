@@ -24,7 +24,8 @@ export function DataTableExport<TData>({
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    const filename = `${filenamePrefix}-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
+    const safePrefix = filenamePrefix.replace(/[^a-zA-Z0-9_-]/g, "-").slice(0, 64) || "export";
+    const filename = `${safePrefix}-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
@@ -34,7 +35,7 @@ export function DataTableExport<TData>({
   };
 
   return (
-    <Button variant="outline" size="sm" onClick={onExport} disabled={selectedCount === 0}>
+    <Button variant="outline" size="sm" onClick={onExport} disabled={selectedCount === 0} aria-label={`${label} (${selectedCount.toString()} selected)`}>
       <Download className="mr-2 h-4 w-4" />
       {label}
     </Button>

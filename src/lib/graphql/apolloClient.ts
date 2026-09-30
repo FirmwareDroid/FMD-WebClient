@@ -1,5 +1,6 @@
 import {ApolloClient, from, HttpLink, InMemoryCache} from "@apollo/client";
 import {RetryLink} from "@apollo/client/link/retry";
+import {getMainDefinition} from "@apollo/client/utilities";
 import {CSRF_URL, GRAPHQL_URL} from "@/envconfig.ts";
 
 let cachedCsrf: string | null = null;
@@ -14,9 +15,16 @@ export async function getCsrf(): Promise<string> {
     if (cachedCsrf) return cachedCsrf;
     if (inflightCsrf) return inflightCsrf;
 
-    inflightCsrf = fetch(CSRF_URL, { credentials: "include" })
-        .then(r => r.json())
-        .then(({ csrfToken }) => {
+    inflightCsrf = fetch(CSRF_URL, {credentials: "include"})
+        .then(async response => {
+            if (!response.ok) throw new Error("Unable to initialize request security.");
+            const body: unknown = await response.json();
+            if (!body || typeof body !== "object" || !("csrfToken" in body) || typeof body.csrfToken !== "string" || !body.csrfToken) {
+                throw new Error("The server returned an invalid security token.");
+            }
+            return body.csrfToken;
+        })
+        .then(csrfToken => {
             cachedCsrf = csrfToken;
             inflightCsrf = null;
             return csrfToken;
@@ -25,7 +33,7 @@ export async function getCsrf(): Promise<string> {
     return inflightCsrf;
 }
 
-const customFetch: typeof fetch = async (uri, options) => {
+export const customFetch: typeof fetch = async (uri, options) => {
     let tried = false;
     while (true) {
         const csrfToken = await getCsrf();
@@ -34,8 +42,9 @@ const customFetch: typeof fetch = async (uri, options) => {
 
         const res = await fetch(uri, { ...options, headers, credentials: "include" });
 
-        // if server rejected CSRF, clear cached token and retry once
-        if (res.status === 403 && !tried) {
+        // Retry once only when Django identifies this as a CSRF rejection.
+        const isCsrfRejection = res.status === 403 && (await res.clone().text()).toLowerCase().includes("csrf");
+        if (isCsrfRejection && !tried) {
             cachedCsrf = null;
             inflightCsrf = null;
             tried = true;
@@ -53,6 +62,14 @@ const httpLink = new HttpLink({
 });
 
 export const client = new ApolloClient({
-    link: from([new RetryLink(), httpLink]),
+    link: from([new RetryLink({
+        attempts: {
+            max: 2,
+            retryIf: (_error, operation) => {
+                const definition = getMainDefinition(operation.query);
+                return definition.kind === "OperationDefinition" && definition.operation === "query";
+            },
+        },
+    }), httpLink]),
     cache: new InMemoryCache(),
 });

@@ -29,15 +29,17 @@ export function DataTableSearch({
     }, [local, onChange, debounceMs]);
 
     return (
-        <div className="flex items-center gap-2">
+        <label className="flex min-w-0 flex-1 items-center gap-2">
             <Search className="text-muted-foreground" />
+            <span className="sr-only">Search table</span>
             <Input
                 value={local}
                 onChange={(e) => setLocal(e.target.value)}
                 placeholder={placeholder}
-                className="max-w-xs"
+                className="w-full max-w-xs"
+                aria-label="Search table"
             />
-        </div>
+        </label>
     );
 }
 

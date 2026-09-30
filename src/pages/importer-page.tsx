@@ -7,7 +7,7 @@ import {
     FIRMWARE_ROW_IMPORTER_PAGE, GET_FIRMWARE_IMPORTER_PAGE, SCAN_APKS_BY_FIRMWARE_OBJECT_IDS,
 } from "@/components/graphql/firmware.graphql.ts";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
-import {useFragment} from "@/__generated__";
+import {useFragment as readFragment} from "@/__generated__";
 
 import type {ColumnDef} from "@tanstack/react-table";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
@@ -77,8 +77,7 @@ export function ImporterPage() {
     const edges = data?.android_firmware_connection?.edges ?? [];
 
     const firmware = edges
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map((edge: any) => useFragment(FIRMWARE_ROW_IMPORTER_PAGE, edge?.node))
+        .map((edge) => readFragment(FIRMWARE_ROW_IMPORTER_PAGE, edge?.node))
         .filter(isNonNullish);
 
     const goNext = () => {

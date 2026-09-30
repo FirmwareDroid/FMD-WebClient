@@ -8,7 +8,7 @@ import {
     GET_FIRMWARES_BY_OBJECT_IDS, SCAN_APKS_BY_FIRMWARE_OBJECT_IDS,
 } from "@/components/graphql/firmware.graphql.ts";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
-import {useFragment} from "@/__generated__";
+import {useFragment as readFragment} from "@/__generated__";
 import {buildFirmwareActionColumns} from "@/components/data-table-action-columns/firmware-action-columns.tsx";
 import {useEffect, useState} from "react";
 import {CursorPaginationProps} from "@/components/ui/table/cursor-pagination.tsx";
@@ -140,8 +140,7 @@ export function FirmwaresPage() {
     const edges = data?.android_firmware_connection?.edges ?? [];
 
     const firmwares = edges
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map((edge: any) => useFragment(FIRMWARE_ALL, edge?.node))
+        .map((edge) => readFragment(FIRMWARE_ALL, edge?.node))
         .filter(isNonNullish);
 
     const goNext = () => {

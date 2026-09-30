@@ -23,6 +23,7 @@ import {NavOperations} from "@/components/ui/sidebar/nav-operations.tsx";
 import {Avatar, AvatarFallback} from "@/components/ui/avatar.tsx";
 import { useQuery } from "@/lib/apollo-hooks";
 import {GET_CURRENT_USER_EMAIL_AND_USERNAME} from "@/components/graphql/current-user.graphql.ts";
+import {Link} from "react-router";
 
 export const IMPORTER_URL = "/importer";
 export const SCAN_JOBS_URL = "/scan-jobs";
@@ -91,7 +92,7 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <a href="/">
+                            <Link to="/">
                                 <div
                                     className="flex aspect-square size-8 items-center justify-center rounded-lg">
                                     <Avatar>
@@ -103,7 +104,7 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
                                 <div className="grid flex-1 text-left text-lg leading-tight">
                                     <span className="truncate font-medium">FirmwareDroid</span>
                                 </div>
-                            </a>
+                            </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>

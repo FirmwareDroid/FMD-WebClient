@@ -15,14 +15,14 @@ export function BasePage(
         title,
     }: Readonly<Props>) {
     return (
-        <div className={cn("p-4", className)}>
+        <main className={cn("px-4 py-6 sm:px-6 lg:px-8", className)}>
             <div className="w-full max-w-5xl mx-auto">
                 <TypographyH1 className="mb-4">{title}</TypographyH1>
 
-                <div className="flex flex-col items-center gap-8">
+                <div className="flex flex-col items-center gap-6 sm:gap-8">
                     {children}
                 </div>
             </div>
-        </div>
+        </main>
     );
 }

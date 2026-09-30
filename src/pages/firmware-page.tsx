@@ -7,7 +7,7 @@ import {
     SCAN_APKS_BY_FIRMWARE_OBJECT_IDS
 } from "@/components/graphql/firmware.graphql.ts";
 import {FirmwareAllFragment} from "@/__generated__/graphql.ts";
-import {useFragment} from "@/__generated__";
+import {useFragment as readFragment} from "@/__generated__";
 import {Alert, AlertTitle} from "@/components/ui/alert.tsx";
 import {AlertCircleIcon, FilesIcon, SquareIcon} from "lucide-react";
 import {convertIdToObjectId, isNonNullish} from "@/lib/graphql/graphql-utils.ts";
@@ -24,6 +24,7 @@ export function FirmwarePage() {
     const {
         loading: firmwaresLoading,
         data: firmwaresData,
+        error: firmwaresError,
     } = useQuery(GET_FIRMWARES_BY_OBJECT_IDS, {
         variables: {objectIds: convertIdToObjectId(firmwareId as string)},
         skip: !firmwareId,
@@ -48,9 +49,12 @@ export function FirmwarePage() {
         );
     }
 
+    if (firmwaresError) {
+        return <BasePage title="Firmware"><Alert variant="destructive" role="alert"><AlertCircleIcon/><AlertTitle>Unable to load this firmware. Please try again.</AlertTitle></Alert></BasePage>;
+    }
+
     const firmwares = (firmwaresData?.android_firmware_connection?.edges ?? [])
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map((edge: any) => useFragment(FIRMWARE_ALL, edge?.node))
+        .map((edge) => readFragment(FIRMWARE_ALL, edge?.node))
         .filter(isNonNullish)
 
     if (firmwares.length === 1) {

@@ -3,6 +3,7 @@ import { useApolloClient, useMutation, useQuery } from "@/lib/apollo-hooks";
 import {GET_CURRENT_USER_ID} from "@/components/graphql/current-user.graphql.ts";
 import {DELETE_TOKEN_COOKIE} from "@/components/graphql/auth.graphql.ts";
 import { clearCachedCsrf } from "@/lib/graphql/apolloClient.ts";
+import {clearCredentials} from "@/services/adb-streamer/credentials.ts";
 
 type AuthContextValue = {
     currentUser: { __typename?: "UserType", id: string } | null | undefined;
@@ -36,7 +37,7 @@ export function AuthProvider({children}: Readonly<{ children: ReactNode }>) {
     const refreshMe = useCallback(async () => {
         try {
             const res = await refetch();
-            return Boolean(res.data.me);
+            return Boolean(res.data?.me);
         } catch {
             return false;
         }
@@ -51,6 +52,8 @@ export function AuthProvider({children}: Readonly<{ children: ReactNode }>) {
     );
 
     const logOut = useCallback(async () => {
+        clearCredentials();
+        clearCachedCsrf();
         try {
             await doLogout({fetchPolicy: "no-cache"});
         } catch {
