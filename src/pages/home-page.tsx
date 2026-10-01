@@ -3,6 +3,7 @@ import {
     CardContent,
 } from "@/components/ui/card.tsx";
 import {TypographyH1} from "@/components/typography/headings.tsx";
+import {FmdIcon} from "@/components/icons/fmd-icon.tsx";
 import "../components/ui/theming/links.css"
 import {Link} from "react-router";
 
@@ -11,7 +12,12 @@ function HomePage() {
         <div>
             <div className="flex flex-col items-center p-4 gap-6">
                 <div className="w-full max-w-5xl">
-                    <TypographyH1>FirmwareDroid</TypographyH1>
+                    <TypographyH1 className="inline-flex items-center gap-3">
+                        <FmdIcon className="size-9 sm:size-10 rounded-lg shrink-0 shadow-sm" />
+                        <span>
+                            Firmware<span className="text-[#8bd450]">Droid</span>
+                        </span>
+                    </TypographyH1>
                 </div>
 
                 <Card className="w-full max-w-5xl">

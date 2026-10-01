@@ -1,9 +1,11 @@
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
-import {CircleAlertIcon, CircleCheckBigIcon, LoaderCircleIcon} from "lucide-react";
+import {CircleAlertIcon, CircleCheckBigIcon} from "lucide-react";
+import {Spinner} from "@/components/ui/spinner.tsx";
 import { useQuery } from "@/lib/apollo-hooks";
 import {GET_RQ_JOB_LIST} from "@/components/graphql/rq-job.graphql.ts";
 import {cn} from "@/lib/utils.ts";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
+import {formatDateTime} from "@/lib/date-utils.ts";
 
 function JobStatus({status, isFinished, isFailed}: Readonly<{
     status: string;
@@ -12,21 +14,21 @@ function JobStatus({status, isFinished, isFailed}: Readonly<{
 }>) {
     if (isFinished) {
         return (
-            <><CircleCheckBigIcon className="text-green-600" aria-hidden="true"/><span className="sr-only">Finished</span></>
+            <><CircleCheckBigIcon className="text-green-600 size-5 shrink-0" aria-hidden="true"/><span className="sr-only">Finished</span></>
         );
     }
 
     if (isFailed) {
         return (
-            <><CircleAlertIcon className="text-destructive" aria-hidden="true"/><span className="sr-only">Failed</span></>
+            <><CircleAlertIcon className="text-destructive size-5 shrink-0" aria-hidden="true"/><span className="sr-only">Failed</span></>
         );
     }
 
     return (
-        <>
-            <LoaderCircleIcon className="mr-2 animate-spin" aria-hidden="true"/>
+        <span className="inline-flex items-center justify-center">
+            <Spinner size="sm" className="mr-1.5" />
             <span>{status}</span>
-        </>
+        </span>
     );
 }
 
@@ -81,19 +83,19 @@ export function RqJobsTable(
                                     <span>{job.id}</span>
                                 </TableCell>
                                 <TableCell>
-                                    <span>{job.startedAt}</span>
+                                    <span title={job.startedAt ?? undefined}>{formatDateTime(job.startedAt)}</span>
                                 </TableCell>
                                 <TableCell>
                                     <span>{job.queueName}</span>
                                 </TableCell>
                                 <TableCell>
-                                    <div className="flex items-center justify-center">
+                                    <div className="flex items-center justify-center min-h-8">
                                         {job.status ? (
                                             <JobStatus status={job.status} isFinished={job.isFinished}
                                                        isFailed={job.isFailed}/>
                                         ) : (
                                             <>
-                                                <CircleAlertIcon className="text-destructive" aria-hidden="true"/>
+                                                <CircleAlertIcon className="text-destructive size-5 shrink-0" aria-hidden="true"/>
                                                 <span>Unknown status</span>
                                             </>
                                         )}

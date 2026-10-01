@@ -8,7 +8,7 @@ type props = {
 
 function TypographyH1({children, className}: Readonly<props>) {
     return (
-        <h1 className={cn("scroll-m-20 text-4xl font-extrabold tracking-tight text-balance", className)}>
+        <h1 className={cn("scroll-m-20 text-3xl font-extrabold tracking-[-0.04em] text-balance sm:text-4xl", className)}>
             {children}
         </h1>
     )
@@ -16,7 +16,7 @@ function TypographyH1({children, className}: Readonly<props>) {
 
 function TypographyH2({children, className}: Readonly<props>) {
     return (
-        <h2 className={cn("scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0", className)}>
+        <h2 className={cn("scroll-m-20 text-2xl font-extrabold tracking-[-0.035em] first:mt-0 sm:text-3xl", className)}>
             {children}
         </h2>
     )

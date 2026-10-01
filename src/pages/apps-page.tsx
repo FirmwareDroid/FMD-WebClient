@@ -1,3 +1,4 @@
+import {formatDateTime} from "@/lib/date-utils.ts";
 import {ColumnDef} from "@tanstack/react-table";
 import {AppAllFragment} from "@/__generated__/graphql.ts";
 import { useQuery } from "@/lib/apollo-hooks";
@@ -46,6 +47,10 @@ const columns: ColumnDef<AppAllFragment>[] = [
         accessorKey: "indexedDate",
         header: "Indexed Date",
         meta: {hidden: true},
+        cell: ({ getValue }) => {
+            const val = getValue() as string | null | undefined;
+            return <span title={val ?? undefined}>{formatDateTime(val)}</span>;
+        },
     },
     {
         id: "md5",

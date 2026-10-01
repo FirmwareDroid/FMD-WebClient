@@ -1,20 +1,19 @@
 import {gql} from "@/__generated__";
 
-export const FILE_ALL = gql(`
-    fragment FileAll on FirmwareFileType {
+export const FILE_LIST_ITEM = gql(`
+    fragment FileListItem on FirmwareFileType {
         id
+        pk
         name
-        absoluteStorePath
+        relativePath
+        parentDir
+        partitionName
         fileSizeBytes
         indexedDate
         isDirectory
-        isOnDisk
         isSymlink
+        isOnDisk
         md5
-        metaDict
-        parentDir
-        partitionName
-        relativePath
         firmwareIdReference {
             id
         }
@@ -24,38 +23,50 @@ export const FILE_ALL = gql(`
     }
 `);
 
-export const GET_FILES_BY_FIRMWARE_OBJECT_IDS = gql(`
-    query GetFilesByFirmwareObjectIds($objectIds: [String!]) {
-        android_firmware_connection(objectIdList: $objectIds) {
-            edges {
-                node {
-                    firmwareFileIdList {
-                        edges {
-                            node {
-                                ...FileAll
-                            }
-                        }
-                    }
-                }
-            }
+export const FILE_ALL = gql(`
+    fragment FileAll on FirmwareFileType {
+        id
+        pk
+        name
+        relativePath
+        parentDir
+        partitionName
+        fileSizeBytes
+        indexedDate
+        isDirectory
+        isSymlink
+        isOnDisk
+        md5
+        metaDict
+        absoluteStorePath
+        firmwareIdReference {
+            id
+            filename
+        }
+        androidAppReference {
+            id
+            packagename
+            filename
+        }
+        tlshReference {
+            digest
         }
     }
 `);
 
-export const GET_FILE_BY_ID = gql(`
-    query GetFileById($id: ID!) {
-        android_firmware_connection {
-            edges {
-                node {
-                    firmwareFileIdList(id: $id) {
-                        edges {
-                            node {
-                                ...FileAll
-                            }
-                        }
-                    }
-                }
-            }
+export const GET_FILES_BY_FIRMWARE = gql(`
+    query GetFilesByFirmware($filter: FirmwareFileFilter, $limit: Int, $offset: Int) {
+        firmware_file_list(fieldFilter: $filter, limit: $limit, offset: $offset) {
+            ...FileListItem
+        }
+        firmware_file_count(fieldFilter: $filter)
+    }
+`);
+
+export const GET_FILE_BY_OBJECT_ID = gql(`
+    query GetFileByObjectId($objectIdList: [String]) {
+        firmware_file_list(objectIdList: $objectIdList) {
+            ...FileAll
         }
     }
 `);

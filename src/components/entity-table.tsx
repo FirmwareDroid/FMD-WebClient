@@ -1,3 +1,4 @@
+import {formatDateTime, isIsoDateTimeString} from "@/lib/date-utils.ts";
 import {Table, TableBody, TableCell, TableRow} from "@/components/ui/table.tsx";
 
 type WithFragmentName = { " $fragmentName"?: string };
@@ -34,6 +35,10 @@ export function EntityTable(
 
                                     if (typeof value !== "string") {
                                         return String(value);
+                                    }
+
+                                    if (isIsoDateTimeString(value)) {
+                                        return <span title={value}>{formatDateTime(value)}</span>;
                                     }
 
                                     try {

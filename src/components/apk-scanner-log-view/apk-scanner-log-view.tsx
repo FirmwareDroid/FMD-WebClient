@@ -1,3 +1,4 @@
+import {formatDateTime} from "@/lib/date-utils.ts";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@/lib/apollo-hooks";
 import { LazyLog, ScrollFollow } from "@melloware/react-logviewer";
@@ -27,7 +28,7 @@ export function ApkScannerLogView() {
 
     const formatLogLine = (l: ApkLog): string => {
         const ts = typeof l.timestamp === "string" || typeof l.timestamp === "number" ? l.timestamp : "";
-        const localTime = ts ? new Date(ts).toLocaleString() : "";
+        const localTime = ts ? formatDateTime(ts) : "";
         const lvl = l.level ?? "INFO";
         return `${localTime} - ${lvl}: ${l.message ?? ""}`;
     };

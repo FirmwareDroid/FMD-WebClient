@@ -1,6 +1,6 @@
 "use client"
 
-import {SidebarIcon} from "lucide-react"
+import {HomeIcon, SidebarIcon} from "lucide-react"
 
 import {
     Breadcrumb,
@@ -14,20 +14,22 @@ import {Separator} from "@/components/ui/separator.tsx"
 import {useSidebar} from "@/components/ui/sidebar.tsx"
 import {ModeToggle} from "@/components/ui/theming/mode-toggle.tsx";
 import {Link, useLocation} from "react-router";
-import {APPS_URL, FIRMWARE_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
+import {FmdIcon} from "@/components/icons/fmd-icon.tsx";
+import {useBreadcrumbStore} from "@/lib/breadcrumb-store.ts";
+import {formatBreadcrumbSegment} from "@/lib/breadcrumb-utils.ts";
 
 export function SiteHeader() {
     const {toggleSidebar} = useSidebar();
     const pathname = useLocation().pathname;
-    const isFirmwaresOrAppsPath = pathname.startsWith(FIRMWARE_URL) || pathname.startsWith(APPS_URL);
     const splitPathname = pathname.split("/").filter(item => item.length > 0);
+    const breadcrumbTitles = useBreadcrumbStore((state) => state.titles);
 
     return (
-        <header className="bg-background sticky top-0 z-50 flex w-full items-center border-b">
+        <header className="sticky top-0 z-50 flex w-full items-center border-b border-[#263649] bg-[#07111f]/95 text-white backdrop-blur">
             <div className="flex justify-between w-full items-center pl-2 pr-4">
                 <div className="flex h-(--header-height) w-full items-center gap-2">
                     <Button
-                        className="h-8 w-8"
+                        className="h-8 w-8 text-slate-200 hover:bg-[#13273a] hover:text-[#8bd450]"
                         variant="ghost"
                         size="icon"
                         onClick={toggleSidebar}
@@ -36,28 +38,57 @@ export function SiteHeader() {
                         <SidebarIcon/>
                     </Button>
 
-                    <Separator orientation="vertical" className="mr-2 h-4"/>
+                    <Separator orientation="vertical" className="mr-2 h-4 bg-[#34465a]"/>
 
-                    <Breadcrumb className="hidden sm:block">
-                        <BreadcrumbList>
-                            {isFirmwaresOrAppsPath && splitPathname
-                                .map((item, index) => (
-                                    <BreadcrumbItem key={`${item}-${index.toString()}`}>
-                                        <BreadcrumbLink asChild>
-                                            <Link
-                                                to={`/${splitPathname.slice(0, index + 1).join("/")}`}>
-                                                {item}
-                                            </Link>
-                                        </BreadcrumbLink>
-                                        {index < splitPathname.length - 1  && (
-                                            <BreadcrumbSeparator/>
-                                        )}
-                                    </BreadcrumbItem>
-                                ))}
-                        </BreadcrumbList>
-                    </Breadcrumb>
+                    <Link to="/" className="fmd-wordmark mr-3 whitespace-nowrap text-sm sm:hidden inline-flex items-center gap-1.5">
+                        <FmdIcon className="size-5 rounded" />
+                        <span>Firmware<span className="text-[#8bd450]">Droid</span></span>
+                    </Link>
+
+                    {splitPathname.length > 0 && (
+                        <Breadcrumb className="hidden sm:block">
+                            <BreadcrumbList className="text-slate-400">
+                                <BreadcrumbItem>
+                                    <BreadcrumbLink asChild>
+                                        <Link
+                                            to="/"
+                                            className="hover:text-white inline-flex items-center gap-1"
+                                            title="Home"
+                                        >
+                                            <HomeIcon className="size-3.5" />
+                                            <span>Home</span>
+                                        </Link>
+                                    </BreadcrumbLink>
+                                    <BreadcrumbSeparator/>
+                                </BreadcrumbItem>
+
+                                {splitPathname.map((item, index) => {
+                                    const {label, tooltip} = formatBreadcrumbSegment(item, breadcrumbTitles);
+                                    const isLast = index === splitPathname.length - 1;
+                                    const targetPath = `/${splitPathname.slice(0, index + 1).join("/")}`;
+
+                                    return (
+                                        <BreadcrumbItem key={`${item}-${index.toString()}`}>
+                                            <BreadcrumbLink asChild>
+                                                <Link
+                                                    to={targetPath}
+                                                    className={`hover:text-white max-w-[220px] truncate inline-block align-bottom ${isLast ? "text-slate-200 font-medium" : ""}`}
+                                                    title={tooltip || label}
+                                                >
+                                                    {label}
+                                                </Link>
+                                            </BreadcrumbLink>
+                                            {!isLast && <BreadcrumbSeparator/>}
+                                        </BreadcrumbItem>
+                                    );
+                                })}
+                            </BreadcrumbList>
+                        </Breadcrumb>
+                    )}
                 </div>
-                <ModeToggle/>
+                <div className="[&_button]:text-slate-200 [&_button:hover]:bg-[#13273a] [&_button:hover]:text-[#8bd450]">
+                    <ModeToggle/>
+                </div>
             </div>
         </header>
     )

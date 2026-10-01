@@ -20,12 +20,12 @@ export function NavOperations({items,}: Readonly<{
 }>) {
     return (
         <SidebarGroup>
-            <SidebarGroupLabel>Operations</SidebarGroupLabel>
+            <SidebarGroupLabel className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.14em] text-slate-500">Operations</SidebarGroupLabel>
             <SidebarMenu>
                 {items.map((item) => (
                     <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton asChild>
-                            <NavLink to={item.url} className={({isActive}) => isActive ? "bg-sidebar-accent" : undefined}>
+                            <NavLink to={item.url} className={({isActive}) => isActive ? "bg-sidebar-accent font-semibold text-[#8bd450]" : undefined}>
                                 <item.icon/>
                                 <span>{item.title}</span>
                             </NavLink>

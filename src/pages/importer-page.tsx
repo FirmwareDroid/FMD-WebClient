@@ -1,3 +1,4 @@
+import {formatDateTime} from "@/lib/date-utils.ts";
 import {TypographyH2} from "@/components/typography/headings.tsx";
 import {BasePage} from "@/pages/base-page.tsx";
 import {Dropzone} from "@/components/importer/dropzone.tsx";
@@ -34,12 +35,9 @@ const columns: ColumnDef<FirmwareRowImporterPageFragment>[] = [
         id: "indexedDate",
         accessorKey: "indexedDate",
         header: "Indexed Date",
-        cell: ({row}) => {
-            const padStart = (value: number): string =>
-                value.toString().padStart(2, "0");
-
-            const date: Date = new Date(row.getValue("indexedDate"));
-            return `${date.getFullYear().toString()}-${padStart(date.getMonth() + 1)}-${padStart(date.getDate())} ${padStart(date.getHours())}:${padStart(date.getMinutes())}`;
+        cell: ({ getValue }) => {
+            const val = getValue() as string | null | undefined;
+            return <span title={val ?? undefined}>{formatDateTime(val)}</span>;
         }
     },
     {

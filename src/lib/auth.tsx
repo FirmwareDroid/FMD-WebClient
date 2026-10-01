@@ -53,14 +53,17 @@ export function AuthProvider({children}: Readonly<{ children: ReactNode }>) {
 
     const logOut = useCallback(async () => {
         clearCredentials();
-        clearCachedCsrf();
         try {
             await doLogout({fetchPolicy: "no-cache"});
         } catch {
             // ignore
         }
-        await client.clearStore().catch(() => {
+        clearCachedCsrf();
+        client.writeQuery({
+            query: GET_CURRENT_USER_ID,
+            data: { me: null },
         });
+        await client.clearStore().catch(() => {});
         try {
             await refetch();
         } catch {

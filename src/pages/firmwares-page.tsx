@@ -1,3 +1,4 @@
+import {formatDateTime} from "@/lib/date-utils.ts";
 import {BasePage} from "@/pages/base-page.tsx";
 import {ColumnDef} from "@tanstack/react-table";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
@@ -58,10 +59,7 @@ const columns: ColumnDef<FirmwareAllFragment>[] = [
         header: "Indexed Date",
         cell: ({ getValue }) => {
             const val = getValue() as string | null | undefined;
-            if (!val) return null;
-            const d = new Date(val);
-            if (Number.isNaN(d.getTime())) return val;
-            return d.toLocaleString();
+            return <span title={val ?? undefined}>{formatDateTime(val)}</span>;
         },
     },
     {

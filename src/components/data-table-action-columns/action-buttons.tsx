@@ -18,7 +18,8 @@ import {
     DialogTrigger
 } from "@/components/ui/dialog.tsx";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
-import {LoaderCircleIcon, ScanSearchIcon, TrashIcon} from "lucide-react";
+import {ScanSearchIcon, TrashIcon} from "lucide-react";
+import {Spinner} from "@/components/ui/spinner.tsx";
 import {Button, buttonVariants} from "@/components/ui/button.tsx";
 import {convertIdToObjectId} from "@/lib/graphql/graphql-utils.ts";
 import * as React from "react";
@@ -100,8 +101,8 @@ function DeleteEntityButton<T extends WithTypenameMutation>(
 
     if (isDeletionOngoing(objectIds, rqJobListData)) {
         return (
-            <div className="flex items-center justify-center">
-                <LoaderCircleIcon className="animate-spin"></LoaderCircleIcon>
+            <div className="flex items-center justify-center size-9">
+                <Spinner size="default" />
             </div>
         );
     }
@@ -138,6 +139,10 @@ function ScanAppActionButton(
         ids,
         tooltip,
         mutation,
+        text,
+        size = "sm",
+        className,
+        variant = "outline",
     }: Readonly<{
         ids: string[];
         tooltip: string;
@@ -146,6 +151,10 @@ function ScanAppActionButton(
             scannerName: Scalars["String"]["input"]
             queueName: Scalars["String"]["input"]
         }>>;
+        text?: string;
+        size?: "default" | "sm" | "lg" | "icon";
+        className?: string;
+        variant?: "default" | "outline" | "secondary" | "ghost" | "link" | "destructive";
     }>
 ) {
     const [selectedScanners, setSelectedScanners] = useState<Scanner[]>([]);
@@ -155,18 +164,32 @@ function ScanAppActionButton(
 
     return (
         <Dialog modal={true}>
-            <DialogTrigger>
-                <Tooltip delayDuration={500}>
-                    <TooltipTrigger asChild>
-                        <ActionButton variant="outline" disabled={ids.length <= 0}>
-                            <ScanSearchIcon className="size-5"/>
-                        </ActionButton>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>{tooltip}</p>
-                    </TooltipContent>
-                </Tooltip>
-            </DialogTrigger>
+            {text ? (
+                <DialogTrigger asChild>
+                    <Button
+                        variant={variant}
+                        size={size}
+                        disabled={ids.length <= 0}
+                        className={className}
+                    >
+                        <ScanSearchIcon className="size-4 mr-1.5" />
+                        {text}
+                    </Button>
+                </DialogTrigger>
+            ) : (
+                <DialogTrigger>
+                    <Tooltip delayDuration={500}>
+                        <TooltipTrigger asChild>
+                            <ActionButton variant={variant} disabled={ids.length <= 0} className={className}>
+                                <ScanSearchIcon className="size-5"/>
+                            </ActionButton>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>{tooltip}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </DialogTrigger>
+            )}
             <DialogContent className="sm:max-w-5xl">
                 <DialogHeader>
                     <DialogTitle>Select Scanner(s)</DialogTitle>
@@ -197,9 +220,8 @@ function ScanAppActionButton(
     );
 }
 
-    export
-{
+export {
     ActionButton,
-        ScanAppActionButton,
-        DeleteEntityButton,
+    ScanAppActionButton,
+    DeleteEntityButton,
 }

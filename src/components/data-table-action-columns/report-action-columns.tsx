@@ -35,7 +35,7 @@ export function buildViewReportColumn<T extends WithIdAndAppIdAndFirmwareId>(): 
                 const reportId = row.original.id;
                 const appId = row.original.androidAppIdReference.id;
                 const firmwareId = row.original.androidAppIdReference.firmwareIdReference?.id;
-                const scannerName = row.original.scannerName;
+                const scannerName = row.original.scannerName ?? "report";
 
                 return (
                     <>
@@ -44,7 +44,7 @@ export function buildViewReportColumn<T extends WithIdAndAppIdAndFirmwareId>(): 
                                 <TooltipTrigger asChild>
                                     <ActionButton
                                         variant="outline"
-                                        onClick={() => void navigate(`${FIRMWARE_URL}/${firmwareId}${APPS_URL}/${appId}${REPORTS_URL}/${scannerName}-${reportId}`)}
+                                        onClick={() => void navigate(`${FIRMWARE_URL}/${encodeURIComponent(firmwareId)}${APPS_URL}/${encodeURIComponent(appId)}${REPORTS_URL}/${encodeURIComponent(scannerName)}-${encodeURIComponent(reportId)}`)}
                                     >
                                         <EyeIcon className="size-5"/>
                                     </ActionButton>

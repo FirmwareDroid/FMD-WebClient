@@ -15,9 +15,12 @@ export function BasePage(
         title,
     }: Readonly<Props>) {
     return (
-        <main className={cn("px-4 py-6 sm:px-6 lg:px-8", className)}>
-            <div className="w-full max-w-5xl mx-auto">
-                <TypographyH1 className="mb-4">{title}</TypographyH1>
+        <main className={cn("px-4 py-8 sm:px-6 sm:py-10 lg:px-10", className)}>
+            <div className="w-full max-w-6xl mx-auto">
+                <header className="mb-7 border-b pb-6">
+                    <p className="fmd-kicker mb-2">FirmwareDroid workspace</p>
+                    <TypographyH1>{title}</TypographyH1>
+                </header>
 
                 <div className="flex flex-col items-center gap-6 sm:gap-8">
                     {children}

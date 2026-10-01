@@ -6,10 +6,10 @@ import {Progress} from "@/components/ui/progress.tsx";
 import {
     CircleCheckBigIcon,
     CloudAlertIcon,
-    LoaderCircleIcon,
     ShieldEllipsisIcon,
     XIcon
 } from "lucide-react";
+import {Spinner} from "@/components/ui/spinner.tsx";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import { useMutation } from "@/lib/apollo-hooks";
@@ -80,7 +80,7 @@ function UploadDialog({storageIndex, fileUploads, setFileUploads, removeUpload}:
 
     return (
         <Dialog open={fileUploads.length > 0 && !fileUploads.every(u => u.importStarted)} modal={true}>
-            <DialogContent className="sm:max-w-5xl" showCloseButton={false}>
+            <DialogContent className="sm:max-w-5xl overflow-hidden" showCloseButton={false}>
                 <DialogHeader>
                     <DialogTitle>Uploading and validating...</DialogTitle>
                 </DialogHeader>
@@ -88,8 +88,8 @@ function UploadDialog({storageIndex, fileUploads, setFileUploads, removeUpload}:
                     <TableHeader>
                         <TableRow>
                             <TableHead>Filename</TableHead>
-                            <TableHead className="text-center">1. Upload to Server</TableHead>
-                            <TableHead className="text-center">2. Server Validation</TableHead>
+                            <TableHead className="text-center w-1/3">1. Upload to Server</TableHead>
+                            <TableHead className="text-center w-1/4">2. Server Validation</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -98,15 +98,15 @@ function UploadDialog({storageIndex, fileUploads, setFileUploads, removeUpload}:
                                 return (
                                     <TableRow key={upload.id}>
                                         <TableCell>
-                                            <div>
+                                            <div className="truncate max-w-xs md:max-w-md">
                                                 <span>{upload.file.name}</span>
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="flex items-center justify-center gap-2 w-full">
+                                            <div className="flex items-center justify-center gap-2 w-full min-h-11">
                                                 {upload.percentComplete < 100 && (
                                                     <>
-                                                        <LoaderCircleIcon className="animate-spin"/>
+                                                        <Spinner size="default" />
                                                         <Progress value={upload.percentComplete}/>
                                                         <Button
                                                             type="button"
@@ -120,19 +120,19 @@ function UploadDialog({storageIndex, fileUploads, setFileUploads, removeUpload}:
                                                     </>
                                                 )}
                                                 {upload.percentComplete >= 100 &&
-                                                    <CircleCheckBigIcon color="green"/>}
+                                                    <CircleCheckBigIcon className="size-6 text-green-600 shrink-0" />}
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="flex items-center justify-center">
+                                            <div className="flex items-center justify-center min-h-11">
                                                 {upload.percentComplete < 100 && (
-                                                    <ShieldEllipsisIcon/>
+                                                    <ShieldEllipsisIcon className="size-6 text-muted-foreground shrink-0"/>
                                                 )}
                                                 {upload.percentComplete >= 100 && !upload.serverResponded && (
-                                                    <LoaderCircleIcon className="animate-spin"/>
+                                                    <Spinner size="default" />
                                                 )}
                                                 {upload.percentComplete >= 100 && upload.serverResponded && (
-                                                    <CircleCheckBigIcon color="green"/>
+                                                    <CircleCheckBigIcon className="size-6 text-green-600 shrink-0" />
                                                 )}
                                             </div>
                                         </TableCell>
@@ -319,7 +319,7 @@ export function Dropzone(
                     <AlertDescription>{dropError}</AlertDescription>
                 </Alert>
             )}
-            <div {...getRootProps({className: "dropzone w-full rounded-xl cursor-pointer"})}>
+            <div {...getRootProps({className: "dropzone w-full rounded-xl cursor-pointer"})} role="region" aria-label="File upload dropzone">
                 <Card className="flex min-h-48 justify-center border-2 border-dashed p-4 text-center transition-colors focus-within:ring-2 focus-within:ring-ring">
                     <input {...getInputProps()} />
                     <p>{message}</p>

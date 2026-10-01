@@ -11,6 +11,7 @@ import {cn} from "@/lib/utils.ts";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
 import {AlertCircleIcon} from "lucide-react";
 import {Button} from "@/components/ui/button.tsx";
+import {FmdIcon} from "@/components/icons/fmd-icon.tsx";
 
 export default function LoginPage() {
     const {isAuthenticated, initializing} = useAuth();
@@ -81,6 +82,12 @@ function LoginForm({className, ...props}: React.ComponentProps<"div">) {
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
+            <div className="flex items-center justify-center gap-3">
+                <FmdIcon className="size-10 rounded-xl shadow-md shrink-0" />
+                <span className="fmd-wordmark text-2xl font-bold tracking-tight">
+                    Firmware<span className="fmd-wordmark-accent">Droid</span>
+                </span>
+            </div>
             <Card>
                 <CardHeader>
                     <CardTitle>Login to your account</CardTitle>
