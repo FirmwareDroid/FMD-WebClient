@@ -18,7 +18,9 @@ export function BasePage(
         <main className={cn("px-4 py-8 sm:px-6 sm:py-10 lg:px-10", className)}>
             <div className="w-full max-w-6xl mx-auto">
                 <header className="mb-7 border-b pb-6">
-                    <p className="fmd-kicker mb-2">FirmwareDroid workspace</p>
+                    <p className="fmd-kicker mb-2">
+                        <span className="text-[#8bd450] font-bold">FMD</span> workspace
+                    </p>
                     <TypographyH1>{title}</TypographyH1>
                 </header>
 

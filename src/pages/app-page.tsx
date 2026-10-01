@@ -4,7 +4,10 @@ import {BasePage} from "@/pages/base-page.tsx";
 import {useMutation, useQuery} from "@/lib/apollo-hooks";
 import {convertIdToObjectId, isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {APP_ALL, GET_APP_BY_ID, SCAN_APKS_BY_OBJECT_IDS} from "@/components/graphql/app.graphql.ts";
-import {GET_REPORT, META_APK_SCANNER_REPORT} from "@/components/graphql/report.graphql.ts";
+import {GET_APP_REPORTS_WITH_FINDINGS, META_APK_SCANNER_REPORT} from "@/components/graphql/report.graphql.ts";
+import {SecurityFindingsCard} from "@/components/report/security-findings-card.tsx";
+import {extractInterestingFindings} from "@/lib/report-utils.ts";
+import {useMemo} from "react";
 import {GET_RQ_JOB_LIST} from "@/components/graphql/rq-job.graphql.ts";
 import {useFragment as readFragment} from "@/__generated__";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
@@ -16,6 +19,7 @@ import {
     FingerprintIcon,
     FolderTreeIcon,
     HardDriveIcon,
+    KeyIcon,
     LayersIcon,
     PlayIcon,
     ShieldCheckIcon,
@@ -36,6 +40,8 @@ import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table
 import {buildViewReportColumn} from "@/components/data-table-action-columns/report-action-columns.tsx";
 import {useToastStore} from "@/stores/toast.ts";
 import {useSetBreadcrumbTitle} from "@/lib/breadcrumb-store.ts";
+import {AndroidManifestCard} from "@/components/app/android-manifest-card.tsx";
+import {parseAndroidManifest} from "@/lib/manifest-utils.ts";
 import type {ColumnDef} from "@tanstack/react-table";
 
 const reportColumns: ColumnDef<MetaReportFieldsFragment, unknown>[] = [
@@ -116,6 +122,8 @@ export function AppPage() {
     const app: AppAllFragment | undefined = apps[0];
     const appObjectId = app?.pk ?? (appId ? convertIdToObjectId(appId) : undefined);
 
+    const parsedManifest = parseAndroidManifest(app?.androidManifestDict);
+
     useSetBreadcrumbTitle(appId, app?.filename || app?.packagename);
 
     const {
@@ -123,18 +131,24 @@ export function AppPage() {
         error: reportsError,
         data: reportsData,
         refetch: refetchReports,
-    } = useQuery(GET_REPORT, {
+    } = useQuery(GET_APP_REPORTS_WITH_FINDINGS, {
         variables: {appObjectId: appObjectId},
         skip: !appObjectId,
         fetchPolicy: "cache-and-network",
     });
 
-    const reports = (reportsData?.apk_scanner_report_list ?? [])
+    const rawReports = (reportsData?.apk_scanner_report_list ?? []).filter(isNonNullish);
+
+    const reports = rawReports
         .map((report) => {
             if (!report) return null;
-            return readFragment(META_APK_SCANNER_REPORT, report);
+            return readFragment(META_APK_SCANNER_REPORT, report as any);
         })
         .filter(isNonNullish);
+
+    const interestingFindings = useMemo(() => {
+        return extractInterestingFindings(rawReports as any);
+    }, [rawReports]);
 
     // Query active scanner RQ jobs
     const {
@@ -286,9 +300,19 @@ export function AppPage() {
                                     <SmartphoneIcon className="size-6" aria-hidden="true" />
                                 </div>
                                 <div className="space-y-1 min-w-0">
-                                    <CardTitle className="text-xl sm:text-2xl font-bold truncate">
-                                        {app.filename || "Unnamed Application"}
-                                    </CardTitle>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <CardTitle className="text-xl sm:text-2xl font-bold truncate">
+                                            {app.filename || "Unnamed Application"}
+                                        </CardTitle>
+                                        {appObjectId && (
+                                            <Badge variant="outline" className="font-mono text-xs gap-1.5 px-2 py-0.5 border-border/80 bg-muted/40">
+                                                <KeyIcon className="size-3 text-primary" aria-hidden="true" />
+                                                <span className="text-muted-foreground text-[11px]">ObjectId:</span>
+                                                <span className="text-foreground font-semibold">{appObjectId}</span>
+                                                <CopyButton value={appObjectId} label="Copy app ObjectId" />
+                                            </Badge>
+                                        )}
+                                    </div>
                                     <div className="flex items-center gap-2 flex-wrap">
                                         <CardDescription className="font-mono text-xs break-all">
                                             {app.packagename || "Unpackaged / System library"}
@@ -366,6 +390,20 @@ export function AppPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div className="space-y-1 md:col-span-2">
+                            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                                <KeyIcon className="size-3.5 text-primary" aria-hidden="true" /> Unique Object ID (MongoDB)
+                            </span>
+                            <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
+                                <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
+                                    {appObjectId || "—"}
+                                </code>
+                                {appObjectId && (
+                                    <CopyButton value={appObjectId} label="Copy unique ObjectId" />
+                                )}
+                            </div>
+                        </div>
+
                         <div className="space-y-1.5">
                             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Package Name</span>
                             <div className="flex items-center gap-2 flex-wrap">
@@ -455,6 +493,20 @@ export function AppPage() {
                             </div>
                         </div>
 
+                        {app.relativeStorePath && (
+                            <div className="space-y-1 md:col-span-2">
+                                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                                    <FolderTreeIcon className="size-3.5" aria-hidden="true" /> Relative Store Path
+                                </span>
+                                <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
+                                    <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
+                                        {app.relativeStorePath}
+                                    </code>
+                                    <CopyButton value={app.relativeStorePath} label="Copy relative store path" />
+                                </div>
+                            </div>
+                        )}
+
                         {app.originalFilename && app.originalFilename !== app.filename && (
                             <div className="space-y-1 md:col-span-2">
                                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Original Filename</span>
@@ -465,6 +517,14 @@ export function AppPage() {
                         )}
                     </CardContent>
                 </Card>
+
+                {/* Android Manifest Card (rendered when manifest data is available) */}
+                {parsedManifest && (
+                    <AndroidManifestCard
+                        manifest={parsedManifest}
+                        appName={app.filename}
+                    />
+                )}
 
                 {/* Hashes & File Integrity */}
                 <Card className="border-border/60 shadow-sm">
@@ -509,6 +569,16 @@ export function AppPage() {
                         </div>
                     </CardContent>
                 </Card>
+
+                {/* Security Scan Findings */}
+                <SecurityFindingsCard
+                    findings={interestingFindings}
+                    loading={reportsLoading}
+                    currentAppId={appId}
+                    defaultFirmwareId={firmwareId}
+                    title="Security Scan Findings"
+                    description="Key findings, secrets, and vulnerabilities detected for this application."
+                />
 
                 {/* Security Scan Reports */}
                 <Card className="border-border/60 shadow-sm">

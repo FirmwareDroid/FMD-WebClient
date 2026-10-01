@@ -41,42 +41,10 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-:root {
-    --radius: 0.625rem;
-    --background: #f4f7f8;
-    --foreground: #07111f;
-    --card: #ffffff;
-    --card-foreground: #07111f;
-    --popover: #ffffff;
-    --popover-foreground: #07111f;
-    --primary: #8bd450;
-    --primary-foreground: #07111f;
-    --secondary: #e8eef0;
-    --secondary-foreground: #07111f;
-    --muted: #edf2f3;
-    --muted-foreground: #60707d;
-    --accent: #e8f5df;
-    --accent-foreground: #274410;
-    --destructive: #c43d43;
-    --border: #dce5e8;
-    --input: #cbd7db;
-    --ring: #5ba722;
-    --chart-1: #8bd450;
-    --chart-2: #6eb6ff;
-    --chart-3: #5ba722;
-    --chart-4: #f2b84b;
-    --chart-5: #60707d;
-    --sidebar: #07111f;
-    --sidebar-foreground: #d7dee4;
-    --sidebar-primary: #8bd450;
-    --sidebar-primary-foreground: #07111f;
-    --sidebar-accent: #13273a;
-    --sidebar-accent-foreground: #ffffff;
-    --sidebar-border: #263649;
-    --sidebar-ring: #8bd450;
-}
-
+:root,
 .dark {
+    color-scheme: dark;
+    --radius: 0.625rem;
     --background: #07111f;
     --foreground: #f4f7f8;
     --card: #0d1b2d;
@@ -110,6 +78,8 @@
     --sidebar-ring: #8bd450;
 }
 
+
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -125,8 +95,7 @@
 }
 
 .theme-text-color {
-    color: #477f1e;
-    transition: color 120ms ease;
+    color: #8bd450;
 }
 
 .dark .theme-text-color,
@@ -142,7 +111,7 @@ html.dark .theme-text {
 }
 
 .fmd-kicker {
-    color: #5ba722;
+    color: #8bd450;
     font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
     font-size: 0.72rem;
     font-weight: 700;

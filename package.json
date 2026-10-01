@@ -14,7 +14,7 @@
     "preview": "vite preview",
     "build_docker_image": "docker ../build ./ -f ./Dockerfile -t firmwaredroid-frontend --platform=\"linux/amd64\"",
     "dev_copy": "rm -R -f ../FirmwareDroid/firmware-droid-client/ && cp -v -r ./ ../FirmwareDroid/firmware-droid-client/",
-    "dev_deploy": "vite build && rm -R -f ../FirmwareDroid/firmware-droid-client/ && mkdir -p ../FirmwareDroid/firmware-droid-client/build && cp -v -r ./build ../FirmwareDroid/firmware-droid-client/",
+    "dev_deploy": "vite build && rm -R -f ../FirmwareDroid/firmware-droid-client/ && mkdir -p ../FirmwareDroid/firmware-droid-client/build && cp -r ./build ../FirmwareDroid/firmware-droid-client/ && docker cp ./build/. nginx:/usr/share/nginx/html/",
     "schema:export": "cd ../FirmwareDroid && docker compose exec -T web sh -lc 'cd /var/www/source && python manage.py graphql_schema --schema api.v2.schema.FirmwareDroidRootSchema.schema --out /var/www/firmware-droid-client/schema/schema.graphql --indent 2' && docker cp backend-worker:/var/www/firmware-droid-client/schema/schema.graphql ./firmware-droid-client/schema/schema.graphql && cp ./firmware-droid-client/schema/schema.graphql ../FMD-WebClient/schema/schema.graphql ",
     "codegen": "graphql-codegen",
     "codegen:all": "yarn schema:export && yarn codegen"

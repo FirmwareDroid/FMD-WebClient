@@ -67,8 +67,17 @@ function DataTable<TData, TValue>(
     const [rowSelection, setRowSelection] = useState({});
     const [pagination, setPagination] = useState({
         pageIndex: 0,
-        pageSize: dataTablePagination ? 25 : Number.MAX_SAFE_INTEGER,
+        pageSize: cursorPagination ? Number.MAX_SAFE_INTEGER : (dataTablePagination ? 25 : Number.MAX_SAFE_INTEGER),
     });
+
+    useEffect(() => {
+        if (cursorPagination) {
+            setPagination({
+                pageIndex: 0,
+                pageSize: Number.MAX_SAFE_INTEGER,
+            });
+        }
+    }, [cursorPagination]);
 
     const [globalFilter, setGlobalFilter] = useState<string>("");
     const filteredData = useMemo(() => {

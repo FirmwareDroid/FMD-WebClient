@@ -113,7 +113,7 @@ export function ImporterPage() {
                     <p className="text-body">
                         To begin, simply drag and drop an Android firmware package
                         (such as a compressed ZIP file) or an Android app (APK)
-                        into the upload area. FirmwareDroid will automatically
+                        into the upload area. FMD will automatically
                         detect the file type and guide you through the analysis process.
                     </p>
                 </CardContent>
@@ -124,7 +124,7 @@ export function ImporterPage() {
             <Card className="w-full max-w-5xl">
                 <CardContent>
                     <p className="text-body">
-                        Below is a list of all firmware images that have been imported into FirmwareDroid.
+                        Below is a list of all firmware images that have been imported into FMD.
                         You can explore the extracted Android apps, as well as initiate
                         various security analyses directly from this table.
                     </p>

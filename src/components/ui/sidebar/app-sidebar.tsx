@@ -97,8 +97,8 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
                                     <FmdIcon className="size-8" />
                                 </div>
                                 <div className="grid flex-1 text-left text-lg leading-tight">
-                                    <span className="fmd-wordmark truncate text-white">
-                                        Firmware<span className="text-[#8bd450]">Droid</span>
+                                    <span className="fmd-wordmark truncate text-[#8bd450] font-bold text-xl tracking-tight">
+                                        FMD
                                     </span>
                                 </div>
                             </Link>

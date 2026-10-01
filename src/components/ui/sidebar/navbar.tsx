@@ -1,4 +1,3 @@
-import {ModeToggle} from "@/components/ui/theming/mode-toggle.tsx";
 import {Button} from "../button.tsx";
 import {Link, NavLink} from "react-router";
 import {
@@ -59,7 +58,7 @@ export default function Navbar() {
                         <Button asChild variant="ghost" size="sm" className="px-3">
                             <Link to="/login">Sign In</Link>
                         </Button>
-                        <ModeToggle />
+                        
                     </div>
                 </nav>
             </div>

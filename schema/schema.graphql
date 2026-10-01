@@ -1,5 +1,6 @@
 type Query {
   apk_scanner_log_list(objectId: [String], fieldFilter: ApkScannerLogFilter): [ApkScannerLogType]
+  trufflehog_report_list(objectId: [String], fieldFilter: TruffleHogReportFilter): [TruffleHogReport]
   trueseeing_report_list(objectId: [String], fieldFilter: TrueseeingReportFilter): [TrueseeingReport]
   mobsfscan_report_list(objectId: [String], fieldFilter: MobSFScanReportFilter): [MobSFScanReport]
   flowdroid_report_list(objectId: [String], fieldFilter: FlowDroidReportFilter): [FlowDroidReport]
@@ -587,7 +588,7 @@ input ApkScannerLogFilter {
   id: String
 }
 
-type TrueseeingReport implements ApkScannerReportInterface & Node {
+type TruffleHogReport implements ApkScannerReportInterface & Node {
   Cls: String
   androidAppIdReference: AndroidAppType
 
@@ -612,6 +613,45 @@ interface ApkScannerReportInterface implements Node {
   scannerName: String
   scannerVersion: String
   androidAppIdReference: AndroidAppType
+}
+
+input TruffleHogReportFilter {
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by android_app_id_reference"""
+  android_app_id_reference: String
+
+  """Filter by scanner_version"""
+  scanner_version: String
+
+  """Filter by scanner_name"""
+  scanner_name: String
+
+  """Filter by scan_status"""
+  scan_status: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by results"""
+  results: String
+}
+
+type TrueseeingReport implements ApkScannerReportInterface & Node {
+  Cls: String
+  androidAppIdReference: AndroidAppType
+
+  """The ID of the object"""
+  id: ID!
+  reportDate: DateTime
+
+  """"""
+  results: JSONString!
+  scanStatus: String
+  scannerName: String
+  scannerVersion: String
+  pk: String
 }
 
 input TrueseeingReportFilter {
@@ -1187,6 +1227,9 @@ input ApkScannerReportFilter {
 
   """Filter by id"""
   id: String
+
+  """Filter reports by firmware ObjectId across all extracted apps"""
+  firmwareIdReference: String
 }
 
 type ApkleaksStatisticsReportType {
@@ -2404,7 +2447,7 @@ type Mutation {
   Starts the firmware extractor module. The extractor module is used to import firmware from the "firmware_import"
   directory to the database. Only one instance of the extractor module is allowed to run.
   """
-  createFirmwareExtractorJob(createFuzzyHashes: Boolean!, keepFilesOnDisk: Boolean = false, queueName: String! = "extractor", storageIndex: Int! = 0): CreateFirmwareExtractorJob
+  createFirmwareExtractorJob(createFuzzyHashes: Boolean = false, keepFilesOnDisk: Boolean = true, queueName: String! = "extractor", scanModules: [String!] = [], storageIndex: Int! = 0): CreateFirmwareExtractorJob
 
   """
   Starts the fuzzy hasher module. The fuzzy hasher module is used to create fuzzy hashes for all firmware files in
@@ -2451,7 +2494,7 @@ type Mutation {
   are accepted. Every module uses an own python interpreter and the module is loaded during runtime.
   """
   createApkScanJob(firmwareIdList: [String!] = [], kwargs: JSONString! = "\"{}\"", moduleName: String!, objectIdList: [String!] = [], queueName: String! = "scanner"): CreateApkScanJob
-  createAppImportJob(queueName: String! = "extractor", storageIndex: Int! = 0): CreateAppImportJob
+  createAppImportJob(queueName: String! = "extractor", scanModules: [String!] = [], storageIndex: Int! = 0): CreateAppImportJob
   _debug: DjangoDebug
 
   """

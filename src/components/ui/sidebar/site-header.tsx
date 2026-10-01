@@ -12,7 +12,6 @@ import {
 import {Button} from "@/components/ui/button.tsx"
 import {Separator} from "@/components/ui/separator.tsx"
 import {useSidebar} from "@/components/ui/sidebar.tsx"
-import {ModeToggle} from "@/components/ui/theming/mode-toggle.tsx";
 import {Link, useLocation} from "react-router";
 import {FmdIcon} from "@/components/icons/fmd-icon.tsx";
 import {useBreadcrumbStore} from "@/lib/breadcrumb-store.ts";
@@ -42,7 +41,7 @@ export function SiteHeader() {
 
                     <Link to="/" className="fmd-wordmark mr-3 whitespace-nowrap text-sm sm:hidden inline-flex items-center gap-1.5">
                         <FmdIcon className="size-5 rounded" />
-                        <span>Firmware<span className="text-[#8bd450]">Droid</span></span>
+                        <span className="text-[#8bd450] font-bold">FMD</span>
                     </Link>
 
                     {splitPathname.length > 0 && (
@@ -86,9 +85,7 @@ export function SiteHeader() {
                         </Breadcrumb>
                     )}
                 </div>
-                <div className="[&_button]:text-slate-200 [&_button:hover]:bg-[#13273a] [&_button:hover]:text-[#8bd450]">
-                    <ModeToggle/>
-                </div>
+
             </div>
         </header>
     )

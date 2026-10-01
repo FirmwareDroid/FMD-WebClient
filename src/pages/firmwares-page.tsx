@@ -174,7 +174,7 @@ export function FirmwaresPage() {
             <Card className="w-full max-w-5xl">
                 <CardContent>
                     <p className="text-body">
-                        Below is a list of all firmware images that have been imported into FirmwareDroid. You can
+                        Below is a list of all firmware images that have been imported into FMD. You can
                         analyze these firmware images to extract Android apps and identify potential security
                         vulnerabilities. Use the action buttons to start an analysis or view detailed information
                         about each firmware via the "View" button.

@@ -17,7 +17,7 @@ export default defineConfig({
         port: 5173,
         strictPort: true,
         // Whitelist allowed hostnames to prevent DNS rebinding attacks while allowing proxied requests from Nginx
-        allowedHosts: ['fmd.localhost', 'localhost', '127.0.0.1'],
+        allowedHosts: ['fmd.localhost', 'localhost', '127.0.0.1', 'host.docker.internal'],
         hmr: {
             // When proxied through Nginx on https://fmd.localhost, HMR connects over wss:// on port 443
             clientPort: process.env.VITE_CLIENT_PORT ? parseInt(process.env.VITE_CLIENT_PORT, 10) : 443,

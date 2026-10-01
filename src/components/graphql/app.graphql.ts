@@ -5,10 +5,11 @@ import {gql} from "@/__generated__";
 // ----------------------------------------------------------------------------------------------------
 
 export const CREATE_APP_IMPORT_JOB = gql(`
-    mutation CreateAppImportJob($queueName: String!, $storageIndex: Int!) {
+    mutation CreateAppImportJob($queueName: String!, $storageIndex: Int!, $scanModules: [String!]) {
         createAppImportJob(
             queueName: $queueName,
-            storageIndex: $storageIndex
+            storageIndex: $storageIndex,
+            scanModules: $scanModules
         ) {
             jobId
         }

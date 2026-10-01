@@ -1,11 +1,13 @@
 import {BasePage} from "@/pages/base-page.tsx";
 import {useNavigate, useParams} from "react-router";
+import {useMemo} from "react";
 import {useQuery} from "@/lib/apollo-hooks";
 import {
     FIRMWARE_ALL,
     GET_FIRMWARES_BY_OBJECT_IDS,
     SCAN_APKS_BY_FIRMWARE_OBJECT_IDS
 } from "@/components/graphql/firmware.graphql.ts";
+import {GET_FIRMWARE_BUILD_PROPS} from "@/components/graphql/build-prop.graphql.ts";
 import {FirmwareAllFragment} from "@/__generated__/graphql.ts";
 import {useFragment as readFragment} from "@/__generated__";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
@@ -20,6 +22,7 @@ import {
     FingerprintIcon,
     FolderTreeIcon,
     HardDriveIcon,
+    KeyIcon,
     LayersIcon,
     ServerIcon,
     SmartphoneIcon,
@@ -31,12 +34,13 @@ import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {Badge} from "@/components/ui/badge.tsx";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import {ScanAppActionButton} from "@/components/data-table-action-columns/action-buttons.tsx";
+import {ScanAppActionButton, ReimportFirmwareButton} from "@/components/data-table-action-columns/action-buttons.tsx";
 import {APPS_URL, FILES_URL, FIRMWARE_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 import {useSetBreadcrumbTitle} from "@/lib/breadcrumb-store.ts";
 import {formatDateTime} from "@/lib/date-utils.ts";
 import {downloadJsonFile, formatBytes} from "@/lib/format-utils.ts";
 import {CopyButton} from "@/components/ui/copy-button.tsx";
+import {BuildPropsCard} from "@/components/firmware/build-props-card.tsx";
 
 interface PartitionInfo {
     is_import_success?: boolean;
@@ -64,6 +68,21 @@ export function FirmwarePage() {
 
     const firmware: FirmwareAllFragment | undefined = firmwares[0];
     useSetBreadcrumbTitle(firmwareId, firmware?.filename || firmware?.originalFilename);
+
+    const firmwareHexId = firmware?.pk ?? (firmwareId ? convertIdToObjectId(firmwareId) : undefined);
+
+    const {
+        loading: buildPropsLoading,
+        data: buildPropsData,
+    } = useQuery(GET_FIRMWARE_BUILD_PROPS, {
+        variables: {firmwareId: firmwareHexId ?? ""},
+        skip: !firmwareHexId,
+        fetchPolicy: "cache-and-network",
+    });
+
+    const buildPropFiles = useMemo(() => {
+        return (buildPropsData?.build_prop_file_id_list ?? []).filter(isNonNullish);
+    }, [buildPropsData?.build_prop_file_id_list]);
 
     if (!firmwareId) {
         return (
@@ -205,6 +224,12 @@ export function FirmwarePage() {
                             </div>
 
                             <div className="flex items-center gap-2 flex-wrap">
+                                <ReimportFirmwareButton
+                                    ids={[firmwareId]}
+                                    text="Reimport (Warning)"
+                                    onSuccessRedirect={FIRMWARE_URL}
+                                />
+
                                 <Button
                                     size="sm"
                                     onClick={() => {
@@ -323,6 +348,12 @@ export function FirmwarePage() {
                     </Card>
                 </div>
 
+                {/* Build Properties & Platform Specs */}
+                <BuildPropsCard
+                    buildPropFiles={buildPropFiles}
+                    loading={buildPropsLoading}
+                />
+
                 {/* Partition Breakdown */}
                 {partitionEntries.length > 0 && (
                     <Card className="border-border/60 shadow-sm">
@@ -426,6 +457,19 @@ export function FirmwarePage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        {firmware.pk && (
+                            <div className="space-y-1 md:col-span-2">
+                                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                                    <KeyIcon className="size-3.5" aria-hidden="true" /> MongoDB ObjectId
+                                </span>
+                                <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
+                                    <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
+                                        {firmware.pk}
+                                    </code>
+                                    <CopyButton value={firmware.pk} label="Copy firmware ObjectId" />
+                                </div>
+                            </div>
+                        )}
                         <div className="space-y-1">
                             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
                                 <HardDriveIcon className="size-3.5" aria-hidden="true" /> File Size

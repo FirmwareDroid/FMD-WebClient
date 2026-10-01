@@ -33,6 +33,7 @@ export const APK_REPORT = gql(`
         ...MobSFSReportType
         ...APKscanReportType
         ...FlowDroidReportType
+        ...TruffleHogReportType
     }
 `);
 
@@ -61,11 +62,20 @@ export const GET_SCANNER_REPORT = gql(`
         $reportObjectId: String
     ) {
         apk_scanner_report_list(fieldFilter: {id: $reportObjectId}) {
+            id
             pk
             reportDate
             scanStatus
             scannerName
             scannerVersion
+            androidAppIdReference {
+                id
+                filename
+                packagename
+                firmwareIdReference {
+                    id
+                }
+            }
             ...AndroGuardReportType
             ...ApkidReportType
             ...ApkleaksReportType
@@ -79,6 +89,7 @@ export const GET_SCANNER_REPORT = gql(`
             ...MobSFSReportType
             ...APKscanReportType
             ...FlowDroidReportType
+            ...TruffleHogReportType
         }
     }
 `);
@@ -254,4 +265,85 @@ export const FLOWDROID_REPORT = gql(`
     }
 `);
 
+// ----------------------------------------------------------------------------------------------------
+// TruffleHog REPORT
+// ----------------------------------------------------------------------------------------------------
 
+export const TRUFFLEHOG_REPORT = gql(`
+    fragment TruffleHogReportType on TruffleHogReport {
+        results
+    }
+`);
+
+
+export const GET_APP_REPORTS_WITH_FINDINGS = gql(`
+    query GetAppReportsWithFindings($appObjectId: String) {
+        apk_scanner_report_list(fieldFilter: {android_app_id_reference: $appObjectId}) {
+            id
+            pk
+            reportDate
+            scannerName
+            scannerVersion
+            scanStatus
+            androidAppIdReference {
+                id
+                pk
+                filename
+                packagename
+                firmwareIdReference {
+                    id
+                    pk
+                }
+            }
+            ...ApkidReportType
+            ...ApkleaksReportType
+            ...ExodusReportType
+            ...TrueseeingReportType
+            ...AndrowarnReportType
+            ...QuarkEngineReportType
+            ...QarkReportType
+            ...SuperReportType
+            ...VirusTotalReportType
+            ...MobSFSReportType
+            ...APKscanReportType
+            ...FlowDroidReportType
+            ...TruffleHogReportType
+        }
+    }
+`);
+
+export const GET_FIRMWARE_REPORTS = gql(`
+    query GetFirmwareReports($firmwareId: String) {
+        apk_scanner_report_list(fieldFilter: {firmwareIdReference: $firmwareId}) {
+            id
+            pk
+            reportDate
+            scannerName
+            scannerVersion
+            scanStatus
+            androidAppIdReference {
+                id
+                pk
+                filename
+                packagename
+                firmwareIdReference {
+                    id
+                    pk
+                }
+            }
+            ...ApkidReportType
+            ...ApkleaksReportType
+            ...ExodusReportType
+            ...TrueseeingReportType
+            ...AndrowarnReportType
+            ...QuarkEngineReportType
+            ...QarkReportType
+            ...SuperReportType
+            ...VirusTotalReportType
+            ...MobSFSReportType
+            ...APKscanReportType
+            ...FlowDroidReportType
+            ...TruffleHogReportType
+        }
+    }
+`);

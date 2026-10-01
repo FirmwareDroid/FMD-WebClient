@@ -22,6 +22,11 @@ import {CREATE_APP_IMPORT_JOB} from "@/components/graphql/app.graphql.ts";
 import {RqJobsTable} from "@/components/rq-jobs-table.tsx";
 import {RqJobQueuesDropdownMenu} from "@/components/rq-jobs/rq-job-queues-dropdown-menu.tsx";
 import {getCsrf} from "@/lib/graphql/apolloClient.ts";
+import {
+    ImportOptionsCard,
+    ScanProfileId,
+    getResolvedScanModules,
+} from "@/components/importer/import-options-card.tsx";
 
 type DropzoneProps = {
     className?: string;
@@ -78,9 +83,14 @@ function UploadDialog({storageIndex, fileUploads, setFileUploads, removeUpload}:
     const [importStarting, setImportStarting] = useState(false);
     const [importError, setImportError] = useState<string | null>(null);
 
+    const [keepFilesOnDisk, setKeepFilesOnDisk] = useState<boolean>(true);
+    const [createFuzzyHashes, setCreateFuzzyHashes] = useState<boolean>(false);
+    const [scanProfile, setScanProfile] = useState<ScanProfileId>("lightweight");
+    const [customScanModules, setCustomScanModules] = useState<string[]>(["MANIFEST", "APKID", "EXODUS"]);
+
     return (
         <Dialog open={fileUploads.length > 0 && !fileUploads.every(u => u.importStarted)} modal={true}>
-            <DialogContent className="sm:max-w-5xl overflow-hidden" showCloseButton={false}>
+            <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-y-auto" showCloseButton={false}>
                 <DialogHeader>
                     <DialogTitle>Uploading and validating...</DialogTitle>
                 </DialogHeader>
@@ -154,6 +164,18 @@ function UploadDialog({storageIndex, fileUploads, setFileUploads, removeUpload}:
                         })}
                     </TableBody>
                 </Table>
+
+                <ImportOptionsCard
+                    keepFilesOnDisk={keepFilesOnDisk}
+                    setKeepFilesOnDisk={setKeepFilesOnDisk}
+                    createFuzzyHashes={createFuzzyHashes}
+                    setCreateFuzzyHashes={setCreateFuzzyHashes}
+                    scanProfile={scanProfile}
+                    setScanProfile={setScanProfile}
+                    customScanModules={customScanModules}
+                    setCustomScanModules={setCustomScanModules}
+                />
+
                 {importError && (
                     <Alert variant="destructive" role="alert">
                         <CloudAlertIcon/>
@@ -188,12 +210,27 @@ function UploadDialog({storageIndex, fileUploads, setFileUploads, removeUpload}:
                         onClick={() => {
                             setImportStarting(true);
                             setImportError(null);
+                            const scanModules = getResolvedScanModules(scanProfile, customScanModules);
                             const jobs: Promise<unknown>[] = [];
                             if (fileUploads.some(upload => upload.type === "firmware")) {
-                                jobs.push(createFirmwareExtractorJob({variables: {queueName: selectedQueue, storageIndex}}));
+                                jobs.push(createFirmwareExtractorJob({
+                                    variables: {
+                                        queueName: selectedQueue,
+                                        storageIndex,
+                                        keepFilesOnDisk,
+                                        createFuzzyHashes,
+                                        scanModules,
+                                    }
+                                }));
                             }
                             if (fileUploads.some(upload => upload.type === "apk")) {
-                                jobs.push(createAppImportJob({variables: {queueName: selectedQueue, storageIndex}}));
+                                jobs.push(createAppImportJob({
+                                    variables: {
+                                        queueName: selectedQueue,
+                                        storageIndex,
+                                        scanModules,
+                                    }
+                                }));
                             }
                             void Promise.all(jobs)
                                 .then(() => setFileUploads(prev => prev.map(upload => ({...upload, importStarted: true}))))

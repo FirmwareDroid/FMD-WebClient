@@ -9,7 +9,7 @@ import {
 } from "@/components/data-table-action-columns/entity-action-columns.tsx";
 import {useNavigate} from "react-router";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
-import {ActionButton} from "@/components/data-table-action-columns/action-buttons.tsx";
+import {ActionButton, ReimportFirmwareButton} from "@/components/data-table-action-columns/action-buttons.tsx";
 import {FIRMWARE_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 import {EyeIcon} from "lucide-react";
 import {buildScanAppColumn} from "@/components/data-table-action-columns/app-action-columns.tsx";
@@ -43,6 +43,26 @@ function buildViewFirmwareColumn<T extends WithId>(): ColumnDef<T> {
     );
 }
 
+function buildReimportFirmwareColumn<T extends WithId>(): ColumnDef<T> {
+    return {
+        id: "reimport",
+        header: ({table}) => (
+            <ReimportFirmwareButton
+                ids={table.getSelectedRowModel().flatRows.map(row => row.original.id)}
+                tooltip="Warning: Reimport selected firmware (permanently deletes all apps & reports)"
+                variant="destructive"
+            />
+        ),
+        cell: ({row}) => (
+            <ReimportFirmwareButton
+                ids={[row.original.id]}
+                tooltip="Warning: Reimport firmware (permanently deletes all apps & reports)"
+                variant="destructive"
+            />
+        ),
+    };
+}
+
 export function buildFirmwareActionColumns<T extends WithId>(
     scanAppMutation: TypedDocumentNode<ScanApksByFirmwareObjectIdsMutation, Exact<{
         objectIds: Array<Scalars["String"]["input"]> | Scalars["String"]["input"]
@@ -54,6 +74,7 @@ export function buildFirmwareActionColumns<T extends WithId>(
         buildSelectEntityColumn(),
         buildViewFirmwareColumn(),
         buildScanAppColumn("Scan all apps of this firmware", "Scan all apps of selected firmware", scanAppMutation),
+        buildReimportFirmwareColumn(),
         buildDeleteEntityColumn("Delete firmware", "Delete selected firmware", DELETE_FIRMWARE_BY_OBJECT_ID),
     ];
 }

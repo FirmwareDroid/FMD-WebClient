@@ -15,18 +15,18 @@ function HomePage() {
                     <TypographyH1 className="inline-flex items-center gap-3">
                         <FmdIcon className="size-9 sm:size-10 rounded-lg shrink-0 shadow-sm" />
                         <span>
-                            Firmware<span className="text-[#8bd450]">Droid</span>
+                            <span className="text-[#8bd450] font-bold">FMD</span>
                         </span>
                     </TypographyH1>
                 </div>
 
                 <Card className="w-full max-w-5xl">
                     <CardContent>
-                        <h3 className="text-lg font-semibold mb-2 theme-text-color">Welcome to FirmwareDroid</h3>
+                        <h3 className="text-lg font-semibold mb-2 theme-text-color">Welcome to <span className="text-[#8bd450] font-bold">FMD</span></h3>
                         <p className="text-body">
                             This tool breaks down firmware images into their core components, extracts apps and
                             files, and highlights configuration issues that may expose devices to risk. You can use
-                            FirmwareDroid to analyze Android-based firmware images from various IoT devices or for
+                            FMD to analyze Android-based firmware images from various IoT devices or for
                             scanning standalone Android APK files for security vulnerabilities.
                         </p>
                     </CardContent>
@@ -48,7 +48,7 @@ function HomePage() {
                     <CardContent>
                         <h3 className="text-lg font-semibold mb-2 theme-text-color">Exploring the API</h3>
                         <p className="text-body">
-                            You can also explore the FirmwareDroid GraphQL API to access analysis results
+                            You can also explore the FMD GraphQL API to access analysis results
                             programmatically, integrate findings into your own workflows, or build custom
                             tooling. The interactive API explorer is available at
                             {' '}<a className="ui-link" href="./graphql">./graphql</a>,

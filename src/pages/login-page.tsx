@@ -84,8 +84,8 @@ function LoginForm({className, ...props}: React.ComponentProps<"div">) {
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <div className="flex items-center justify-center gap-3">
                 <FmdIcon className="size-10 rounded-xl shadow-md shrink-0" />
-                <span className="fmd-wordmark text-2xl font-bold tracking-tight">
-                    Firmware<span className="fmd-wordmark-accent">Droid</span>
+                <span className="fmd-wordmark text-2xl font-bold tracking-tight text-[#8bd450]">
+                    FMD
                 </span>
             </div>
             <Card>

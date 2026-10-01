@@ -141,7 +141,7 @@ export function AppsPage() {
                 <CardContent>
                     <p className="text-body">
                         Below is a list of all Android applications (APKs) extracted from the firmware or APKs you have
-                        imported into FirmwareDroid. You can explore detailed information about each app, including
+                        imported into FMD. You can explore detailed information about each app, including
                         metadata, permissions, and potential security issues identified during the analysis.
                     </p>
                 </CardContent>
