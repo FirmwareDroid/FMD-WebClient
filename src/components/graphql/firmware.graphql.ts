@@ -5,11 +5,19 @@ import {gql} from "@/__generated__";
 // ----------------------------------------------------------------------------------------------------
 
 export const CREATE_FIRMWARE_EXTRACTOR_JOB = gql(`
-    mutation CreateFirmwareExtractorJob($queueName: String!, $storageIndex: Int!) {
+    mutation CreateFirmwareExtractorJob(
+        $queueName: String!
+        $storageIndex: Int!
+        $keepFilesOnDisk: Boolean
+        $createFuzzyHashes: Boolean
+        $scanModules: [String!]
+    ) {
         createFirmwareExtractorJob(
-            createFuzzyHashes: false
             queueName: $queueName
             storageIndex: $storageIndex
+            keepFilesOnDisk: $keepFilesOnDisk
+            createFuzzyHashes: $createFuzzyHashes
+            scanModules: $scanModules
         ) {
             jobId
         }
@@ -126,6 +134,26 @@ export const SCAN_APKS_BY_FIRMWARE_OBJECT_IDS = gql(`
 export const DELETE_FIRMWARE_BY_OBJECT_ID = gql(`
     mutation DeleteFirmwareByObjectId($objectIds: [String!]!) {
         deleteAndroidFirmware(firmwareIdList: $objectIds) {
+            jobId
+        }
+    }
+`);
+
+// ----------------------------------------------------------------------------------------------------
+// REIMPORT FIRMWARES
+// ----------------------------------------------------------------------------------------------------
+
+export const CREATE_FIRMWARE_REIMPORT_JOB = gql(`
+    mutation CreateFirmwareReImportJob(
+        $firmwareIdList: [String!]!
+        $queueName: String = "extractor"
+        $createFuzzyHashes: Boolean = false
+    ) {
+        createFirmwareReImportJob(
+            firmwareIdList: $firmwareIdList
+            queueName: $queueName
+            createFuzzyHashes: $createFuzzyHashes
+        ) {
             jobId
         }
     }

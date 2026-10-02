@@ -1,5 +1,6 @@
 type Query {
   apk_scanner_log_list(objectId: [String], fieldFilter: ApkScannerLogFilter): [ApkScannerLogType]
+  trufflehog_report_list(objectId: [String], fieldFilter: TruffleHogReportFilter): [TruffleHogReport]
   trueseeing_report_list(objectId: [String], fieldFilter: TrueseeingReportFilter): [TrueseeingReport]
   mobsfscan_report_list(objectId: [String], fieldFilter: MobSFScanReportFilter): [MobSFScanReport]
   flowdroid_report_list(objectId: [String], fieldFilter: FlowDroidReportFilter): [FlowDroidReport]
@@ -49,7 +50,19 @@ type Query {
   super_statistics_report_list(objectId: [String], fieldFilter: SuperStatisticsReportFilter): [SuperStatisticsReportType]
   image_file_list(objectIdList: [String], fieldFilter: ImageFileFilter): [ImageFileType]
   json_file_list(objectIdList: [String], fieldFilter: JsonFileFilter): [JsonFileType]
-  firmware_file_list(objectIdList: [String], fieldFilter: FirmwareFileFilter): [FirmwareFileType]
+  firmware_file_list(
+    objectIdList: [String]
+    fieldFilter: FirmwareFileFilter
+
+    """Maximum number of records to return (capped at 250)"""
+    limit: Int
+
+    """Number of records to skip"""
+    offset: Int
+  ): [FirmwareFileType]
+
+  """Total count of matching firmware files"""
+  firmware_file_count(objectIdList: [String], fieldFilter: FirmwareFileFilter): Int
   virustotal_report_list(objectIdList: [String], fieldFilter: VirusTotalReportFilter): [VirusTotalReport]
   statistics_report_list(objectIdList: [String], fieldFilter: StatisticsReportFilter): [StatisticsReportType]
   qark_report_list(objectIdList: [String], fieldFilter: QarkReportFilter): [QarkReport]
@@ -177,7 +190,7 @@ type AndroidAppType implements Node {
   """"""
   sha256: String!
   pk: String
-  optFirmwareFileReferenceList(before: String, after: String, first: Int, last: Int, absoluteStorePath: String, fileSizeBytes: Int, id: ID, indexedDate: DateTime, isDirectory: Boolean, isOnDisk: Boolean, isSymlink: Boolean, md5: String, metaDict: JSONString, name: String, parentDir: String, partitionName: String, relativePath: String, androidAppReference: ID, firmwareIdReference: ID, sdhashReference: ID, ssdeepReference: ID, tlshReference: ID): FirmwareFileTypeConnection
+  optFirmwareFileReferenceList(before: String, after: String, first: Int, last: Int, absoluteStorePath: String, fileSizeBytes: Float, id: ID, indexedDate: DateTime, isDirectory: Boolean, isOnDisk: Boolean, isSymlink: Boolean, md5: String, metaDict: JSONString, name: String, parentDir: String, partitionName: String, relativePath: String, androidAppReference: ID, firmwareIdReference: ID, sdhashReference: ID, ssdeepReference: ID, tlshReference: ID): FirmwareFileTypeConnection
   certificateIdList(before: String, after: String, first: Int, last: Int, crlDistributionPointsList: String, deltaCrlDistributionPointsList: String, hashAlgo: String, id: ID, isCa: Boolean, isSelfIssued: Boolean, isSelfSignedStr: String, isValidDomainIp: Boolean, issuer: String, issuerDict: JSONString, issuerSerial: String, keyIdentifier: String, keyIdentifierValue: String, maxPathLengthInt: Int, notValidAfter: DateTime, notValidBefore: DateTime, ocspUrlsList: String, publicKeyAlgorithm: String, publicKeyBitSize: String, publicKeyByteSize: String, publicKeyCurve: String, publicKeyExponent: Int, publicKeyHashAlgoDsa: String, publicKeyModulusN: String, publicKeySha1: String, publicKeySha256: String, serialNumber: String, sha1: String, sha256: String, signature: String, signatureAlgo: String, subject: String, subjectDict: JSONString, validDomainsList: String, validIpsList: String, androidAppIdReference: ID): AppCertificateTypeConnection
 }
 
@@ -195,9 +208,7 @@ type FirmwareFileType implements Node {
 
   """"""
   androidAppReference: AndroidAppType
-
-  """"""
-  fileSizeBytes: Int
+  fileSizeBytes: Float
 
   """"""
   firmwareIdReference: AndroidFirmwareType
@@ -237,6 +248,7 @@ type FirmwareFileType implements Node {
 
   """"""
   tlshReference: TlshHashType
+  pk: String
 }
 
 type AndroidFirmwareType implements Node {
@@ -290,7 +302,6 @@ type AndroidFirmwareType implements Node {
   """"""
   versionDetected: Int
   pk: String
-  firmwareFileIdList(before: String, after: String, first: Int, last: Int, absoluteStorePath: String, fileSizeBytes: Int, id: ID, indexedDate: DateTime, isDirectory: Boolean, isOnDisk: Boolean, isSymlink: Boolean, md5: String, metaDict: JSONString, name: String, parentDir: String, partitionName: String, relativePath: String, androidAppReference: ID, firmwareIdReference: ID, sdhashReference: ID, ssdeepReference: ID, tlshReference: ID): FirmwareFileTypeConnection
   buildPropFileIdList(before: String, after: String, first: Int, last: Int, id: ID, properties: JSONString, firmwareFileIdReference: ID, firmwareIdReference: ID): BuildPropFileTypeConnection
 }
 
@@ -334,23 +345,6 @@ value as specified by
 [iso8601](https://en.wikipedia.org/wiki/ISO_8601).
 """
 scalar DateTime
-
-type FirmwareFileTypeConnection {
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-
-  """Contains the nodes in this connection."""
-  edges: [FirmwareFileTypeEdge]!
-}
-
-"""A Relay edge containing a `FirmwareFileType` and its cursor."""
-type FirmwareFileTypeEdge {
-  """The item at the end of the edge"""
-  node: FirmwareFileType
-
-  """A cursor for use in pagination"""
-  cursor: String!
-}
 
 type BuildPropFileTypeConnection {
   """Pagination data for this connection."""
@@ -401,6 +395,23 @@ type TlshHashType {
 
   """_id"""
   id: ID
+}
+
+type FirmwareFileTypeConnection {
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection."""
+  edges: [FirmwareFileTypeEdge]!
+}
+
+"""A Relay edge containing a `FirmwareFileType` and its cursor."""
+type FirmwareFileTypeEdge {
+  """The item at the end of the edge"""
+  node: FirmwareFileType
+
+  """A cursor for use in pagination"""
+  cursor: String!
 }
 
 type AppCertificateTypeConnection {
@@ -577,7 +588,7 @@ input ApkScannerLogFilter {
   id: String
 }
 
-type TrueseeingReport implements ApkScannerReportInterface & Node {
+type TruffleHogReport implements ApkScannerReportInterface & Node {
   Cls: String
   androidAppIdReference: AndroidAppType
 
@@ -602,6 +613,45 @@ interface ApkScannerReportInterface implements Node {
   scannerName: String
   scannerVersion: String
   androidAppIdReference: AndroidAppType
+}
+
+input TruffleHogReportFilter {
+  """Filter by report_date"""
+  report_date: String
+
+  """Filter by android_app_id_reference"""
+  android_app_id_reference: String
+
+  """Filter by scanner_version"""
+  scanner_version: String
+
+  """Filter by scanner_name"""
+  scanner_name: String
+
+  """Filter by scan_status"""
+  scan_status: String
+
+  """Filter by id"""
+  id: String
+
+  """Filter by results"""
+  results: String
+}
+
+type TrueseeingReport implements ApkScannerReportInterface & Node {
+  Cls: String
+  androidAppIdReference: AndroidAppType
+
+  """The ID of the object"""
+  id: ID!
+  reportDate: DateTime
+
+  """"""
+  results: JSONString!
+  scanStatus: String
+  scannerName: String
+  scannerVersion: String
+  pk: String
 }
 
 input TrueseeingReportFilter {
@@ -863,6 +913,9 @@ type RqJobType {
 
   """Exception information if job failed"""
   excInfo: String
+
+  """Metadata of the RQ job"""
+  meta: JSONString
 }
 
 input AppCertificateFilter {
@@ -1174,6 +1227,9 @@ input ApkScannerReportFilter {
 
   """Filter by id"""
   id: String
+
+  """Filter reports by firmware ObjectId across all extracted apps"""
+  firmwareIdReference: String
 }
 
 type ApkleaksStatisticsReportType {
@@ -2176,8 +2232,8 @@ input AndroidFirmwareFilter {
   """Filter by aecs_build_file_path"""
   aecs_build_file_path: String
 
-  """Filter by firmware_file_id_list"""
-  firmware_file_id_list: [String]
+  """Filter by firmware_file_set_list"""
+  firmware_file_set_list: [String]
 
   """Filter by version_detected"""
   version_detected: Int
@@ -2364,6 +2420,7 @@ type DjangoDebugException {
 type ObtainJSONWebToken {
   payload: GenericScalar!
   refreshExpiresIn: Int!
+  token: String!
 }
 
 type Verify {
@@ -2373,6 +2430,7 @@ type Verify {
 type Refresh {
   payload: GenericScalar!
   refreshExpiresIn: Int!
+  token: String!
 }
 
 type Mutation {
@@ -2382,14 +2440,14 @@ type Mutation {
     queueName: String! = "scanner"
   ): UpdateFirmwareImportSetting
   createVirustotalScanJob(objectIdList: [String!]!, queueName: String! = "scanner", vtApiKey: String!): CreateVirusTotalScanJob
-  exportFirmwareFile(filenameRegex: String!, firmwareIdList: [String!]!, queueName: String! = "extractor", storeSettingId: String!): ExportFirmwareFileByRegexMutation
+  exportFirmwareFile(filenameRegex: String = ".*", firmwareIdList: [String!]!, queueName: String = "extractor", storeSettingId: String): ExportFirmwareFileByRegexMutation
   deleteAndroidFirmware(firmwareIdList: [String!]!, queueName: String! = "scanner"): DeleteAndroidFirmwareMutation
 
   """
   Starts the firmware extractor module. The extractor module is used to import firmware from the "firmware_import"
   directory to the database. Only one instance of the extractor module is allowed to run.
   """
-  createFirmwareExtractorJob(createFuzzyHashes: Boolean!, queueName: String! = "extractor", storageIndex: Int! = 0): CreateFirmwareExtractorJob
+  createFirmwareExtractorJob(createFuzzyHashes: Boolean = false, keepFilesOnDisk: Boolean = true, queueName: String! = "extractor", scanModules: [String!] = [], storageIndex: Int! = 0): CreateFirmwareExtractorJob
 
   """
   Starts the fuzzy hasher module. The fuzzy hasher module is used to create fuzzy hashes for all firmware files in
@@ -2401,7 +2459,7 @@ type Mutation {
   First, copies the firmware into the importer queue. Second, deletes the firmware from the database and runs
   the importer.
   """
-  createFirmwareReImportJob(createFuzzyHashes: Boolean = false, firmwareIdList: [String!]!, queueName: String! = "extractor"): CreateFirmwareReImportJob
+  createFirmwareReImportJob(createFuzzyHashes: Boolean = false, firmwareIdList: [String!]!, keepFilesOnDisk: Boolean = false, queueName: String! = "extractor"): CreateFirmwareReImportJob
 
   """
   Updates OS vendor information for firmware based on build.prop files.
@@ -2436,9 +2494,13 @@ type Mutation {
   are accepted. Every module uses an own python interpreter and the module is loaded during runtime.
   """
   createApkScanJob(firmwareIdList: [String!] = [], kwargs: JSONString! = "\"{}\"", moduleName: String!, objectIdList: [String!] = [], queueName: String! = "scanner"): CreateApkScanJob
-  createAppImportJob(queueName: String! = "extractor", storageIndex: Int! = 0): CreateAppImportJob
+  createAppImportJob(queueName: String! = "extractor", scanModules: [String!] = [], storageIndex: Int! = 0): CreateAppImportJob
   _debug: DjangoDebug
-  deleteTokenCookie: DeleteJSONWebTokenCookie
+
+  """
+  GraphQL mutation that revokes the caller's JWT token and signals cookie deletion.
+  """
+  deleteTokenCookie: FMDDeleteJSONWebTokenCookie
   deleteRefreshTokenCookie: DeleteRefreshTokenCookie
 }
 
@@ -2524,7 +2586,10 @@ type CreateAppImportJob {
   jobId: String
 }
 
-type DeleteJSONWebTokenCookie {
+"""
+GraphQL mutation that revokes the caller's JWT token and signals cookie deletion.
+"""
+type FMDDeleteJSONWebTokenCookie {
   deleted: Boolean!
 }
 

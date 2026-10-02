@@ -3,23 +3,33 @@ import {
     CardContent,
 } from "@/components/ui/card.tsx";
 import {TypographyH1} from "@/components/typography/headings.tsx";
+import {FmdIcon} from "@/components/icons/fmd-icon.tsx";
 import "../components/ui/theming/links.css"
+import {Link} from "react-router";
 
 function HomePage() {
     return (
         <div>
             <div className="flex flex-col items-center p-4 gap-6">
                 <div className="w-full max-w-5xl">
-                    <TypographyH1>FirmwareDroid</TypographyH1>
+                    <TypographyH1 className="inline-flex items-center gap-3">
+                        <FmdIcon className="size-9 sm:size-10 rounded-lg shrink-0 shadow-sm" />
+                        <span>
+                            <span className="text-[#8bd450] font-bold">FMD</span>
+                        </span>
+                    </TypographyH1>
+                    <p className="mt-2 text-sm sm:text-base text-muted-foreground">
+                        From firmware image to deep system visibility.
+                    </p>
                 </div>
 
                 <Card className="w-full max-w-5xl">
                     <CardContent>
-                        <h3 className="text-lg font-semibold mb-2 theme-text-color">Welcome to FirmwareDroid</h3>
+                        <h3 className="text-lg font-semibold mb-2 theme-text-color">Welcome to <span className="text-[#8bd450] font-bold">FMD</span></h3>
                         <p className="text-body">
                             This tool breaks down firmware images into their core components, extracts apps and
                             files, and highlights configuration issues that may expose devices to risk. You can use
-                            FirmwareDroid to analyze Android-based firmware images from various IoT devices or for
+                            FMD to analyze Android-based firmware images from various IoT devices or for
                             scanning standalone Android APK files for security vulnerabilities.
                         </p>
                     </CardContent>
@@ -30,9 +40,9 @@ function HomePage() {
                         <h3 className="text-lg font-semibold mb-2 theme-text-color">Getting started</h3>
                         <p className="text-body">
                             Get started by uploading a firmware image or an Android app via the
-                            {' '}<a className="ui-link" href="./importer">Importer</a> operation. Once imported, you can start analyzing the
+                            {' '}<Link className="ui-link" to="/importer">Importer</Link> operation. Once imported, you can start analyzing the
                             extracted Android apps using a set of security-focused tools available in the
-                            {' '}<a className="ui-link" href="./firmware">Analysis</a> section.
+                            {' '}<Link className="ui-link" to="/firmware">Analysis</Link> section.
                         </p>
                     </CardContent>
                 </Card>
@@ -41,7 +51,7 @@ function HomePage() {
                     <CardContent>
                         <h3 className="text-lg font-semibold mb-2 theme-text-color">Exploring the API</h3>
                         <p className="text-body">
-                            You can also explore the FirmwareDroid GraphQL API to access analysis results
+                            You can also explore the FMD GraphQL API to access analysis results
                             programmatically, integrate findings into your own workflows, or build custom
                             tooling. The interactive API explorer is available at
                             {' '}<a className="ui-link" href="./graphql">./graphql</a>,

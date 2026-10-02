@@ -1,4 +1,5 @@
 import {v4 as uuid} from "uuid";
+import {normalizeBackendOrigin} from "../endpoint-security.ts";
 
 export type StreamInitOptions = {
     device?: string;
@@ -15,9 +16,6 @@ export type StreamInitOptions = {
     onmessage?: (ws: WebSocket, id: string, evt: MessageEvent) => void;
     onerror?: (ws: WebSocket, id: string, evt: Event) => void;
     backendBaseUrl?: string;
-    // optional credentials for basic auth — may be included in URL userinfo or used to build an `auth` query param
-    username?: string;
-    password?: string;
 };
 
 export class StreamingService {
@@ -29,20 +27,8 @@ export class StreamingService {
     }
 
     private normalizeToWsBase(base: string): string {
-        if (!base) throw new Error("Missing backend base");
-        let u: URL;
-        try {
-            u = new URL(String(base).trim());
-        } catch {
-            throw new Error("Invalid backend base URL");
-        }
-        // If http(s) convert to ws(s)
-        if (u.protocol === "http:") u.protocol = "ws:";
-        if (u.protocol === "https:") u.protocol = "wss:";
-        if (!["ws:", "wss:"].includes(u.protocol)) {
-            throw new Error("Unsupported protocol for streaming (must be http/https/ws/wss)");
-        }
-        return `${u.protocol}//${u.host}`.replace(/\/+$/, "");
+        if (!base) throw new Error("Missing backend base URL.");
+        return normalizeBackendOrigin(base, "websocket");
     }
 
     async init(opts: StreamInitOptions = {}): Promise<WebSocket> {
@@ -83,59 +69,7 @@ export class StreamingService {
             params.push(`videoBitRate=${encodeURIComponent(String(opts.videoBitRate ?? ""))}`);
         }
 
-        // If credentials were passed, expose them also as an `auth` query parameter containing
-        // the Basic auth header value (Basic <base64(user:pass)>). This helps servers that
-        // rely on the Authorization header but can't get it from URL userinfo due to browser
-        // restrictions; server-side can accept this param as a fallback.
-        try {
-            const user = (opts.username ?? (import.meta.env?.VITE_WS_USERNAME as string) ?? "").toString();
-            const pass = (opts.password ?? (import.meta.env?.VITE_WS_PASSWORD as string) ?? "").toString();
-            if (user || pass) {
-                // compute Basic <base64>
-                let token = "";
-                try {
-                    // btoa available in browsers; fall back to Buffer on Node (defensive)
-                    token = typeof btoa === 'function'
-                        ? btoa(`${user}:${pass}`)
-                        : (typeof Buffer !== 'undefined' ? Buffer.from(`${user}:${pass}`).toString('base64') : '');
-                } catch (e) {
-                    try { token = Buffer.from(`${user}:${pass}`).toString('base64'); } catch { token = ''; }
-                }
-                if (token) {
-                    params.push(`auth=${encodeURIComponent(`Basic ${token}`)}`);
-                }
-            }
-        } catch (e) {
-            // ignore
-        }
-
-        // Build the websocket origin. If username/password are provided, add them
-        // into the authority part (user:pass@host). Use the URL API to avoid
-        // manual string surgery and ensure encoding. Also support fallback to
-        // environment variables VITE_WS_USERNAME / VITE_WS_PASSWORD when opts don't provide them.
-        let wsOrigin = wsBase; // default (e.g. wss://host:port)
-        const usernameFromEnv = (import.meta.env?.VITE_WS_USERNAME as string) ?? undefined;
-        const passwordFromEnv = (import.meta.env?.VITE_WS_PASSWORD as string) ?? undefined;
-        const usernameToUse = opts.username ?? usernameFromEnv ?? "";
-        const passwordToUse = opts.password ?? passwordFromEnv ?? "";
-        if (usernameToUse || passwordToUse) {
-            try {
-                const u = new URL(wsBase);
-                // assign raw values; URL will handle encoding when we construct the authority
-                u.username = usernameToUse;
-                u.password = passwordToUse;
-                // build origin with userinfo if present
-                const userinfo = (u.username || u.password)
-                    ? `${encodeURIComponent(u.username)}${u.password ? `:${encodeURIComponent(u.password)}` : ''}@`
-                    : '';
-                wsOrigin = `${u.protocol}//${userinfo}${u.host}`;
-            } catch {
-                // fall back to plain wsBase if URL parsing/assignment fails
-                wsOrigin = wsBase;
-            }
-        }
-
-        const wsUri = `${wsOrigin}/?${params.filter(Boolean).join("&")}`;
+        const wsUri = `${wsBase}/?${params.filter(Boolean).join("&")}`;
         const ws = new WebSocket(wsUri);
         ws.binaryType = "arraybuffer";
         this.ws = ws;

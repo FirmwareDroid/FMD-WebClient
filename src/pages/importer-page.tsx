@@ -1,3 +1,4 @@
+import {formatDateTime} from "@/lib/date-utils.ts";
 import {TypographyH2} from "@/components/typography/headings.tsx";
 import {BasePage} from "@/pages/base-page.tsx";
 import {Dropzone} from "@/components/importer/dropzone.tsx";
@@ -7,7 +8,7 @@ import {
     FIRMWARE_ROW_IMPORTER_PAGE, GET_FIRMWARE_IMPORTER_PAGE, SCAN_APKS_BY_FIRMWARE_OBJECT_IDS,
 } from "@/components/graphql/firmware.graphql.ts";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
-import {useFragment} from "@/__generated__";
+import {useFragment as readFragment} from "@/__generated__";
 
 import type {ColumnDef} from "@tanstack/react-table";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
@@ -34,12 +35,9 @@ const columns: ColumnDef<FirmwareRowImporterPageFragment>[] = [
         id: "indexedDate",
         accessorKey: "indexedDate",
         header: "Indexed Date",
-        cell: ({row}) => {
-            const padStart = (value: number): string =>
-                value.toString().padStart(2, "0");
-
-            const date: Date = new Date(row.getValue("indexedDate"));
-            return `${date.getFullYear().toString()}-${padStart(date.getMonth() + 1)}-${padStart(date.getDate())} ${padStart(date.getHours())}:${padStart(date.getMinutes())}`;
+        cell: ({ getValue }) => {
+            const val = getValue() as string | null | undefined;
+            return <span title={val ?? undefined}>{formatDateTime(val)}</span>;
         }
     },
     {
@@ -77,8 +75,7 @@ export function ImporterPage() {
     const edges = data?.android_firmware_connection?.edges ?? [];
 
     const firmware = edges
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map((edge: any) => useFragment(FIRMWARE_ROW_IMPORTER_PAGE, edge?.node))
+        .map((edge) => readFragment(FIRMWARE_ROW_IMPORTER_PAGE, edge?.node))
         .filter(isNonNullish);
 
     const goNext = () => {
@@ -116,7 +113,7 @@ export function ImporterPage() {
                     <p className="text-body">
                         To begin, simply drag and drop an Android firmware package
                         (such as a compressed ZIP file) or an Android app (APK)
-                        into the upload area. FirmwareDroid will automatically
+                        into the upload area. FMD will automatically
                         detect the file type and guide you through the analysis process.
                     </p>
                 </CardContent>
@@ -127,7 +124,7 @@ export function ImporterPage() {
             <Card className="w-full max-w-5xl">
                 <CardContent>
                     <p className="text-body">
-                        Below is a list of all firmware images that have been imported into FirmwareDroid.
+                        Below is a list of all firmware images that have been imported into FMD.
                         You can explore the extracted Android apps, as well as initiate
                         various security analyses directly from this table.
                     </p>

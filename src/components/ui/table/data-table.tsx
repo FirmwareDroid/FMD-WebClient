@@ -45,6 +45,8 @@ interface DataTableProps<TData, TValue> {
     onRowSelectionChange?: (selectedRows: TData[]) => void;
     dataTablePagination?: boolean;
     cursorPagination?: CursorPaginationProps;
+    showExport?: boolean;
+    getRowId?: (originalRow: TData, index: number, parent?: any) => string;
 }
 
 function DataTable<TData, TValue>(
@@ -55,6 +57,8 @@ function DataTable<TData, TValue>(
         onRowSelectionChange,
         dataTablePagination = true,
         cursorPagination,
+        showExport = true,
+        getRowId,
     }: Readonly<DataTableProps<TData, TValue>>
 ) {
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -67,8 +71,17 @@ function DataTable<TData, TValue>(
     const [rowSelection, setRowSelection] = useState({});
     const [pagination, setPagination] = useState({
         pageIndex: 0,
-        pageSize: dataTablePagination ? 25 : Number.MAX_SAFE_INTEGER,
+        pageSize: cursorPagination ? Number.MAX_SAFE_INTEGER : (dataTablePagination ? 25 : Number.MAX_SAFE_INTEGER),
     });
+
+    useEffect(() => {
+        if (cursorPagination) {
+            setPagination({
+                pageIndex: 0,
+                pageSize: Number.MAX_SAFE_INTEGER,
+            });
+        }
+    }, [cursorPagination]);
 
     const [globalFilter, setGlobalFilter] = useState<string>("");
     const filteredData = useMemo(() => {
@@ -86,6 +99,7 @@ function DataTable<TData, TValue>(
     const table = useReactTable({
         data: filteredData,
         columns,
+        ...(getRowId ? { getRowId } : {}),
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         enableRowSelection: true,
@@ -111,16 +125,15 @@ function DataTable<TData, TValue>(
         if (!onRowSelectionChangeRef.current) return;
         const selectedRows = table.getSelectedRowModel().flatRows.map(row => row.original);
         onRowSelectionChangeRef.current(selectedRows);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [rowSelection]);
+    }, [table, rowSelection, filteredData]);
 
     return (
         <div className={cn(className)}>
-            <div className="flex items-center p-4 gap-4">
+            <div className="flex flex-col items-stretch gap-3 p-3 sm:flex-row sm:items-center sm:p-4">
                 <DataTableSearch value={globalFilter} onChange={setGlobalFilter} />
 
-                <div className="ml-auto flex items-center gap-2">
-                    <DataTableExport table={table} />
+                <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+                    {showExport && <DataTableExport table={table} />}
                     <DataTableViewOptions table={table} />
                 </div>
             </div>
@@ -162,15 +175,15 @@ function DataTable<TData, TValue>(
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="text-center">
-                                    No results.
+                                <TableCell colSpan={columns.length} className="h-32 text-center text-muted-foreground">
+                                    {globalFilter ? "No matching results." : "No data available."}
                                 </TableCell>
                             </TableRow>
                         )}
                     </TableBody>
                 </Table>
             </div>
-            <div className="flex items-center justify-between space-x-2 py-4">
+            <div className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="text-muted-foreground flex-1 text-sm px-2">
                     {table.getFilteredSelectedRowModel().rows.length} of{" "}
                     {table.getFilteredRowModel().rows.length} row(s) selected.
@@ -189,6 +202,8 @@ function ScrollableDataTable<TData, TValue>(
         onRowSelectionChange,
         dataTablePagination,
         cursorPagination,
+        showExport = true,
+        getRowId,
     }: Readonly<DataTableProps<TData, TValue>>
 ) {
     return (
@@ -199,6 +214,8 @@ function ScrollableDataTable<TData, TValue>(
                 onRowSelectionChange={onRowSelectionChange}
                 dataTablePagination={dataTablePagination}
                 cursorPagination={cursorPagination}
+                showExport={showExport}
+                getRowId={getRowId}
             />
             <ScrollBar orientation="horizontal"/>
         </ScrollArea>
@@ -212,6 +229,8 @@ function StateHandlingScrollableDataTable<TData, TValue>(
         onRowSelectionChange,
         dataTablePagination,
         cursorPagination,
+        showExport = true,
+        getRowId,
         idsLoading,
         dataLoading,
         idsError,
@@ -226,14 +245,17 @@ function StateHandlingScrollableDataTable<TData, TValue>(
     return (
         <>
             {(idsLoading || dataLoading) && (
-                <Skeleton className="w-full h-[400px]"/>
+                <div className="w-full" role="status" aria-live="polite">
+                    <span className="sr-only">Loading data…</span>
+                    <Skeleton className="h-[400px] w-full"/>
+                </div>
             )}
 
             {idsError && (
                 <Alert className="max-w-max" variant="destructive">
                     <AlertCircleIcon/>
                     <AlertTitle>Unable to load firmware IDs.</AlertTitle>
-                    <AlertDescription>Error message: "{idsError.message}"</AlertDescription>
+                    <AlertDescription>Please try again. If the problem continues, contact an administrator.</AlertDescription>
                 </Alert>
             )}
 
@@ -241,7 +263,7 @@ function StateHandlingScrollableDataTable<TData, TValue>(
                 <Alert className="max-w-max" variant="destructive">
                     <AlertCircleIcon/>
                     <AlertTitle>Unable to load firmware.</AlertTitle>
-                    <AlertDescription>Error message: "{dataError.message}"</AlertDescription>
+                    <AlertDescription>Please try again. If the problem continues, contact an administrator.</AlertDescription>
                 </Alert>
             )}
 
@@ -252,6 +274,8 @@ function StateHandlingScrollableDataTable<TData, TValue>(
                     onRowSelectionChange={onRowSelectionChange}
                     dataTablePagination={dataTablePagination}
                     cursorPagination={cursorPagination}
+                    showExport={showExport}
+                    getRowId={getRowId}
                 />
             )}
         </>

@@ -28,7 +28,7 @@ import {useAdbStore} from '@/stores/adb';
 import {useFileStore} from '@/stores/file';
 import {useToastStore} from '@/stores/toast';
 import {streamingService} from '@/services/adb-streamer/stream/streaming-service';
-import { setAuthToken, setBackendBaseUrl } from '@/services/adb-streamer/http-client';
+import {setBackendBaseUrl} from '@/services/adb-streamer/http-client';
 import DeviceActions from '@/components/adb-client/device/DeviceActions';
 import DeviceControls from '@/components/adb-client/device/DeviceControls';
 import {mapClientToDevicePosition} from '@/services/adb-streamer/utils/mapClientToDevicePosition';
@@ -483,7 +483,7 @@ const AdbEmulatorView: React.FC = () => {
     const down = useCallback(async (key: string) => {
         const keyCode = (AndroidKeyCode as any)[key];
         if (!keyCode) {
-            console.log('unknown key');
+            adbLog.debug('unknown key');
             return;
         }
 
@@ -551,22 +551,22 @@ const AdbEmulatorView: React.FC = () => {
         } catch (e) {}
         if (abortControllerRef.current) {
             await abortControllerRef.current.abort();
-            console.log('abortController.aborted');
+            adbLog.debug('abortController.aborted');
         }
         if (decoderRef.current) {
             await decoderRef.current.dispose();
             decoderRef.current = null;
-            console.log('decoder disposed');
+            adbLog.debug('decoder disposed');
         }
         if (audioPlayerRef.current) {
             await audioPlayerRef.current.stop();
             audioPlayerRef.current = null;
-            console.log('audioPlayer stopped');
+            adbLog.debug('audioPlayer stopped');
         }
         if (wsRef.current) {
             await wsRef.current.close();
             wsRef.current = null;
-            console.log('ws closed');
+            adbLog.debug('ws closed');
         }
         if (framesIntervalRef.current) {
             clearTimeout(framesIntervalRef.current);
@@ -574,7 +574,7 @@ const AdbEmulatorView: React.FC = () => {
         }
         if (containerRef.current) {
             while (containerRef.current.firstChild) {
-                console.log('Removing container.firstChild');
+                adbLog.debug('Removing container.firstChild');
                 containerRef.current.firstChild.remove();
             }
         }
@@ -610,7 +610,7 @@ const AdbEmulatorView: React.FC = () => {
             return adbStore.videoEncoderObj();
         })();
 
-        console.log('[adb-emulator] audio encoder:', audioEncoderObj);
+        adbLog.debug('[adb-emulator] audio encoder configured');
 
         if (['off', 'raw'].includes(audioEncoderObj?.codec || '')) {
             audioPlayerRef.current = new Int16PcmPlayer(48000, 2);
@@ -620,7 +620,7 @@ const AdbEmulatorView: React.FC = () => {
             audioPlayerRef.current = new Float32PcmPlayer(48000, 2);
         }
 
-        console.log('[adb-emulator] audioPlayer created:', !!audioPlayerRef.current, audioPlayerRef.current?.constructor?.name);
+        adbLog.debug('[adb-emulator] audioPlayer created:', !!audioPlayerRef.current);
 
         // Ensure we always have a decoder object; if videoEncoderObj is missing, pick a safe default
         if (!videoEncoderObj) {
@@ -784,7 +784,7 @@ const AdbEmulatorView: React.FC = () => {
             decoderRef.current.sizeChanged((size: { width: number; height: number }) => {
                 setWidth(size.width);
                 setHeight(size.height);
-                console.log(`RESIZE: width=${size.width}, height=${size.height}`);
+                adbLog.debug(`RESIZE: width=${size.width}, height=${size.height}`);
             });
         }
 
@@ -1032,21 +1032,18 @@ const AdbEmulatorView: React.FC = () => {
                  (overrideVideoEncoder ?? videoEncoderObj?.name) === 'off' ? undefined : (overrideVideoEncoder ?? videoEncoderObj?.name),
              videoBitRate: bitRate,
              maxFps: maxFps,
-             // include user-specified backend and credentials so the websocket upgrade can be authenticated
              backendBaseUrl: emulatorUrl || undefined,
-             username: backendUser || undefined,
-             password: backendPass || undefined,
              onopen: (wsInstance: WebSocket) => {
                  try {
                      wsRef.current = wsInstance;
                  } catch (err) {
                      // ignore
                  }
-                 console.log(`CONNECTED`);
+                 adbLog.debug('CONNECTED');
                  setIsWsOpen(true);
              },
              onclose: () => {
-                 console.log(`DISCONNECTED`);
+                 adbLog.debug('DISCONNECTED');
                  // mark controllers closed
                  videoControllerClosedRef.current = true;
                  audioControllerClosedRef.current = true;
@@ -1089,9 +1086,8 @@ const AdbEmulatorView: React.FC = () => {
                      }
                  }
              },
-             onerror: (...args: any[]) => {
-                 const evt = args[args.length - 1];
-                 console.log(`ERROR=${(evt && (evt as any).data) ?? evt}`);
+             onerror: (..._args: any[]) => {
+                 adbLog.error('WebSocket error');
                  // also mark controllers closed on error
                  videoControllerClosedRef.current = true;
                  audioControllerClosedRef.current = true;
@@ -1445,70 +1441,22 @@ const AdbEmulatorView: React.FC = () => {
             return v ? String(v) : '';
         } catch { return ''; }
     });
-    // optional basic auth credentials for websocket upgrade (user-provided)
-    const [backendUser, setBackendUser] = useState<string>(() => {
-        try { return String(storage.getSession('adbBackendUser') || ''); } catch { return ''; }
-    });
-    const [backendPass, setBackendPass] = useState<string>(() => {
-        try { return String(storage.getSession('adbBackendPass') || ''); } catch { return ''; }
-    });
-
-    // Keep the HTTP client and streaming defaults in sync with user inputs.
-    // This ensures the Authorization header is set for apiClient (metadata/file calls)
-    // and streamingService can receive credentials for websocket auth when starting.
+    // Keep the HTTP client and streaming defaults in sync with the validated endpoint.
     useEffect(() => {
         try {
             if (emulatorUrl && emulatorUrl.trim()) {
-                // configure base URL (this also extracts and applies credentials embedded in a URL)
                 setBackendBaseUrl(emulatorUrl.trim());
             }
-        } catch (e) {
-            // ignore invalid URL here; connect() will surface missing/invalid URL to user
+        } catch {
+            // Validation is surfaced when the user connects.
         }
-
-        // Apply or clear Authorization header based on explicit credentials fields
-        try {
-            if (backendUser || backendPass) {
-                const user = backendUser ?? '';
-                const pass = backendPass ?? '';
-                let token = '';
-                try { token = typeof btoa === 'function' ? btoa(`${user}:${pass}`) : Buffer.from(`${user}:${pass}`).toString('base64'); } catch { try { token = Buffer.from(`${user}:${pass}`).toString('base64'); } catch { token = ''; } }
-                if (token) {
-                    setAuthToken(`Basic ${token}`);
-                } else {
-                    setAuthToken(undefined);
-                }
-            } else {
-                // no credentials – clear Authorization header
-                setAuthToken(undefined);
-            }
-        } catch (e) {
-            // ignore
-        }
-    }, [emulatorUrl, backendUser, backendPass]);
+    }, [emulatorUrl]);
 
     const connect = useCallback(async () => {
         setIsLoadingMeta(true);
         try {
-            // configure API client to target the emulator backend and include Authorization header if credentials provided
-            try {
-                if (emulatorUrl && emulatorUrl.trim()) {
-                    setBackendBaseUrl(emulatorUrl.trim());
-                }
-                if (backendUser || backendPass) {
-                    // compute Basic base64 and set as Authorization header for apiClient
-                    const user = backendUser ?? '';
-                    const pass = backendPass ?? '';
-                    let token = '';
-                    try {
-                        token = typeof btoa === 'function' ? btoa(`${user}:${pass}`) : Buffer.from(`${user}:${pass}`).toString('base64');
-                    } catch {
-                        try { token = Buffer.from(`${user}:${pass}`).toString('base64'); } catch { token = ''; }
-                    }
-                    if (token) setAuthToken(`Basic ${token}`);
-                }
-            } catch (e) {
-                // non-fatal: continue to attempt metadata fetch
+            if (emulatorUrl && emulatorUrl.trim()) {
+                setBackendBaseUrl(emulatorUrl.trim());
             }
 
             // fetch meta information from adb service and related file lists
@@ -1518,9 +1466,8 @@ const AdbEmulatorView: React.FC = () => {
                 fileStore.getApps ? fileStore.getApps() : Promise.resolve(),
             ]);
             toast.success('Metadata loaded');
-        } catch (err: any) {
-            const msg = err?.message ?? String(err ?? 'Failed to load metadata');
-            toast.error(`Failed to load metadata: ${msg}`);
+        } catch {
+            toast.error('Unable to connect. Verify the secure backend URL and try again.');
         } finally {
             setIsLoadingMeta(false);
         }
@@ -1550,40 +1497,6 @@ const AdbEmulatorView: React.FC = () => {
                                 }}
                                 placeholder="Emulator backend URL (wss://host:port)"
                                 style={{ padding: 8, minWidth: 320 }}
-                            />
-                        </div>
-                    </div>
-
-                    {/** Add CONTROLS HERE */}
-                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8, flexWrap: 'wrap' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 200 }}>
-                            <label style={{ fontSize: 12, marginBottom: 6 }}>Username</label>
-                            <input
-                                className="emulator-input"
-                                value={backendUser}
-                                onChange={(e) => {
-                                    const v = String(e.target.value || '');
-                                    setBackendUser(v);
-                                    try { storage.setSession('adbBackendUser', v); } catch {}
-                                }}
-                                placeholder="Username (optional)"
-                                style={{ padding: 8 }}
-                            />
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 200 }}>
-                            <label style={{ fontSize: 12, marginBottom: 6 }}>Password</label>
-                            <input
-                                className="emulator-input"
-                                type="password"
-                                value={backendPass}
-                                onChange={(e) => {
-                                    const v = String(e.target.value || '');
-                                    setBackendPass(v);
-                                    try { storage.setSession('adbBackendPass', v); } catch {}
-                                }}
-                                placeholder="Password (optional)"
-                                style={{ padding: 8 }}
                             />
                         </div>
                     </div>

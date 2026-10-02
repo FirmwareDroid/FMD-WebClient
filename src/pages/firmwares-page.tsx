@@ -1,3 +1,4 @@
+import {formatDateTime} from "@/lib/date-utils.ts";
 import {BasePage} from "@/pages/base-page.tsx";
 import {ColumnDef} from "@tanstack/react-table";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
@@ -8,7 +9,7 @@ import {
     GET_FIRMWARES_BY_OBJECT_IDS, SCAN_APKS_BY_FIRMWARE_OBJECT_IDS,
 } from "@/components/graphql/firmware.graphql.ts";
 import {isNonNullish} from "@/lib/graphql/graphql-utils.ts";
-import {useFragment} from "@/__generated__";
+import {useFragment as readFragment} from "@/__generated__";
 import {buildFirmwareActionColumns} from "@/components/data-table-action-columns/firmware-action-columns.tsx";
 import {useEffect, useState} from "react";
 import {CursorPaginationProps} from "@/components/ui/table/cursor-pagination.tsx";
@@ -58,10 +59,7 @@ const columns: ColumnDef<FirmwareAllFragment>[] = [
         header: "Indexed Date",
         cell: ({ getValue }) => {
             const val = getValue() as string | null | undefined;
-            if (!val) return null;
-            const d = new Date(val);
-            if (Number.isNaN(d.getTime())) return val;
-            return d.toLocaleString();
+            return <span title={val ?? undefined}>{formatDateTime(val)}</span>;
         },
     },
     {
@@ -140,8 +138,7 @@ export function FirmwaresPage() {
     const edges = data?.android_firmware_connection?.edges ?? [];
 
     const firmwares = edges
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map((edge: any) => useFragment(FIRMWARE_ALL, edge?.node))
+        .map((edge) => readFragment(FIRMWARE_ALL, edge?.node))
         .filter(isNonNullish);
 
     const goNext = () => {
@@ -177,7 +174,7 @@ export function FirmwaresPage() {
             <Card className="w-full max-w-5xl">
                 <CardContent>
                     <p className="text-body">
-                        Below is a list of all firmware images that have been imported into FirmwareDroid. You can
+                        Below is a list of all firmware images that have been imported into FMD. You can
                         analyze these firmware images to extract Android apps and identify potential security
                         vulnerabilities. Use the action buttons to start an analysis or view detailed information
                         about each firmware via the "View" button.

@@ -20,9 +20,10 @@ import {
 } from "@/components/ui/sidebar.tsx"
 import {NavOptions} from "@/components/ui/sidebar/nav-options.tsx";
 import {NavOperations} from "@/components/ui/sidebar/nav-operations.tsx";
-import {Avatar, AvatarFallback} from "@/components/ui/avatar.tsx";
+import {FmdIcon} from "@/components/icons/fmd-icon.tsx";
 import { useQuery } from "@/lib/apollo-hooks";
 import {GET_CURRENT_USER_EMAIL_AND_USERNAME} from "@/components/graphql/current-user.graphql.ts";
+import {Link} from "react-router";
 
 export const IMPORTER_URL = "/importer";
 export const SCAN_JOBS_URL = "/scan-jobs";
@@ -87,23 +88,20 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
             collapsible="icon"
             {...props}
         >
-            <SidebarHeader>
+            <SidebarHeader className="border-b border-sidebar-border px-2 py-3">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                            <a href="/">
-                                <div
-                                    className="flex aspect-square size-8 items-center justify-center rounded-lg">
-                                    <Avatar>
-                                        <img src="/logo1.png" alt="Logo (light)" className="block dark:hidden rounded" />
-                                        <img src="/logo.png" alt="Logo (dark)" className="hidden dark:block rounded" />
-                                        <AvatarFallback>FMD</AvatarFallback>
-                                    </Avatar>
+                        <SidebarMenuButton size="lg" asChild className="hover:bg-sidebar-accent">
+                            <Link to="/">
+                                <div className="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden shrink-0">
+                                    <FmdIcon className="size-8" />
                                 </div>
                                 <div className="grid flex-1 text-left text-lg leading-tight">
-                                    <span className="truncate font-medium">FirmwareDroid</span>
+                                    <span className="fmd-wordmark truncate text-[#8bd450] font-bold text-xl tracking-tight">
+                                        FMD
+                                    </span>
                                 </div>
-                            </a>
+                            </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
@@ -113,7 +111,7 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
                 <NavAnalyses analyses={data.analyses}/>
                 <NavOptions items={data.options} className="mt-auto"/>
             </SidebarContent>
-            <SidebarFooter>
+            <SidebarFooter className="border-t border-sidebar-border">
                 <NavUser user={{email: email, name: username, avatar: ""}}/>
             </SidebarFooter>
             <SidebarRail/>

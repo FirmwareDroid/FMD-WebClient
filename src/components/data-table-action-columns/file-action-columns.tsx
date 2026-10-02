@@ -8,6 +8,13 @@ import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.t
 import {ActionButton} from "@/components/data-table-action-columns/action-buttons.tsx";
 import {FILES_URL, FIRMWARE_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 import {EyeIcon} from "lucide-react";
+import {DownloadFirmwareFileButton} from "@/components/firmware/download-firmware-file-button.tsx";
+
+export type WithFileDownload = WithIdAndFirmwareIdReference & {
+    name?: string | null;
+    isOnDisk?: boolean | null;
+    isDirectory?: boolean | null;
+};
 
 function buildViewFileColumn<T extends WithIdAndFirmwareIdReference>(): ColumnDef<T> {
     return (
@@ -43,9 +50,33 @@ function buildViewFileColumn<T extends WithIdAndFirmwareIdReference>(): ColumnDe
     );
 }
 
-export function buildFileActionColumns<T extends WithIdAndFirmwareIdReference>(): ColumnDef<T> [] {
+function buildDownloadFileColumn<T extends WithFileDownload>(): ColumnDef<T> {
+    return (
+        {
+            id: "download",
+            cell: ({row}) => {
+                const file = row.original;
+                if (file.isDirectory) {
+                    return null;
+                }
+                return (
+                    <DownloadFirmwareFileButton
+                        fileId={file.id}
+                        isOnDisk={file.isOnDisk}
+                        fileName={file.name}
+                        variant="outline"
+                        size="icon"
+                    />
+                );
+            },
+        }
+    );
+}
+
+export function buildFileActionColumns<T extends WithFileDownload>(): ColumnDef<T> [] {
     return [
         buildSelectEntityColumn(),
         buildViewFileColumn(),
+        buildDownloadFileColumn(),
     ];
 }

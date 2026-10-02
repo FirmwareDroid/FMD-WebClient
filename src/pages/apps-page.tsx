@@ -1,7 +1,8 @@
+import {formatDateTime} from "@/lib/date-utils.ts";
 import {ColumnDef} from "@tanstack/react-table";
 import {AppAllFragment} from "@/__generated__/graphql.ts";
 import { useQuery } from "@/lib/apollo-hooks";
-import {useFragment} from "@/__generated__";
+import {useFragment as readFragment} from "@/__generated__";
 import {convertIdToObjectId, isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {BasePage} from "@/pages/base-page.tsx";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
@@ -46,6 +47,10 @@ const columns: ColumnDef<AppAllFragment>[] = [
         accessorKey: "indexedDate",
         header: "Indexed Date",
         meta: {hidden: true},
+        cell: ({ getValue }) => {
+            const val = getValue() as string | null | undefined;
+            return <span title={val ?? undefined}>{formatDateTime(val)}</span>;
+        },
     },
     {
         id: "md5",
@@ -127,8 +132,7 @@ export function AppsPage() {
 
     const apps = (appsData?.android_firmware_connection?.edges ?? [])
         .flatMap((firmwareEdge: any) => (firmwareEdge?.node?.androidAppIdList?.edges ?? []))
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map((edge: any) => useFragment(APP_ALL, edge?.node))
+        .map((edge) => readFragment(APP_ALL, edge?.node))
         .filter(isNonNullish);
 
     return (
@@ -137,7 +141,7 @@ export function AppsPage() {
                 <CardContent>
                     <p className="text-body">
                         Below is a list of all Android applications (APKs) extracted from the firmware or APKs you have
-                        imported into FirmwareDroid. You can explore detailed information about each app, including
+                        imported into FMD. You can explore detailed information about each app, including
                         metadata, permissions, and potential security issues identified during the analysis.
                     </p>
                 </CardContent>

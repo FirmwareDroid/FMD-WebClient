@@ -1,8 +1,9 @@
+import {formatDateTime} from "@/lib/date-utils.ts";
 import {BasePage} from "@/pages/base-page.tsx";
 import {ColumnDef} from "@tanstack/react-table";
 import {StateHandlingScrollableDataTable} from "@/components/ui/table/data-table.tsx";
 import { useQuery } from "@/lib/apollo-hooks";
-import {useFragment} from "@/__generated__";
+import {useFragment as readFragment} from "@/__generated__";
 import {convertIdToObjectId, isNonNullish} from "@/lib/graphql/graphql-utils.ts";
 import {GET_REPORT, META_APK_SCANNER_REPORT} from "@/components/graphql/report.graphql.ts";
 import {useParams} from "react-router";
@@ -24,10 +25,7 @@ const columns: ColumnDef<MetaReportFieldsFragment, unknown>[] = [
         header: "Report Date",
         cell: ({ getValue }) => {
             const val = getValue() as string | null | undefined;
-            if (!val) return null;
-            const d = new Date(val);
-            if (Number.isNaN(d.getTime())) return val;
-            return d.toLocaleString();
+            return <span title={val ?? undefined}>{formatDateTime(val)}</span>;
         },
     },
     {
@@ -69,20 +67,12 @@ export function ReportsPage() {
         fetchPolicy: "cache-first",
     });
 
-    //const reports = reportsData?.apk_scanner_report_list ?? []
-    if (reportsData) {
-        console.log(reportsData);
-    }
-
     const reports = (reportsData?.apk_scanner_report_list ?? [])
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        .map((report: any) => {
+        .map((report) => {
             if (!report) return null;
-            return useFragment(META_APK_SCANNER_REPORT, report);
+            return readFragment(META_APK_SCANNER_REPORT, report);
         })
         .filter(isNonNullish);
-
-    console.log("reports2", reports);
 
     return (
         <BasePage title={"Reports"}>

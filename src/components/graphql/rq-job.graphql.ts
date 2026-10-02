@@ -1,8 +1,8 @@
 import {gql} from "@/__generated__";
 
 export const GET_RQ_JOB_LIST = gql(`
-    query GetRqJobList {
-        rq_job_list {
+    query GetRqJobList($queueName: String, $jobIds: [String]) {
+        rq_job_list(queueName: $queueName, jobIds: $jobIds) {
             description
             funcName
             id
@@ -11,6 +11,7 @@ export const GET_RQ_JOB_LIST = gql(`
             queueName
             startedAt
             status
+            meta
         }
     }
 `);

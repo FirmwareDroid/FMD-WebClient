@@ -27,10 +27,10 @@ export function CursorPagination({
                                      loading,
                                  }: Readonly<CursorPaginationProps>) {
     return (
-        <div className="flex items-center justify-between px-2 py-4">
-            <div className="flex items-center space-x-6 lg:space-x-8">
+        <div className="flex items-center justify-between px-2 py-2">
+            <div className="flex flex-wrap items-center gap-4 lg:gap-8">
                 <div className="flex items-center space-x-2">
-                    <p className="text-sm font-medium">Rows per page</p>
+                    <span className="text-sm font-medium">Rows per page</span>
                     <Select
                         value={pageSize.toString()}
                         onValueChange={(value) => {

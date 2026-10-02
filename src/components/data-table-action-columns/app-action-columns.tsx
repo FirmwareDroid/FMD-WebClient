@@ -11,7 +11,7 @@ import {
 } from "@/components/data-table-action-columns/entity-action-columns.tsx";
 import {useNavigate} from "react-router";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
-import {ActionButton, ScanAppActionButton} from "@/components/data-table-action-columns/action-buttons.tsx";
+import {ActionButton, DownloadApkButton, ScanAppActionButton} from "@/components/data-table-action-columns/action-buttons.tsx";
 import {APPS_URL, FIRMWARE_URL, REPORTS_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 import {BookOpenIcon, EyeIcon} from "lucide-react";
 
@@ -83,6 +83,18 @@ function buildViewReportsColumn<T extends WithIdAndFirmwareIdReference>(): Colum
     );
 }
 
+export function buildDownloadAppColumn<T extends WithId>(): ColumnDef<T> {
+    return {
+        id: "download",
+        cell: ({row}) => (
+            <DownloadApkButton
+                appId={row.original.id}
+                tooltip="Download APK"
+            />
+        ),
+    };
+}
+
 export function buildScanAppColumn<T extends WithId>(
     tooltipSingle: string,
     tooltipSelected: string,
@@ -122,6 +134,7 @@ export function buildAppActionColumns<T extends WithIdAndFirmwareIdReference>(
         buildSelectEntityColumn(),
         buildViewAppColumn(),
         buildViewReportsColumn(),
+        buildDownloadAppColumn(),
         buildScanAppColumn("Scan app", "Scan selected apps", scanAppMutation),
     ];
 }

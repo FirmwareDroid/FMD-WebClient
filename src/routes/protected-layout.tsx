@@ -8,7 +8,7 @@ export default function ProtectedLayout() {
     const {isAuthenticated, initializing} = useAuth();
     const location = useLocation();
 
-    if (initializing) return null;
+    if (initializing) return <div className="flex min-h-svh items-center justify-center" role="status">Checking your session…</div>;
     if (!isAuthenticated) {
         return <Navigate to="/login" replace state={{from: location}}/>
     }

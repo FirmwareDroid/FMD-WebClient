@@ -5,10 +5,11 @@ import {gql} from "@/__generated__";
 // ----------------------------------------------------------------------------------------------------
 
 export const CREATE_APP_IMPORT_JOB = gql(`
-    mutation CreateAppImportJob($queueName: String!, $storageIndex: Int!) {
+    mutation CreateAppImportJob($queueName: String!, $storageIndex: Int!, $scanModules: [String!]) {
         createAppImportJob(
             queueName: $queueName,
-            storageIndex: $storageIndex
+            storageIndex: $storageIndex,
+            scanModules: $scanModules
         ) {
             jobId
         }
@@ -97,6 +98,17 @@ export const SCAN_APKS_BY_OBJECT_IDS = gql(`
             objectIdList: $objectIds,
             moduleName: $scannerName,
             queueName: $queueName,
+        ) {
+            jobIdList
+        }
+    }
+`);
+export const CREATE_VIRUSTOTAL_SCAN_JOB = gql(`
+    mutation CreateVirusTotalScanJob($objectIds: [String!]!, $queueName: String! = "scanner", $vtApiKey: String!) {
+        createVirustotalScanJob(
+            objectIdList: $objectIds,
+            queueName: $queueName,
+            vtApiKey: $vtApiKey
         ) {
             jobIdList
         }
