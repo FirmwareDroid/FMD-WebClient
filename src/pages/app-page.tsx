@@ -31,7 +31,7 @@ import {AppAllFragment, MetaReportFieldsFragment} from "@/__generated__/graphql.
 import {Button} from "@/components/ui/button.tsx";
 import {Badge} from "@/components/ui/badge.tsx";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import {ScanAppActionButton} from "@/components/data-table-action-columns/action-buttons.tsx";
+import {DownloadApkButton, ScanAppActionButton} from "@/components/data-table-action-columns/action-buttons.tsx";
 import {FILES_URL, FIRMWARE_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 import {formatDateTime} from "@/lib/date-utils.ts";
 import {downloadJsonFile, formatBytes} from "@/lib/format-utils.ts";
@@ -373,6 +373,12 @@ export function AppPage() {
                                     <DownloadIcon className="size-4 mr-1.5" aria-hidden="true" />
                                     Download JSON
                                 </Button>
+                                <DownloadApkButton
+                                    appId={appObjectId || appId}
+                                    fallbackFilename={app.originalFilename || app.filename || undefined}
+                                    text="Download APK"
+                                    variant="default"
+                                />
                             </div>
                         </div>
                     </CardHeader>

@@ -1,6 +1,13 @@
 export const convertIdToObjectId = (id: string): string => {
+    if (!id || typeof id !== "string") {
+        return "";
+    }
+    const trimmed = id.trim();
+    if (/^[a-f\d]{24}$/i.test(trimmed)) {
+        return trimmed;
+    }
     try {
-        const objectId = atob(id).split(":").at(1) ?? "";
+        const objectId = atob(trimmed).split(":").at(1) ?? "";
         return /^[a-f\d]{24}$/i.test(objectId) ? objectId : "";
     } catch {
         return "";

@@ -28,6 +28,7 @@ import {APPS_URL, FILES_URL, FIRMWARE_URL} from "@/components/ui/sidebar/app-sid
 import {formatDateTime} from "@/lib/date-utils.ts";
 import {downloadJsonFile, formatBytes} from "@/lib/format-utils.ts";
 import {CopyButton} from "@/components/ui/copy-button.tsx";
+import {DownloadFirmwareFileButton} from "@/components/firmware/download-firmware-file-button.tsx";
 import {useSetBreadcrumbTitle} from "@/lib/breadcrumb-store.ts";
 
 export function FilePage() {
@@ -207,6 +208,16 @@ export function FilePage() {
                                         <SmartphoneIcon className="size-4 mr-1.5" aria-hidden="true" />
                                         View App
                                     </Button>
+                                )}
+                                {!file.isDirectory && (
+                                    <DownloadFirmwareFileButton
+                                        fileId={file.id}
+                                        isOnDisk={file.isOnDisk}
+                                        fileName={file.name}
+                                        text="Download File"
+                                        variant="default"
+                                        size="sm"
+                                    />
                                 )}
                                 <Button
                                     variant="outline"

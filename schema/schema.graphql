@@ -2440,7 +2440,7 @@ type Mutation {
     queueName: String! = "scanner"
   ): UpdateFirmwareImportSetting
   createVirustotalScanJob(objectIdList: [String!]!, queueName: String! = "scanner", vtApiKey: String!): CreateVirusTotalScanJob
-  exportFirmwareFile(filenameRegex: String!, firmwareIdList: [String!]!, queueName: String! = "extractor", storeSettingId: String!): ExportFirmwareFileByRegexMutation
+  exportFirmwareFile(filenameRegex: String = ".*", firmwareIdList: [String!]!, queueName: String = "extractor", storeSettingId: String): ExportFirmwareFileByRegexMutation
   deleteAndroidFirmware(firmwareIdList: [String!]!, queueName: String! = "scanner"): DeleteAndroidFirmwareMutation
 
   """

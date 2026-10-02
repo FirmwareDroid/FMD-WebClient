@@ -45,6 +45,8 @@ interface DataTableProps<TData, TValue> {
     onRowSelectionChange?: (selectedRows: TData[]) => void;
     dataTablePagination?: boolean;
     cursorPagination?: CursorPaginationProps;
+    showExport?: boolean;
+    getRowId?: (originalRow: TData, index: number, parent?: any) => string;
 }
 
 function DataTable<TData, TValue>(
@@ -55,6 +57,8 @@ function DataTable<TData, TValue>(
         onRowSelectionChange,
         dataTablePagination = true,
         cursorPagination,
+        showExport = true,
+        getRowId,
     }: Readonly<DataTableProps<TData, TValue>>
 ) {
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -95,6 +99,7 @@ function DataTable<TData, TValue>(
     const table = useReactTable({
         data: filteredData,
         columns,
+        ...(getRowId ? { getRowId } : {}),
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         enableRowSelection: true,
@@ -120,8 +125,7 @@ function DataTable<TData, TValue>(
         if (!onRowSelectionChangeRef.current) return;
         const selectedRows = table.getSelectedRowModel().flatRows.map(row => row.original);
         onRowSelectionChangeRef.current(selectedRows);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [rowSelection]);
+    }, [table, rowSelection, filteredData]);
 
     return (
         <div className={cn(className)}>
@@ -129,7 +133,7 @@ function DataTable<TData, TValue>(
                 <DataTableSearch value={globalFilter} onChange={setGlobalFilter} />
 
                 <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
-                    <DataTableExport table={table} />
+                    {showExport && <DataTableExport table={table} />}
                     <DataTableViewOptions table={table} />
                 </div>
             </div>
@@ -198,6 +202,8 @@ function ScrollableDataTable<TData, TValue>(
         onRowSelectionChange,
         dataTablePagination,
         cursorPagination,
+        showExport = true,
+        getRowId,
     }: Readonly<DataTableProps<TData, TValue>>
 ) {
     return (
@@ -208,6 +214,8 @@ function ScrollableDataTable<TData, TValue>(
                 onRowSelectionChange={onRowSelectionChange}
                 dataTablePagination={dataTablePagination}
                 cursorPagination={cursorPagination}
+                showExport={showExport}
+                getRowId={getRowId}
             />
             <ScrollBar orientation="horizontal"/>
         </ScrollArea>
@@ -221,6 +229,8 @@ function StateHandlingScrollableDataTable<TData, TValue>(
         onRowSelectionChange,
         dataTablePagination,
         cursorPagination,
+        showExport = true,
+        getRowId,
         idsLoading,
         dataLoading,
         idsError,
@@ -264,6 +274,8 @@ function StateHandlingScrollableDataTable<TData, TValue>(
                     onRowSelectionChange={onRowSelectionChange}
                     dataTablePagination={dataTablePagination}
                     cursorPagination={cursorPagination}
+                    showExport={showExport}
+                    getRowId={getRowId}
                 />
             )}
         </>

@@ -103,3 +103,14 @@ export const SCAN_APKS_BY_OBJECT_IDS = gql(`
         }
     }
 `);
+export const CREATE_VIRUSTOTAL_SCAN_JOB = gql(`
+    mutation CreateVirusTotalScanJob($objectIds: [String!]!, $queueName: String! = "scanner", $vtApiKey: String!) {
+        createVirustotalScanJob(
+            objectIdList: $objectIds,
+            queueName: $queueName,
+            vtApiKey: $vtApiKey
+        ) {
+            jobIdList
+        }
+    }
+`);

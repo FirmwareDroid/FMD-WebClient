@@ -18,6 +18,9 @@ function HomePage() {
                             <span className="text-[#8bd450] font-bold">FMD</span>
                         </span>
                     </TypographyH1>
+                    <p className="mt-2 text-sm sm:text-base text-muted-foreground">
+                        From firmware image to deep system visibility.
+                    </p>
                 </div>
 
                 <Card className="w-full max-w-5xl">

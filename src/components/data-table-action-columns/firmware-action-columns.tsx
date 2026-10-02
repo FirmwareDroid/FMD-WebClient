@@ -11,8 +11,9 @@ import {useNavigate} from "react-router";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
 import {ActionButton, ReimportFirmwareButton} from "@/components/data-table-action-columns/action-buttons.tsx";
 import {FIRMWARE_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
-import {EyeIcon} from "lucide-react";
+import {DownloadIcon, EyeIcon} from "lucide-react";
 import {buildScanAppColumn} from "@/components/data-table-action-columns/app-action-columns.tsx";
+import {ExportFirmwareDataDialog} from "@/components/export/export-firmware-data-dialog.tsx";
 
 function buildViewFirmwareColumn<T extends WithId>(): ColumnDef<T> {
     return (
@@ -41,6 +42,35 @@ function buildViewFirmwareColumn<T extends WithId>(): ColumnDef<T> {
             },
         }
     );
+}
+
+function buildExportFirmwareColumn<T extends WithId>(): ColumnDef<T> {
+    return {
+        id: "export",
+        cell: ({row}) => {
+            const firmwareId = row.original.id;
+            return (
+                <ExportFirmwareDataDialog
+                    firmwareId={firmwareId}
+                    trigger={
+                        <Tooltip delayDuration={500}>
+                            <TooltipTrigger asChild>
+                                <ActionButton
+                                    variant="outline"
+                                    aria-label="Export scan data"
+                                >
+                                    <DownloadIcon className="size-5" />
+                                </ActionButton>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Export scan data (JSONL / ZIP)</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    }
+                />
+            );
+        },
+    };
 }
 
 function buildReimportFirmwareColumn<T extends WithId>(): ColumnDef<T> {
@@ -74,6 +104,7 @@ export function buildFirmwareActionColumns<T extends WithId>(
         buildSelectEntityColumn(),
         buildViewFirmwareColumn(),
         buildScanAppColumn("Scan all apps of this firmware", "Scan all apps of selected firmware", scanAppMutation),
+        buildExportFirmwareColumn(),
         buildReimportFirmwareColumn(),
         buildDeleteEntityColumn("Delete firmware", "Delete selected firmware", DELETE_FIRMWARE_BY_OBJECT_ID),
     ];

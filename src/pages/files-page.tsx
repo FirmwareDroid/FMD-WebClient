@@ -17,6 +17,9 @@ import {Card, CardContent} from "@/components/ui/card.tsx";
 import {CursorPaginationProps} from "@/components/ui/table/cursor-pagination.tsx";
 import {FileIcon, FolderIcon, HardDriveIcon, LayersIcon, LinkIcon} from "lucide-react";
 import {useSetBreadcrumbTitle} from "@/lib/breadcrumb-store.ts";
+import {ExtractFirmwareFilesDialog} from "@/components/firmware/extract-firmware-files-dialog.tsx";
+import {DownloadExtractedArchiveButton} from "@/components/firmware/download-firmware-file-button.tsx";
+import {FirmwareExtractionProgressBar} from "@/components/firmware/firmware-extraction-progress-bar.tsx";
 
 interface PartitionInfo {
     is_import_success?: boolean;
@@ -175,6 +178,7 @@ export function FilesPage() {
         loading: filesLoading,
         error: filesError,
         data: filesData,
+        refetch: refetchFiles,
     } = useQuery(GET_FILES_BY_FIRMWARE, {
         variables: {
             filter: {
@@ -272,6 +276,45 @@ export function FilesPage() {
                         </CardContent>
                     </Card>
                 )}
+
+                {/* Real-Time File Extraction Progress Tracker */}
+                {firmwareId && (
+                    <FirmwareExtractionProgressBar
+                        firmwareId={firmwareId}
+                        onExtractionComplete={() => {
+                            void refetchFiles();
+                        }}
+                    />
+                )}
+
+                {/* File Extraction & Download Actions */}
+                <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-muted/30 border border-border/60 rounded-xl shadow-xs">
+                    <div className="flex items-center gap-2">
+                        <HardDriveIcon className="size-4 text-primary shrink-0" aria-hidden="true" />
+                        <span className="text-xs text-muted-foreground">
+                            Extract firmware files to server storage to enable direct file and archive downloads.
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                        {firmwareId && (
+                            <>
+                                <ExtractFirmwareFilesDialog
+                                    firmwareId={firmwareId}
+                                    firmwareName={firmware?.filename}
+                                    buttonText="Extract All Files"
+                                    variant="outline"
+                                    size="sm"
+                                />
+                                <DownloadExtractedArchiveButton
+                                    firmwareId={firmwareId}
+                                    firmwareName={firmware?.filename}
+                                    variant="outline"
+                                    size="sm"
+                                />
+                            </>
+                        )}
+                    </div>
+                </div>
 
                 {/* Status Bar */}
                 <div className="flex items-center justify-between text-xs text-muted-foreground px-1">

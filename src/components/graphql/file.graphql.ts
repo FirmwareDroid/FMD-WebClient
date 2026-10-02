@@ -70,3 +70,12 @@ export const GET_FILE_BY_OBJECT_ID = gql(`
         }
     }
 `);
+
+
+export const EXPORT_FIRMWARE_FILES = gql(`
+    mutation ExportFirmwareFiles($firmwareIdList: [String!]!, $filenameRegex: String, $queueName: String, $storeSettingId: String) {
+        exportFirmwareFile(firmwareIdList: $firmwareIdList, filenameRegex: $filenameRegex, queueName: $queueName, storeSettingId: $storeSettingId) {
+            jobId
+        }
+    }
+`);

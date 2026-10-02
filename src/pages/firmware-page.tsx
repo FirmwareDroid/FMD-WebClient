@@ -41,6 +41,10 @@ import {formatDateTime} from "@/lib/date-utils.ts";
 import {downloadJsonFile, formatBytes} from "@/lib/format-utils.ts";
 import {CopyButton} from "@/components/ui/copy-button.tsx";
 import {BuildPropsCard} from "@/components/firmware/build-props-card.tsx";
+import { ExportFirmwareDataDialog } from "@/components/export/export-firmware-data-dialog.tsx";
+import { ExtractFirmwareFilesDialog } from "@/components/firmware/extract-firmware-files-dialog.tsx";
+import { FirmwareExtractionProgressBar } from "@/components/firmware/firmware-extraction-progress-bar.tsx";
+
 
 interface PartitionInfo {
     is_import_success?: boolean;
@@ -57,6 +61,7 @@ export function FirmwarePage() {
         loading: firmwaresLoading,
         data: firmwaresData,
         error: firmwaresError,
+        refetch: refetchFirmware,
     } = useQuery(GET_FIRMWARES_BY_OBJECT_IDS, {
         variables: {objectIds: convertIdToObjectId(firmwareId as string)},
         skip: !firmwareId,
@@ -257,6 +262,20 @@ export function FirmwarePage() {
                                     text="Scan All Apps"
                                     mutation={SCAN_APKS_BY_FIRMWARE_OBJECT_IDS}
                                 />
+                                <ExtractFirmwareFilesDialog
+                                    firmwareId={firmwareId}
+                                    firmwareName={firmware.filename}
+                                    buttonText="Extract All Files"
+                                    variant="outline"
+                                    size="sm"
+                                />
+                                <ExportFirmwareDataDialog
+                                    firmwareId={firmwareId}
+                                    firmwareName={firmware.filename}
+                                    buttonText="Export Scan Data"
+                                    variant="outline"
+                                    size="sm"
+                                />
                                 <Button
                                     variant="outline"
                                     size="sm"
@@ -272,6 +291,14 @@ export function FirmwarePage() {
                         </div>
                     </CardHeader>
                 </Card>
+
+                {/* Real-time File Extraction Progress Tracker */}
+                <FirmwareExtractionProgressBar
+                    firmwareId={firmwareId}
+                    onExtractionComplete={() => {
+                        void refetchFirmware();
+                    }}
+                />
 
                 {/* KPI Metrics Summary Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
