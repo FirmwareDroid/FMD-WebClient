@@ -334,3 +334,20 @@ html.dark .emulator-page .emulator-container {
         order: 1;
     }
 }
+
+/* Loading spinner used inside emulator buttons and placeholders */
+@keyframes emu-spin {
+    to { transform: rotate(360deg); }
+}
+
+.emu-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: emu-spin 0.75s linear infinite;
+    vertical-align: middle;
+    flex-shrink: 0;
+}

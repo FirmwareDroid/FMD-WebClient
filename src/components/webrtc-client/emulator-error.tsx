@@ -1,6 +1,13 @@
 // File: src/components/webrtc-client/emulator-error.tsx
 import React, { useCallback, useState } from "react";
 
+export type DisconnectionInfo = {
+    countdown: number;
+    attempt: number;
+    maxAttempts: number;
+    failed: boolean;
+};
+
 export function useEmulatorError() {
     const [hasEmulatorError, setHasEmulatorError] = useState(false);
     const [emulatorErrorMessage, setEmulatorErrorMessage] = useState<string>("");
@@ -79,6 +86,63 @@ export const EmulatorErrorBanner: React.FC<BannerProps> = ({ message, onDismiss,
                     onClick={onDismiss}
                     style={{ padding: "6px 10px", borderRadius: 6, cursor: "pointer" }}
                     aria-label="Dismiss error"
+                >
+                    Dismiss
+                </button>
+            </div>
+        </div>
+    );
+};
+
+type DisconnectionBannerProps = {
+    info: DisconnectionInfo;
+    onReconnectNow: () => void;
+    onDismiss: () => void;
+};
+
+export const DisconnectionBanner: React.FC<DisconnectionBannerProps> = ({ info, onReconnectNow, onDismiss }) => {
+    const { countdown, attempt, maxAttempts, failed } = info;
+    return (
+        <div
+            role="alert"
+            aria-live="assertive"
+            style={{
+                display: "flex",
+                gap: 8,
+                alignItems: "center",
+                justifyContent: "space-between",
+                background: "#1a1a2b",
+                color: "#d7d7ff",
+                padding: "8px 12px",
+                borderRadius: 6,
+                marginBottom: 8,
+            }}
+        >
+            <div style={{ flex: 1, marginRight: 12 }}>
+                <div style={{ fontWeight: 600 }}>
+                    {failed ? "Connection lost" : "Connection lost — reconnecting…"}
+                </div>
+                <div style={{ fontSize: 13, opacity: 0.9, marginTop: 4 }}>
+                    {failed
+                        ? `Auto-reconnect failed after ${maxAttempts} attempt${maxAttempts !== 1 ? "s" : ""}. Please reconnect manually.`
+                        : countdown > 0
+                            ? `Attempt ${attempt} of ${maxAttempts} — retrying in ${countdown}s`
+                            : `Attempt ${attempt} of ${maxAttempts} — connecting…`}
+                </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 8 }}>
+                <button
+                    onClick={onReconnectNow}
+                    style={{ padding: "6px 10px", borderRadius: 6, cursor: "pointer" }}
+                    aria-label={failed ? "Retry connection" : "Reconnect now"}
+                >
+                    {failed ? "Retry" : "Now"}
+                </button>
+                <button
+                    onClick={onDismiss}
+                    style={{ padding: "6px 10px", borderRadius: 6, cursor: "pointer" }}
+                    aria-label="Dismiss reconnect"
                 >
                     Dismiss
                 </button>
