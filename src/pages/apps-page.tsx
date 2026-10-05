@@ -126,7 +126,7 @@ export function AppsPage() {
         error: appsError,
         data: appsData,
     } = useQuery(GET_APPS_BY_FIRMWARE_OBJECT_IDS, {
-        variables: {objectIds: firmwareObjectId},
+        variables: {objectIds: firmwareObjectId ? [firmwareObjectId] : undefined},
         fetchPolicy: "cache-first",
     });
 
