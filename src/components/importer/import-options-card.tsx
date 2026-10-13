@@ -351,7 +351,8 @@ export function ImportOptionsCard({
                                     <FileCodeIcon className="size-3.5 text-primary" aria-hidden="true" />
                                     Select Scanners to Run:
                                 </span>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                <div className="max-h-60 overflow-y-auto pr-1 rounded-md border border-border/40 p-2 bg-muted/10">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                     {ALL_AVAILABLE_SCANNERS.map((scanner) => {
                                         const isSelected = customScanModules.includes(scanner.name);
                                         const isVt = scanner.name === "VIRUSTOTAL";
@@ -390,6 +391,7 @@ export function ImportOptionsCard({
                                             </label>
                                         );
                                     })}
+                                    </div>
                                 </div>
                             </div>
                         )}

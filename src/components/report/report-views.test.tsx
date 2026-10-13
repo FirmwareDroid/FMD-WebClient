@@ -92,13 +92,72 @@ describe("Report Views Components", () => {
             },
         };
 
-        it("renders detected compilers and packers", () => {
+        it("renders detected compilers and packers (legacy dictionary format)", () => {
             render(<ApkidReportView data={mockApkidData} />);
 
             expect(screen.getByText("classes.dex")).toBeInTheDocument();
             expect(screen.getByText("dexlib 2.x")).toBeInTheDocument();
             expect(screen.getByText("SecShell")).toBeInTheDocument();
             expect(screen.getByText("ProGuard")).toBeInTheDocument();
+        });
+
+        it("renders compilers, anti-VM, and version metadata from standard APKiD array format", () => {
+            const arrayApkidData = {
+                apkid_version: "3.1.0",
+                rules_sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                files: [
+                    {
+                        filename: "/var/www/file_store/system/app/FT313/FT313.apk",
+                        matches: {
+                            file_type: ["APK"],
+                        },
+                    },
+                    {
+                        filename: "/var/www/file_store/system/app/FT313/FT313.apk!classes.dex",
+                        matches: {
+                            file_type: ["DEX"],
+                            anti_vm: [
+                                "Build.MANUFACTURER check",
+                                "Build.BOARD check",
+                            ],
+                            compiler: [
+                                "r8",
+                            ],
+                        },
+                    },
+                    {
+                        filename: "/var/www/file_store/system/app/FT313/FT313.apk!resources.arsc",
+                        matches: {
+                            file_type: ["RES"],
+                        },
+                    },
+                ],
+            };
+
+            render(<ApkidReportView data={arrayApkidData} />);
+
+            // Check metadata bar
+            expect(screen.getByText("APKiD Version:")).toBeInTheDocument();
+            expect(screen.getByText("3.1.0")).toBeInTheDocument();
+
+            // Check KPI stats: Anti-Analysis should be 2, Compilers should be 1
+            expect(screen.getAllByText("Anti-Analysis").length).toBeGreaterThanOrEqual(1);
+            expect(screen.getByText("Compilers")).toBeInTheDocument();
+            expect(screen.getByText("2")).toBeInTheDocument(); // Anti-Analysis count: 2
+            expect(screen.getByText("1")).toBeInTheDocument(); // Compilers count: 1
+
+            // Check file presence
+            expect(screen.getByText("/var/www/file_store/system/app/FT313/FT313.apk!classes.dex")).toBeInTheDocument();
+
+            // Check compiler and anti-VM badges
+            expect(screen.getByText("r8")).toBeInTheDocument();
+            expect(screen.getByText("Anti-VM: Build.MANUFACTURER check")).toBeInTheDocument();
+            expect(screen.getByText("Anti-VM: Build.BOARD check")).toBeInTheDocument();
+
+            // Check file types
+            expect(screen.getByText("DEX")).toBeInTheDocument();
+            expect(screen.getByText("APK")).toBeInTheDocument();
+            expect(screen.getByText("RES")).toBeInTheDocument();
         });
     });
 

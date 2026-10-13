@@ -130,7 +130,7 @@ describe("report-utils", () => {
     });
 
     describe("extractApkidFindings", () => {
-        it("extracts protections per file", () => {
+        it("extracts protections per file (legacy dictionary format)", () => {
             const data = {
                 files: {
                     "classes.dex": {
@@ -145,11 +145,83 @@ describe("report-utils", () => {
             expect(extracted[0].filename).toBe("classes.dex");
             expect(extracted[0].compilers).toContain("dexlib 2.x");
         });
+
+        it("extracts protections from standard APKiD array format with matches", () => {
+            const data = {
+                apkid_version: "3.1.0",
+                rules_sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                files: [
+                    {
+                        filename: "/var/www/.../FT313.apk",
+                        matches: {
+                            file_type: ["APK"],
+                        },
+                    },
+                    {
+                        filename: "/var/www/.../FT313.apk!classes.dex",
+                        matches: {
+                            file_type: ["DEX"],
+                            anti_vm: ["Build.MANUFACTURER check", "Build.BOARD check"],
+                            anti_disassembly: ["illegal class name"],
+                            compiler: ["r8"],
+                            packer: ["SecShell"],
+                            manipulator: ["dx"],
+                            dropper: ["Dropper.A"],
+                        },
+                    },
+                    {
+                        filename: "/var/www/.../FT313.apk!resources.arsc",
+                        matches: {
+                            file_type: ["RES"],
+                        },
+                    },
+                ],
+            };
+
+            const extracted = extractApkidFindings(data);
+            expect(extracted).toHaveLength(3);
+
+            // File 0: APK
+            expect(extracted[0].filename).toBe("/var/www/.../FT313.apk");
+            expect(extracted[0].compilers).toEqual([]);
+            expect(extracted[0].antiVm).toEqual([]);
+            expect(extracted[0].other.file_type).toEqual(["APK"]);
+
+            // File 1: DEX with compiler and anti_vm
+            expect(extracted[1].filename).toBe("/var/www/.../FT313.apk!classes.dex");
+            expect(extracted[1].compilers).toEqual(["r8"]);
+            expect(extracted[1].antiVm).toEqual(["Build.MANUFACTURER check", "Build.BOARD check"]);
+            expect(extracted[1].antiDisassembly).toEqual(["illegal class name"]);
+            expect(extracted[1].packers).toEqual(["SecShell"]);
+            expect(extracted[1].manipulators).toEqual(["dx"]);
+            expect(extracted[1].droppers).toEqual(["Dropper.A"]);
+            expect(extracted[1].other.file_type).toEqual(["DEX"]);
+
+            // File 2: RES
+            expect(extracted[2].filename).toBe("/var/www/.../FT313.apk!resources.arsc");
+            expect(extracted[2].other.file_type).toEqual(["RES"]);
+        });
     });
 
     describe("extractInterestingFindings", () => {
         it("extracts and prioritizes findings from multiple scanner outputs", () => {
             const reports = [
+                {
+                    pk: "report-apkid-1",
+                    scannerName: "APKiD",
+                    results: JSON.stringify({
+                        files: [
+                            {
+                                filename: "app.apk!classes.dex",
+                                matches: {
+                                    anti_vm: ["Build.MANUFACTURER check", "Build.BOARD check"],
+                                    anti_disassembly: ["invalid instruction"],
+                                    compiler: ["r8"],
+                                },
+                            },
+                        ],
+                    }),
+                },
                 {
                     pk: "report-th-1",
                     scannerName: "TruffleHog",

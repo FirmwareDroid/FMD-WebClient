@@ -314,8 +314,8 @@ function ScanAppActionButton(
                         </Tooltip>
                     </DialogTrigger>
                 )}
-                <DialogContent className="sm:max-w-5xl">
-                    <DialogHeader>
+                <DialogContent className="sm:max-w-5xl max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
+                    <DialogHeader className="p-6 pb-4 border-b border-border/40 shrink-0">
                         <div className="flex items-center justify-between pr-6">
                             <div>
                                 <DialogTitle>Select Scanner(s)</DialogTitle>
@@ -339,39 +339,41 @@ function ScanAppActionButton(
                         </div>
                     </DialogHeader>
 
-                    <ScannersTable
-                        setSelectedScanners={setSelectedScanners}
-                        onConfigureClick={(scannerId) => {
-                            setConfigTargetScanner(scannerId);
-                            setConfigDialogOpen(true);
-                        }}
-                    />
+                    <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
+                        <ScannersTable
+                            setSelectedScanners={setSelectedScanners}
+                            onConfigureClick={(scannerId) => {
+                                setConfigTargetScanner(scannerId);
+                                setConfigDialogOpen(true);
+                            }}
+                        />
 
-                    {hasUnconfiguredSelected && (
-                        <div className="flex items-center justify-between rounded-md border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-500 dark:text-amber-400">
-                            <div className="flex items-center gap-2">
-                                <AlertCircleIcon className="size-4 shrink-0" />
-                                <span>
-                                    <strong>{unconfiguredSelected.map((s) => s.label).join(", ")}</strong> requires configuration before scanning can proceed.
-                                </span>
+                        {hasUnconfiguredSelected && (
+                            <div className="flex items-center justify-between rounded-md border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-500 dark:text-amber-400">
+                                <div className="flex items-center gap-2">
+                                    <AlertCircleIcon className="size-4 shrink-0" />
+                                    <span>
+                                        <strong>{unconfiguredSelected.map((s) => s.label).join(", ")}</strong> requires configuration before scanning can proceed.
+                                    </span>
+                                </div>
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                        const first = unconfiguredSelected[0]?.id === "TRUFFLEHOG" ? "TRUFFLEHOG" : "VIRUSTOTAL";
+                                        setConfigTargetScanner(first);
+                                        setConfigDialogOpen(true);
+                                    }}
+                                    className="h-7 text-xs border-amber-500/30 text-amber-500 hover:bg-amber-500/20"
+                                >
+                                    Configure Now
+                                </Button>
                             </div>
-                            <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                    const first = unconfiguredSelected[0]?.id === "TRUFFLEHOG" ? "TRUFFLEHOG" : "VIRUSTOTAL";
-                                    setConfigTargetScanner(first);
-                                    setConfigDialogOpen(true);
-                                }}
-                                className="h-7 text-xs border-amber-500/30 text-amber-500 hover:bg-amber-500/20"
-                            >
-                                Configure Now
-                            </Button>
-                        </div>
-                    )}
+                        )}
+                    </div>
 
-                    <DialogFooter className="flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <DialogFooter className="p-6 pt-4 border-t border-border/40 shrink-0 bg-background/50 flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div className="flex items-center gap-2">
                             <Checkbox
                                 id="navigate-scan-jobs-toggle"

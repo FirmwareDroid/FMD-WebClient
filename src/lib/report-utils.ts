@@ -336,33 +336,57 @@ export interface ApkidFileDetection {
     obfuscators: string[];
     antiDebug: string[];
     antiVm: string[];
+    antiDisassembly: string[];
+    manipulators: string[];
+    droppers: string[];
     other: Record<string, string[]>;
 }
 
 export function extractApkidFindings(data: Record<string, any>): ApkidFileDetection[] {
-    const filesRaw = data.files ?? (typeof data === "object" ? data : {});
+    if (!data || typeof data !== "object") {
+        return [];
+    }
+
     const detections: ApkidFileDetection[] = [];
+    const toStrArray = (val: unknown): string[] => {
+        if (Array.isArray(val)) return val.map(String).map((s) => s.trim()).filter(Boolean);
+        if (typeof val === "string" && val.trim()) return [val.trim()];
+        return [];
+    };
 
-    for (const [filename, fileObj] of Object.entries(filesRaw)) {
-        if (filename === "error" || filename === "errors" || typeof fileObj !== "object" || fileObj === null) {
-            continue;
-        }
+    const parseEntry = (rawFilename: string, item: any) => {
+        if (!item || typeof item !== "object") return;
 
-        const toStrArray = (val: unknown): string[] => {
-            if (Array.isArray(val)) return val.map(String);
-            if (typeof val === "string" && val) return [val];
-            return [];
-        };
+        const matchesObj = (item.matches && typeof item.matches === "object") ? item.matches : item;
+        const filename = String(item.filename || rawFilename || item.name || item.path || "Unknown file");
 
-        const compilers = toStrArray((fileObj as any).compiler);
-        const packers = toStrArray((fileObj as any).packer);
-        const obfuscators = toStrArray((fileObj as any).obfuscator);
-        const antiDebug = toStrArray((fileObj as any).anti_debug);
-        const antiVm = toStrArray((fileObj as any).anti_vm);
+        const compilers = toStrArray(matchesObj.compiler ?? item.compiler);
+        const packers = toStrArray(matchesObj.packer ?? item.packer);
+        const obfuscators = toStrArray(matchesObj.obfuscator ?? item.obfuscator);
+        const antiDebug = toStrArray(matchesObj.anti_debug ?? item.anti_debug);
+        const antiVm = toStrArray(matchesObj.anti_vm ?? item.anti_vm);
+        const antiDisassembly = toStrArray(matchesObj.anti_disassembly ?? item.anti_disassembly);
+        const manipulators = toStrArray(matchesObj.manipulator ?? item.manipulator);
+        const droppers = toStrArray(matchesObj.dropper ?? item.dropper);
 
         const other: Record<string, string[]> = {};
-        for (const [k, v] of Object.entries(fileObj as Record<string, any>)) {
-            if (!["compiler", "packer", "obfuscator", "anti_debug", "anti_vm"].includes(k)) {
+        const knownKeys = new Set([
+            "compiler",
+            "packer",
+            "obfuscator",
+            "anti_debug",
+            "anti_vm",
+            "anti_disassembly",
+            "manipulator",
+            "dropper",
+            "filename",
+            "name",
+            "path",
+            "matches",
+        ]);
+
+        for (const [k, v] of Object.entries(matchesObj)) {
+            if (!knownKeys.has(k)) {
                 const arr = toStrArray(v);
                 if (arr.length > 0) {
                     other[k] = arr;
@@ -377,8 +401,37 @@ export function extractApkidFindings(data: Record<string, any>): ApkidFileDetect
             obfuscators,
             antiDebug,
             antiVm,
+            antiDisassembly,
+            manipulators,
+            droppers,
             other,
         });
+    };
+
+    const filesRaw = Array.isArray(data)
+        ? data
+        : Array.isArray(data.files)
+          ? data.files
+          : (data.files && typeof data.files === "object")
+            ? data.files
+            : data;
+
+    if (Array.isArray(filesRaw)) {
+        for (const item of filesRaw) {
+            parseEntry("", item);
+        }
+    } else if (typeof filesRaw === "object" && filesRaw !== null) {
+        for (const [key, fileObj] of Object.entries(filesRaw)) {
+            if (
+                key === "error" ||
+                key === "errors" ||
+                key === "apkid_version" ||
+                key === "rules_sha256"
+            ) {
+                continue;
+            }
+            parseEntry(key, fileObj);
+        }
     }
 
     return detections;
@@ -538,6 +591,22 @@ export function extractInterestingFindings(
                         severity: "medium",
                         title: `Anti-VM Protection: ${fd.antiVm.join(", ")}`,
                         description: "App contains emulator / virtual machine detection routines",
+                        location: fd.filename,
+                        appId,
+                        appFilename,
+                        firmwareId,
+                        reportDate,
+                    });
+                }
+                if (fd.antiDisassembly.length > 0) {
+                    findings.push({
+                        id: `${reportId}-apkid-antidisasm-${idx}`,
+                        reportId,
+                        reportPk,
+                        scannerName: report.scannerName || "APKiD",
+                        severity: "medium",
+                        title: `Anti-Disassembly Protection: ${fd.antiDisassembly.join(", ")}`,
+                        description: "App contains anti-disassembly detection routines",
                         location: fd.filename,
                         appId,
                         appFilename,

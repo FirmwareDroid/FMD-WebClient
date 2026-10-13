@@ -42,11 +42,13 @@ const SCANNER_DESCRIPTIONS: Record<string, string> = {
 type ScannersTableProps = {
     setSelectedScanners: React.Dispatch<React.SetStateAction<Scanner[]>>;
     onConfigureClick?: (scannerId: "VIRUSTOTAL" | "TRUFFLEHOG") => void;
+    className?: string;
 };
 
 export function ScannersTable({
     setSelectedScanners,
     onConfigureClick,
+    className,
 }: Readonly<ScannersTableProps>) {
     const { data } = useQuery(GET_SCANNER_MODULE_NAMES);
     const { isScannerConfigured, scannerRequiresConfiguration } = useScannerConfigStore();
@@ -163,7 +165,7 @@ export function ScannersTable({
     }, [data, scannerRequiresConfiguration, isScannerConfigured]);
 
     return (
-        <>
+        <div className={className}>
             <StateHandlingScrollableDataTable
                 columns={columns}
                 data={scanners}
@@ -180,6 +182,6 @@ export function ScannersTable({
                 onOpenChange={setConfigDialogOpen}
                 initialScanner={configTargetScanner}
             />
-        </>
+        </div>
     );
 }
