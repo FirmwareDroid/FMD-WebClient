@@ -1,5 +1,10 @@
 import { useMemo, useState } from "react";
-import { getSeverityBadgeProps, normalizeSeverity, NormalizedSeverity } from "@/lib/report-utils.ts";
+import {
+    getSeverityBadgeProps,
+    normalizeSeverity,
+    NormalizedSeverity,
+    resolveFindingDescription,
+} from "@/lib/report-utils.ts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -7,16 +12,30 @@ import { Button } from "@/components/ui/button.tsx";
 import {
     AlertTriangleIcon,
     CheckCircle2Icon,
+    ChevronDownIcon,
+    ChevronRightIcon,
     FileCodeIcon,
     SearchIcon,
     ShieldAlertIcon,
 } from "lucide-react";
+
+export interface UnifiedFindingInstance {
+    info?: string;
+    source?: string | null;
+    row?: number | null;
+    col?: number | null;
+}
 
 export interface UnifiedFinding {
     id: string;
     title: string;
     severity: NormalizedSeverity;
     description?: string;
+    sig?: string;
+    cvss3_score?: number;
+    cvss3_vector?: string;
+    solution?: string;
+    instances?: UnifiedFindingInstance[];
     cwe?: string;
     owasp?: string;
     filePath?: string;
@@ -28,6 +47,51 @@ export interface UnifiedFinding {
 interface VulnerabilitiesReportViewProps {
     data: Record<string, any>;
     scannerName: string;
+}
+
+function FindingInstances({ instances }: { instances: UnifiedFindingInstance[] }) {
+    const [expanded, setExpanded] = useState(false);
+    return (
+        <div className="pt-1 space-y-1.5">
+            <button
+                type="button"
+                onClick={() => setExpanded(!expanded)}
+                className="text-xs font-medium text-primary hover:underline flex items-center gap-1 focus:outline-none"
+            >
+                {expanded ? (
+                    <>
+                        <ChevronDownIcon className="size-3.5" />
+                        Hide instances ({instances.length})
+                    </>
+                ) : (
+                    <>
+                        <ChevronRightIcon className="size-3.5" />
+                        Show all {instances.length} instances
+                    </>
+                )}
+            </button>
+            {expanded && (
+                <div className="space-y-1.5 max-h-56 overflow-y-auto p-2.5 rounded-md bg-muted/40 border border-border/40 font-mono text-xs">
+                    {instances.map((inst, idx) => (
+                        <div key={idx} className="pb-1.5 border-b border-border/30 last:border-0 last:pb-0 space-y-0.5">
+                            {inst.source && (
+                                <div className="text-foreground flex items-center gap-1.5 truncate">
+                                    <FileCodeIcon className="size-3 shrink-0 text-muted-foreground" />
+                                    <span className="truncate">{inst.source}</span>
+                                    {inst.row ? <span className="text-muted-foreground shrink-0">:{inst.row}</span> : null}
+                                </div>
+                            )}
+                            {inst.info && (
+                                <div className="text-muted-foreground pl-4 truncate">
+                                    {inst.info}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
 }
 
 export function VulnerabilitiesReportView({ data, scannerName }: VulnerabilitiesReportViewProps) {
@@ -109,7 +173,7 @@ export function VulnerabilitiesReportView({ data, scannerName }: Vulnerabilities
                         id: `malware-${i}`,
                         title: item.crime || item.rule || "Suspicious Behavior",
                         severity: "high",
-                        description: `Confidence: ${item.confidence || "Unknown"}, Score: ${item.score ?? "\u2014"}`,
+                        description: `Confidence: ${item.confidence || "Unknown"}, Score: ${item.score ?? "—"}`,
                         extra: item,
                     });
                 }
@@ -122,13 +186,52 @@ export function VulnerabilitiesReportView({ data, scannerName }: Vulnerabilities
             for (let i = 0; i < vulnsArray.length; i++) {
                 const item = vulnsArray[i];
                 if (typeof item === "object" && item !== null) {
+                    const primaryInstance = Array.isArray(item.instances) && item.instances[0];
+                    const filePath =
+                        item.file ||
+                        item.path ||
+                        (primaryInstance && typeof primaryInstance.source === "string" ? primaryInstance.source : undefined);
+                    const lines = item.line
+                        ? [item.line]
+                        : primaryInstance && typeof primaryInstance.row === "number" && primaryInstance.row > 0
+                        ? [primaryInstance.row]
+                        : undefined;
+                    const snippet =
+                        item.snippet ||
+                        (primaryInstance && typeof primaryInstance.info === "string" && primaryInstance.info.trim().length > 0
+                            ? primaryInstance.info
+                            : undefined);
+
+                    const title =
+                        item.summary ||
+                        item.title ||
+                        item.name ||
+                        item.sig ||
+                        item.id ||
+                        `Finding #${i + 1}`;
+
+                    const description = resolveFindingDescription({
+                        description: item.description,
+                        synopsis: item.synopsis,
+                        sig: item.sig,
+                        summary: item.summary,
+                        solution: item.solution,
+                        instances: item.instances,
+                    });
+
                     list.push({
                         id: `vuln-${i}`,
-                        title: item.title || item.name || item.id || `Finding #${i + 1}`,
+                        title,
                         severity: normalizeSeverity(item.severity || item.level),
-                        description: item.description || item.details,
-                        filePath: item.file || item.path,
-                        lines: item.line ? [item.line] : undefined,
+                        description,
+                        sig: typeof item.sig === "string" ? item.sig : undefined,
+                        cvss3_score: typeof item.cvss3_score === "number" ? item.cvss3_score : undefined,
+                        cvss3_vector: typeof item.cvss3_vector === "string" ? item.cvss3_vector : undefined,
+                        solution: typeof item.solution === "string" ? item.solution : undefined,
+                        instances: Array.isArray(item.instances) ? item.instances : undefined,
+                        filePath,
+                        lines,
+                        snippet,
                         cwe: item.cwe,
                     });
                 }
@@ -167,7 +270,9 @@ export function VulnerabilitiesReportView({ data, scannerName }: Vulnerabilities
                 f.title.toLowerCase().includes(term) ||
                 (f.description && f.description.toLowerCase().includes(term)) ||
                 (f.filePath && f.filePath.toLowerCase().includes(term)) ||
-                (f.cwe && f.cwe.toLowerCase().includes(term))
+                (f.sig && f.sig.toLowerCase().includes(term)) ||
+                (f.cwe && f.cwe.toLowerCase().includes(term)) ||
+                (f.solution && f.solution.toLowerCase().includes(term))
             );
         });
     }, [findings, selectedSeverity, search]);
@@ -294,7 +399,7 @@ export function VulnerabilitiesReportView({ data, scannerName }: Vulnerabilities
                                 <div className="relative w-48 sm:w-64">
                                     <SearchIcon className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
                                     <Input
-                                        placeholder="Search title, file, CWE..."
+                                        placeholder="Search title, file, CWE, rule..."
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
                                         className="pl-8 h-9 text-xs"
@@ -341,7 +446,7 @@ export function VulnerabilitiesReportView({ data, scannerName }: Vulnerabilities
                                         className="p-4 rounded-lg border border-border/70 bg-card hover:bg-muted/30 transition-colors space-y-2.5"
                                     >
                                         <div className="flex items-start justify-between gap-3 flex-wrap">
-                                            <div className="space-y-1">
+                                            <div className="space-y-1 min-w-0">
                                                 <div className="flex items-center gap-2 flex-wrap">
                                                     <Badge
                                                         variant={badgeProps.variant}
@@ -349,6 +454,20 @@ export function VulnerabilitiesReportView({ data, scannerName }: Vulnerabilities
                                                     >
                                                         {badgeProps.label}
                                                     </Badge>
+                                                    {finding.sig && (
+                                                        <Badge variant="outline" className="font-mono text-[11px] text-muted-foreground border-border/80">
+                                                            {finding.sig}
+                                                        </Badge>
+                                                    )}
+                                                    {finding.cvss3_score !== undefined && (
+                                                        <Badge
+                                                            variant="outline"
+                                                            className="font-mono text-[11px] font-semibold border-amber-500/40 text-amber-600 dark:text-amber-400"
+                                                            title={finding.cvss3_vector || undefined}
+                                                        >
+                                                            CVSS {finding.cvss3_score.toFixed(1)}
+                                                        </Badge>
+                                                    )}
                                                     <h4 className="font-medium text-sm text-foreground">
                                                         {finding.title}
                                                     </h4>
@@ -370,25 +489,41 @@ export function VulnerabilitiesReportView({ data, scannerName }: Vulnerabilities
                                         </div>
 
                                         {finding.description && (
-                                            <p className="text-xs text-muted-foreground">
+                                            <p className="text-xs text-muted-foreground leading-relaxed">
                                                 {finding.description}
                                             </p>
                                         )}
 
+                                        {finding.solution && (
+                                            <div className="p-2.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-xs text-foreground space-y-1">
+                                                <div className="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                                                    <ShieldAlertIcon className="size-3.5 shrink-0" />
+                                                    Remediation / Solution
+                                                </div>
+                                                <p className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed">
+                                                    {finding.solution}
+                                                </p>
+                                            </div>
+                                        )}
+
                                         {finding.filePath && (
-                                            <div className="font-mono text-xs text-muted-foreground flex items-center gap-1.5 pt-1">
-                                                <FileCodeIcon className="size-3.5" />
-                                                <span className="text-foreground">{finding.filePath}</span>
+                                            <div className="font-mono text-xs text-muted-foreground flex items-center gap-1.5 pt-1 truncate">
+                                                <FileCodeIcon className="size-3.5 shrink-0" />
+                                                <span className="text-foreground truncate">{finding.filePath}</span>
                                                 {finding.lines && finding.lines.length > 0 && (
-                                                    <span>(lines: {finding.lines.join(", ")})</span>
+                                                    <span className="shrink-0">(lines: {finding.lines.join(", ")})</span>
                                                 )}
                                             </div>
                                         )}
 
                                         {finding.snippet && (
-                                            <pre className="p-2 rounded-md bg-muted/60 border border-border/60 font-mono text-xs text-foreground overflow-x-auto">
+                                            <pre className="p-2 rounded-md bg-muted/60 border border-border/60 font-mono text-xs text-foreground overflow-x-auto whitespace-pre-wrap">
                                                 {finding.snippet}
                                             </pre>
+                                        )}
+
+                                        {finding.instances && finding.instances.length > 1 && (
+                                            <FindingInstances instances={finding.instances} />
                                         )}
                                     </div>
                                 );

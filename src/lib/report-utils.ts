@@ -151,6 +151,94 @@ export function getSeverityBadgeProps(severity: NormalizedSeverity): {
             };
     }
 }
+/**
+ * Known signature contextual descriptions for static analysis scanners such as TrueSeeing.
+ * Used as high-quality fallbacks when scanners return null for description and synopsis.
+ */
+export const KNOWN_SIGNATURE_DESCRIPTIONS: Record<string, string> = {
+    "privacy-device-id":
+        "Potential privacy concern: application accesses sensitive device or hardware identifiers (e.g., Bluetooth MAC, IMEI, serial numbers, or Wi-Fi state) that can identify or track the device.",
+    "detect-obfuscator":
+        "Lack of code obfuscation: application binaries appear unobfuscated, leaving application logic, classes, and sensitive methods susceptible to decompilation and reverse-engineering.",
+    "security-log":
+        "Diagnostic and debug logging detected: logging statements (Log, PrintWriter, PrintStream) may expose sensitive runtime data, internal application state, or credentials in system logs.",
+    "detect-library":
+        "Third-party library detected: external dependencies, SDKs, or bundled utility libraries identified within the application package.",
+    "detect-url":
+        "Hardcoded URL, IP address, hostname, or URI path component detected in application bytecode or resources.",
+    "detect-reflection":
+        "Use of Java reflection: dynamic class loading, method invocation, or field access via reflection APIs detected, which can circumvent static checks or invoke restricted internal APIs.",
+    "manifest-open-permission":
+        "Application requests Android permissions in AndroidManifest.xml that control access to sensitive device resources or privacy-impacting features.",
+    "manifest-manip-activity":
+        "Exported activity detected in AndroidManifest.xml: activity can be invoked by external applications or system intents, expanding the application attack surface.",
+    "manifest-manip-backup":
+        "Application data backup allowed via Auto Backup (allowBackup is true or unset), which could expose application state to local backup extraction attacks.",
+    "security-file-write":
+        "Application opens files for writing on local storage (internal or external), which may be susceptible to directory traversal or unauthorized data overwrites if unconstrained.",
+};
+
+export interface FindingDescriptionFallbackOptions {
+    description?: string | null;
+    synopsis?: string | null;
+    sig?: string | null;
+    summary?: string | null;
+    solution?: string | null;
+    instances?: Array<{ info?: string | null; source?: string | null }> | null;
+}
+
+/**
+ * Resolves a human-readable description for a finding using an intelligent fallback cascade.
+ * Ensures findings never appear blank when scanners (e.g. TrueSeeing) omit explicit descriptions.
+ */
+export function resolveFindingDescription(options: FindingDescriptionFallbackOptions): string {
+    // 1. Direct description if present and non-empty
+    if (typeof options.description === "string" && options.description.trim().length > 0) {
+        return options.description.trim();
+    }
+
+    // 2. Synopsis if present and non-empty
+    if (typeof options.synopsis === "string" && options.synopsis.trim().length > 0) {
+        return options.synopsis.trim();
+    }
+
+    // 3. Known signature mapping
+    if (typeof options.sig === "string" && KNOWN_SIGNATURE_DESCRIPTIONS[options.sig]) {
+        return KNOWN_SIGNATURE_DESCRIPTIONS[options.sig];
+    }
+
+    // 4. Instances summary
+    if (Array.isArray(options.instances) && options.instances.length > 0) {
+        const samples = options.instances
+            .map((inst) => (inst.info && inst.info.trim()) || (inst.source && inst.source.trim()))
+            .filter((val): val is string => Boolean(val && val.length > 0))
+            .slice(0, 2);
+
+        if (samples.length > 0) {
+            const prefix = options.summary ? `${options.summary}: ` : "";
+            return `${prefix}${options.instances.length} instance(s) detected (${samples.join("; ")})`;
+        }
+    }
+
+    // 5. Solution fallback
+    if (typeof options.solution === "string" && options.solution.trim().length > 0) {
+        const firstLine = options.solution.trim().split("\n")[0];
+        return `Recommended remediation: ${firstLine}`;
+    }
+
+    // 6. Summary fallback
+    if (typeof options.summary === "string" && options.summary.trim().length > 0) {
+        return `${options.summary.trim()} detected during static analysis.`;
+    }
+
+    // 7. Signature generic fallback
+    if (typeof options.sig === "string" && options.sig.trim().length > 0) {
+        return `Issue identified by rule signature: ${options.sig.trim()}`;
+    }
+
+    return "No description provided by scanner.";
+}
+
 
 /**
  * TruffleHog finding representation
@@ -660,8 +748,48 @@ export function extractInterestingFindings(
                     reportDate,
                 });
             }
+        } else if (scannerUpper === "TRUESEEING" || Array.isArray(data.issues)) {
+            const issues = Array.isArray(data.issues) ? data.issues : [];
+            let count = 0;
+            for (let i = 0; i < issues.length; i++) {
+                if (count > 50) break;
+                const issue = issues[i];
+                if (typeof issue === "object" && issue !== null) {
+                    const rawSev = issue.severity || issue.level;
+                    const normSev = normalizeSeverity(rawSev);
+                    if (["critical", "high", "medium", "low"].includes(normSev)) {
+                        const title = issue.summary || issue.title || issue.sig || `Finding #${i + 1}`;
+                        const desc = resolveFindingDescription({
+                            description: issue.description,
+                            synopsis: issue.synopsis,
+                            sig: issue.sig,
+                            summary: issue.summary,
+                            solution: issue.solution,
+                            instances: issue.instances,
+                        });
+                        const primaryInst = Array.isArray(issue.instances) && issue.instances[0];
+                        const location = primaryInst?.source || undefined;
+
+                        findings.push({
+                            id: `${reportId}-trueseeing-${i}`,
+                            reportId,
+                            reportPk,
+                            scannerName: report.scannerName || "Trueseeing",
+                            severity: normSev,
+                            title,
+                            description: desc,
+                            location,
+                            appId,
+                            appFilename,
+                            firmwareId,
+                            reportDate,
+                        });
+                        count++;
+                    }
+                }
+            }
         } else {
-            // General static/dynamic scanners: MobSFScan, Super, Trueseeing, QuarkEngine, FlowDroid, Qark, Androwarn
+            // General static/dynamic scanners: MobSFScan, Super, QuarkEngine, FlowDroid, Qark, Androwarn
             const resultsObj = data.results || data.findings || data.vulnerabilities || (Array.isArray(data) ? null : data);
             if (resultsObj && typeof resultsObj === "object") {
                 let count = 0;

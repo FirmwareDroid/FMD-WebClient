@@ -8,6 +8,7 @@ import {
     normalizeSeverity,
     parseReportResults,
     sanitizeExternalUrl,
+    resolveFindingDescription,
 } from "./report-utils";
 
 describe("report-utils", () => {
@@ -60,6 +61,94 @@ describe("report-utils", () => {
             expect(normalizeSeverity("low")).toBe("low");
             expect(normalizeSeverity("info")).toBe("info");
             expect(normalizeSeverity("anything-else")).toBe("unknown");
+        });
+    });
+
+    describe("resolveFindingDescription", () => {
+        it("returns direct description when present", () => {
+            const desc = resolveFindingDescription({
+                description: "Application is debuggable",
+                synopsis: "Debug flag set",
+                sig: "security-log",
+            });
+            expect(desc).toBe("Application is debuggable");
+        });
+
+        it("falls back to synopsis when description is null or empty", () => {
+            const desc = resolveFindingDescription({
+                description: null,
+                synopsis: "Application data can be backed up and restored.",
+                sig: "manifest-manip-backup",
+            });
+            expect(desc).toBe("Application data can be backed up and restored.");
+        });
+
+        it("falls back to curated knowledge base for known TrueSeeing signatures", () => {
+            expect(
+                resolveFindingDescription({
+                    description: null,
+                    synopsis: null,
+                    sig: "privacy-device-id",
+                })
+            ).toContain("Potential privacy concern");
+
+            expect(
+                resolveFindingDescription({
+                    description: null,
+                    synopsis: null,
+                    sig: "detect-obfuscator",
+                })
+            ).toContain("Lack of code obfuscation");
+
+            expect(
+                resolveFindingDescription({
+                    description: null,
+                    synopsis: null,
+                    sig: "security-log",
+                })
+            ).toContain("Diagnostic and debug logging detected");
+        });
+
+        it("falls back to instances sample when signature is unknown", () => {
+            const desc = resolveFindingDescription({
+                description: null,
+                synopsis: null,
+                sig: "custom-sig-xyz",
+                summary: "Custom Check",
+                instances: [
+                    { info: "found matching pattern at row 42", source: "com/example/Test.java" },
+                    { info: "found matching pattern at row 88", source: "com/example/Test2.java" },
+                ],
+            });
+            expect(desc).toContain("Custom Check: 2 instance(s) detected");
+            expect(desc).toContain("found matching pattern at row 42");
+        });
+
+        it("falls back to solution when only solution is available", () => {
+            const desc = resolveFindingDescription({
+                description: null,
+                synopsis: null,
+                solution: "Set android:allowBackup to false in manifest.\nDetails here...",
+            });
+            expect(desc).toBe("Recommended remediation: Set android:allowBackup to false in manifest.");
+        });
+
+        it("falls back to summary and signature when nothing else is present", () => {
+            expect(
+                resolveFindingDescription({
+                    description: null,
+                    summary: "Unusual Export",
+                })
+            ).toBe("Unusual Export detected during static analysis.");
+
+            expect(
+                resolveFindingDescription({
+                    description: null,
+                    sig: "unknown-sig-999",
+                })
+            ).toBe("Issue identified by rule signature: unknown-sig-999");
+
+            expect(resolveFindingDescription({})).toBe("No description provided by scanner.");
         });
     });
 
@@ -305,6 +394,64 @@ describe("report-utils", () => {
             const medFindings = findings.filter(f => f.severity === "medium");
             expect(medFindings.some(f => f.title.includes("Unverified Secret"))).toBe(true);
             expect(medFindings.some(f => f.title.includes("Anti-Debug"))).toBe(true);
+        });
+
+        it("extracts findings from TrueSeeing reports with description fallbacks", () => {
+            const trueseeingReport = [
+                {
+                    pk: "report-ts-1",
+                    scannerName: "Trueseeing",
+                    results: JSON.stringify({
+                        app: { package: "com.example.app" },
+                        issues: [
+                            {
+                                no: 0,
+                                sig: "manifest-manip-backup",
+                                summary: "Manipulatable Backups",
+                                synopsis: "Application data can be backed up.",
+                                description: "Auto Backup feature makes app data subject to backup attack.",
+                                severity: "High",
+                                instances: [{ source: "AndroidManifest.xml" }],
+                            },
+                            {
+                                no: 1,
+                                sig: "privacy-device-id",
+                                summary: "Privacy Concerns",
+                                synopsis: null,
+                                description: null,
+                                severity: "Low",
+                                instances: [
+                                    {
+                                        info: "getting L2 address (Bluetooth)",
+                                        source: "Lcom/example/Adapter;->getAddress()Ljava/lang/String;",
+                                    },
+                                ],
+                            },
+                        ],
+                    }),
+                    androidAppIdReference: {
+                        pk: "app-ts-1",
+                        filename: "app.apk",
+                    },
+                },
+            ];
+
+            const findings = extractInterestingFindings(trueseeingReport);
+            expect(findings).toHaveLength(2);
+
+            // High severity issue
+            const highFinding = findings.find(f => f.severity === "high");
+            expect(highFinding).toBeDefined();
+            expect(highFinding?.title).toBe("Manipulatable Backups");
+            expect(highFinding?.description).toContain("Auto Backup feature");
+            expect(highFinding?.location).toBe("AndroidManifest.xml");
+
+            // Low severity issue with fallback description
+            const lowFinding = findings.find(f => f.severity === "low");
+            expect(lowFinding).toBeDefined();
+            expect(lowFinding?.title).toBe("Privacy Concerns");
+            expect(lowFinding?.description).toContain("Potential privacy concern");
+            expect(lowFinding?.location).toContain("Lcom/example/Adapter");
         });
 
         it("handles empty or null reports gracefully", () => {
