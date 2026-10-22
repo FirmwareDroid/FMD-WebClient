@@ -1,13 +1,17 @@
 import {BasePage} from "@/pages/base-page.tsx";
-import {useNavigate, useParams} from "react-router";
-import {useMemo} from "react";
-import {useQuery} from "@/lib/apollo-hooks";
+import {useNavigate, useParams, useSearchParams} from "react-router";
+import {useEffect, useMemo, useState} from "react";
+import {useMutation, useQuery} from "@/lib/apollo-hooks";
 import {
     FIRMWARE_ALL,
     GET_FIRMWARES_BY_OBJECT_IDS,
     SCAN_APKS_BY_FIRMWARE_OBJECT_IDS
 } from "@/components/graphql/firmware.graphql.ts";
+import {GET_FIRMWARE_APPS_WITH_CERTIFICATES} from "@/components/graphql/app.graphql.ts";
 import {GET_FIRMWARE_BUILD_PROPS} from "@/components/graphql/build-prop.graphql.ts";
+import {GET_FIRMWARE_REPORTS} from "@/components/graphql/report.graphql.ts";
+import {GET_RQ_JOB_LIST} from "@/components/graphql/rq-job.graphql.ts";
+import {useToastStore} from "@/stores/toast.ts";
 import {FirmwareAllFragment} from "@/__generated__/graphql.ts";
 import {useFragment as readFragment} from "@/__generated__";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
@@ -25,6 +29,8 @@ import {
     KeyIcon,
     LayersIcon,
     ServerIcon,
+    ShieldAlertIcon,
+    ShieldCheckIcon,
     SmartphoneIcon,
     TagIcon,
     XCircleIcon,
@@ -34,6 +40,7 @@ import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {Badge} from "@/components/ui/badge.tsx";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card.tsx";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs.tsx";
 import {ScanAppActionButton, ReimportFirmwareButton} from "@/components/data-table-action-columns/action-buttons.tsx";
 import {APPS_URL, FILES_URL, FIRMWARE_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
 import {useSetBreadcrumbTitle} from "@/lib/breadcrumb-store.ts";
@@ -41,9 +48,18 @@ import {formatDateTime} from "@/lib/date-utils.ts";
 import {downloadJsonFile, formatBytes} from "@/lib/format-utils.ts";
 import {CopyButton} from "@/components/ui/copy-button.tsx";
 import {BuildPropsCard} from "@/components/firmware/build-props-card.tsx";
-import { ExportFirmwareDataDialog } from "@/components/export/export-firmware-data-dialog.tsx";
-import { ExtractFirmwareFilesDialog } from "@/components/firmware/extract-firmware-files-dialog.tsx";
-import { FirmwareExtractionProgressBar } from "@/components/firmware/firmware-extraction-progress-bar.tsx";
+import {FirmwareAppMetadataOverview} from "@/components/firmware/firmware-app-metadata-overview.tsx";
+import {FirmwareSecurityOverview} from "@/components/firmware/firmware-security-overview.tsx";
+import {ExportFirmwareDataDialog} from "@/components/export/export-firmware-data-dialog.tsx";
+import {ExtractFirmwareFilesDialog} from "@/components/firmware/extract-firmware-files-dialog.tsx";
+import {FirmwareExtractionProgressBar} from "@/components/firmware/firmware-extraction-progress-bar.tsx";
+import {aggregateFirmwareAppMetadata} from "@/lib/app-metadata-utils.ts";
+import {extractBuildPropSecurityFindings} from "@/lib/build-prop-utils.ts";
+import {
+    aggregateFirmwareAppRisks,
+    extractInterestingFindings,
+    sortFindingsBySeverity,
+} from "@/lib/report-utils.ts";
 
 
 interface PartitionInfo {
@@ -56,6 +72,32 @@ interface PartitionInfo {
 export function FirmwarePage() {
     const {firmwareId} = useParams<{ firmwareId: string }>();
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // Strictly validate tab parameter against allowlist
+    const rawTab = searchParams.get("tab");
+    const activeTab: "overview" | "security" | "metadata" =
+        rawTab === "security"
+            ? "security"
+            : rawTab === "metadata"
+            ? "metadata"
+            : "overview";
+
+    const handleTabChange = (nextTab: string) => {
+        const validatedTab =
+            nextTab === "security"
+                ? "security"
+                : nextTab === "metadata"
+                ? "metadata"
+                : "overview";
+        const nextParams = new URLSearchParams(searchParams);
+        if (validatedTab === "overview") {
+            nextParams.delete("tab");
+        } else {
+            nextParams.set("tab", validatedTab);
+        }
+        setSearchParams(nextParams, {replace: true});
+    };
 
     const {
         loading: firmwaresLoading,
@@ -88,6 +130,123 @@ export function FirmwarePage() {
     const buildPropFiles = useMemo(() => {
         return (buildPropsData?.build_prop_file_id_list ?? []).filter(isNonNullish);
     }, [buildPropsData?.build_prop_file_id_list]);
+
+    const {
+        loading: reportsLoading,
+        data: reportsData,
+        error: reportsError,
+    } = useQuery(GET_FIRMWARE_REPORTS, {
+        variables: {firmwareId: firmwareHexId ?? ""},
+        skip: !firmwareHexId,
+        fetchPolicy: "cache-and-network",
+    });
+
+    const rawReports = useMemo(() => {
+        return (reportsData?.apk_scanner_report_list ?? []).filter(isNonNullish);
+    }, [reportsData?.apk_scanner_report_list]);
+
+    const {
+        loading: appsCertsLoading,
+        data: appsCertsData,
+        error: appsCertsError,
+        refetch: refetchAppsCerts,
+    } = useQuery(GET_FIRMWARE_APPS_WITH_CERTIFICATES, {
+        variables: {objectIds: convertIdToObjectId(firmwareId as string)},
+        skip: !firmwareId,
+        fetchPolicy: "cache-and-network",
+    });
+
+    const toast = useToastStore();
+    const [certScanJobIds, setCertScanJobIds] = useState<string[]>([]);
+    const [isSubmittingCertScan, setIsSubmittingCertScan] = useState(false);
+    const [scanFirmwareApks] = useMutation(SCAN_APKS_BY_FIRMWARE_OBJECT_IDS);
+
+    const {data: certScanJobsData} = useQuery(GET_RQ_JOB_LIST, {
+        variables: {queueName: "scanner", jobIds: certScanJobIds},
+        skip: certScanJobIds.length === 0,
+        pollInterval: 2000,
+        fetchPolicy: "cache-and-network",
+    });
+
+    useEffect(() => {
+        if (certScanJobIds.length === 0) return;
+        const trackedJobs = (certScanJobsData?.rq_job_list ?? []).filter(isNonNullish);
+        if (trackedJobs.length === 0) return;
+
+        const allDone = trackedJobs.every((job) => Boolean(job.isFinished || job.isFailed));
+        if (allDone) {
+            const anyFailed = trackedJobs.some((job) => Boolean(job.isFailed));
+            setCertScanJobIds([]);
+            void refetchAppsCerts();
+            if (anyFailed) {
+                toast.warning("Certificate extraction finished with one or more failed jobs.");
+            } else {
+                toast.success("Certificate extraction complete. App certificates updated.");
+            }
+        }
+    }, [certScanJobIds, certScanJobsData, refetchAppsCerts, toast]);
+
+    const isExtractingCertificates = isSubmittingCertScan || certScanJobIds.length > 0;
+
+    const handleExtractCertificates = async () => {
+        if (!firmwareHexId || isExtractingCertificates) return;
+        setIsSubmittingCertScan(true);
+        try {
+            const result = await scanFirmwareApks({
+                variables: {
+                    objectIds: [firmwareHexId],
+                    scannerName: "CERTIFICATE",
+                    queueName: "scanner",
+                },
+            });
+            const jobIds = (result.data?.createApkScanJob?.jobIdList ?? []).filter(isNonNullish);
+            if (jobIds.length > 0) {
+                setCertScanJobIds(jobIds);
+                toast.success("Fast certificate extraction started in background.");
+            } else {
+                void refetchAppsCerts();
+                toast.info("Certificate extraction triggered.");
+            }
+        } catch (err: any) {
+            const msg = err?.graphQLErrors?.[0]?.message || err?.message || "Failed to start certificate extraction";
+            toast.error(`Certificate extraction failed: ${msg}`);
+        } finally {
+            setIsSubmittingCertScan(false);
+        }
+    };
+
+    const firmwareAppsWithCerts = useMemo(() => {
+        return (appsCertsData?.android_firmware_connection?.edges ?? [])
+            .flatMap((fwEdge) => fwEdge?.node?.androidAppIdList?.edges ?? [])
+            .map((edge) => edge?.node)
+            .filter(isNonNullish);
+    }, [appsCertsData?.android_firmware_connection?.edges]);
+
+    const appMetadataAggregation = useMemo(() => {
+        return aggregateFirmwareAppMetadata(firmwareAppsWithCerts, rawReports as any);
+    }, [firmwareAppsWithCerts, rawReports]);
+
+    const scannerFindings = useMemo(() => {
+        return extractInterestingFindings(rawReports as any);
+    }, [rawReports]);
+
+    const buildPropFindings = useMemo(() => {
+        return extractBuildPropSecurityFindings(buildPropFiles, firmwareId);
+    }, [buildPropFiles, firmwareId]);
+
+    const allSecurityFindings = useMemo(() => {
+        return sortFindingsBySeverity([...buildPropFindings, ...scannerFindings]);
+    }, [buildPropFindings, scannerFindings]);
+
+    const appRisks = useMemo(() => {
+        return aggregateFirmwareAppRisks(rawReports as any, scannerFindings);
+    }, [rawReports, scannerFindings]);
+
+    const criticalHighCount = useMemo(() => {
+        return allSecurityFindings.filter(
+            (f) => f.severity === "critical" || f.severity === "high"
+        ).length;
+    }, [allSecurityFindings]);
 
     if (!firmwareId) {
         return (
@@ -155,13 +314,20 @@ export function FirmwarePage() {
         );
     }
 
-    // Safely parse partitionInfoDict
+    // Safely parse partitionInfoDict and strip prototype pollution keys
     let partitions: Record<string, PartitionInfo> = {};
     if (firmware.partitionInfoDict) {
         try {
-            partitions = typeof firmware.partitionInfoDict === "string"
+            const parsed = typeof firmware.partitionInfoDict === "string"
                 ? JSON.parse(firmware.partitionInfoDict)
                 : firmware.partitionInfoDict;
+            if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+                for (const [k, v] of Object.entries(parsed as Record<string, PartitionInfo>)) {
+                    if (k !== "__proto__" && k !== "constructor" && k !== "prototype") {
+                        partitions[k] = v;
+                    }
+                }
+            }
         } catch {
             partitions = {};
         }
@@ -300,344 +466,432 @@ export function FirmwarePage() {
                     }}
                 />
 
-                {/* KPI Metrics Summary Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card
-                        className="border-border/60 shadow-sm cursor-pointer hover:border-primary/50 transition-colors"
-                        onClick={() => void navigate(`${FIRMWARE_URL}/${encodeURIComponent(firmwareId)}${APPS_URL}`)}
-                    >
-                        <CardContent className="pt-4 space-y-1">
-                            <div className="flex items-center justify-between text-muted-foreground">
-                                <span className="text-xs font-semibold uppercase tracking-wider">Extracted Apps</span>
-                                <SmartphoneIcon className="size-4 text-primary" aria-hidden="true" />
-                            </div>
-                            <div className="text-2xl font-bold text-foreground">
-                                {totalExtractedApps.toLocaleString()}
-                            </div>
-                            <div className="flex items-center text-xs text-primary font-medium pt-1">
-                                <span>View all apps</span>
-                                <ArrowRightIcon className="size-3 ml-1" />
-                            </div>
-                        </CardContent>
-                    </Card>
+                {/* Firmware View Tabs: Overview, Security Issues & App Metadata */}
+                <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
+                    <TabsList className="bg-muted/80 p-1 border border-border/50">
+                        <TabsTrigger value="overview" className="gap-1.5">
+                            <LayersIcon className="size-4 text-primary" aria-hidden="true" />
+                            Overview
+                        </TabsTrigger>
+                        <TabsTrigger value="security" className="gap-1.5">
+                            {criticalHighCount > 0 ? (
+                                <ShieldAlertIcon className="size-4 text-rose-500" aria-hidden="true" />
+                            ) : (
+                                <ShieldCheckIcon className="size-4 text-primary" aria-hidden="true" />
+                            )}
+                            <span>Security Issues</span>
+                            <Badge
+                                variant={criticalHighCount > 0 ? "destructive" : "secondary"}
+                                className="ml-1 font-mono text-[11px] px-1.5 py-0"
+                            >
+                                {allSecurityFindings.length}
+                            </Badge>
+                        </TabsTrigger>
+                        <TabsTrigger value="metadata" className="gap-1.5">
+                            <KeyIcon className="size-4 text-primary" aria-hidden="true" />
+                            <span>App Metadata &amp; Certificates</span>
+                            <Badge
+                                variant="secondary"
+                                className="ml-1 font-mono text-[11px] px-1.5 py-0"
+                            >
+                                {appMetadataAggregation.totalApps || totalExtractedApps}
+                            </Badge>
+                        </TabsTrigger>
+                    </TabsList>
 
-                    <Card
-                        className="border-border/60 shadow-sm cursor-pointer hover:border-primary/50 transition-colors"
-                        onClick={() => void navigate(`${FIRMWARE_URL}/${encodeURIComponent(firmwareId)}${FILES_URL}`)}
-                    >
-                        <CardContent className="pt-4 space-y-1">
-                            <div className="flex items-center justify-between text-muted-foreground">
-                                <span className="text-xs font-semibold uppercase tracking-wider">Total Files</span>
-                                <FilesIcon className="size-4 text-primary" aria-hidden="true" />
-                            </div>
-                            <div className="text-2xl font-bold text-foreground">
-                                {totalExtractedFiles.toLocaleString()}
-                            </div>
-                            <div className="flex items-center text-xs text-primary font-medium pt-1">
-                                <span>Browse file system</span>
-                                <ArrowRightIcon className="size-3 ml-1" />
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <TabsContent value="overview" className="space-y-6">
+                        {/* KPI Metrics Summary Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                            <Card
+                                className="border-border/60 shadow-sm cursor-pointer hover:border-primary/50 transition-colors"
+                                onClick={() => void navigate(`${FIRMWARE_URL}/${encodeURIComponent(firmwareId)}${APPS_URL}`)}
+                            >
+                                <CardContent className="pt-4 space-y-1">
+                                    <div className="flex items-center justify-between text-muted-foreground">
+                                        <span className="text-xs font-semibold uppercase tracking-wider">Extracted Apps</span>
+                                        <SmartphoneIcon className="size-4 text-primary" aria-hidden="true" />
+                                    </div>
+                                    <div className="text-2xl font-bold text-foreground">
+                                        {totalExtractedApps.toLocaleString()}
+                                    </div>
+                                    <div className="flex items-center text-xs text-primary font-medium pt-1">
+                                        <span>View all apps</span>
+                                        <ArrowRightIcon className="size-3 ml-1" />
+                                    </div>
+                                </CardContent>
+                            </Card>
 
-                    <Card className="border-border/60 shadow-sm">
-                        <CardContent className="pt-4 space-y-1">
-                            <div className="flex items-center justify-between text-muted-foreground">
-                                <span className="text-xs font-semibold uppercase tracking-wider">Active Partitions</span>
-                                <LayersIcon className="size-4 text-primary" aria-hidden="true" />
-                            </div>
-                            <div className="text-2xl font-bold text-foreground">
-                                {successfulPartitions.length}
-                                <span className="text-xs font-normal text-muted-foreground ml-1.5">
-                                    of {partitionEntries.length} total
-                                </span>
-                            </div>
-                            <div className="text-xs text-muted-foreground pt-1 truncate">
-                                {successfulPartitions.map(([name]) => name).join(", ") || "None"}
-                            </div>
-                        </CardContent>
-                    </Card>
+                            <Card
+                                className="border-border/60 shadow-sm cursor-pointer hover:border-primary/50 transition-colors"
+                                onClick={() => void navigate(`${FIRMWARE_URL}/${encodeURIComponent(firmwareId)}${FILES_URL}`)}
+                            >
+                                <CardContent className="pt-4 space-y-1">
+                                    <div className="flex items-center justify-between text-muted-foreground">
+                                        <span className="text-xs font-semibold uppercase tracking-wider">Total Files</span>
+                                        <FilesIcon className="size-4 text-primary" aria-hidden="true" />
+                                    </div>
+                                    <div className="text-2xl font-bold text-foreground">
+                                        {totalExtractedFiles.toLocaleString()}
+                                    </div>
+                                    <div className="flex items-center text-xs text-primary font-medium pt-1">
+                                        <span>Browse file system</span>
+                                        <ArrowRightIcon className="size-3 ml-1" />
+                                    </div>
+                                </CardContent>
+                            </Card>
 
-                    <Card className="border-border/60 shadow-sm">
-                        <CardContent className="pt-4 space-y-1">
-                            <div className="flex items-center justify-between text-muted-foreground">
-                                <span className="text-xs font-semibold uppercase tracking-wider">OS Platform</span>
-                                <CpuIcon className="size-4 text-primary" aria-hidden="true" />
-                            </div>
-                            <div className="text-2xl font-bold text-foreground truncate">
-                                {firmware.osVendor || "Android"}
-                            </div>
-                            <div className="text-xs text-muted-foreground pt-1">
-                                {firmware.versionDetected ? `Version ${firmware.versionDetected}` : "Version undetected"}
-                                {totalBuildProps > 0 && ` (${totalBuildProps} build.prop)`}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+                            <Card
+                                className="border-border/60 shadow-sm cursor-pointer hover:border-primary/50 transition-colors"
+                                onClick={() => handleTabChange("security")}
+                            >
+                                <CardContent className="pt-4 space-y-1">
+                                    <div className="flex items-center justify-between text-muted-foreground">
+                                        <span className="text-xs font-semibold uppercase tracking-wider">Security Issues</span>
+                                        {criticalHighCount > 0 ? (
+                                            <ShieldAlertIcon className="size-4 text-rose-500" aria-hidden="true" />
+                                        ) : (
+                                            <ShieldCheckIcon className="size-4 text-emerald-500" aria-hidden="true" />
+                                        )}
+                                    </div>
+                                    <div className="text-2xl font-bold text-foreground">
+                                        {allSecurityFindings.length.toLocaleString()}
+                                    </div>
+                                    <div className="flex items-center text-xs text-primary font-medium pt-1">
+                                        <span>
+                                            {criticalHighCount > 0
+                                                ? `${criticalHighCount} high severity`
+                                                : "View security overview"}
+                                        </span>
+                                        <ArrowRightIcon className="size-3 ml-1" />
+                                    </div>
+                                </CardContent>
+                            </Card>
 
-                {/* Build Properties & Platform Specs */}
-                <BuildPropsCard
-                    buildPropFiles={buildPropFiles}
-                    loading={buildPropsLoading}
-                />
+                            <Card className="border-border/60 shadow-sm">
+                                <CardContent className="pt-4 space-y-1">
+                                    <div className="flex items-center justify-between text-muted-foreground">
+                                        <span className="text-xs font-semibold uppercase tracking-wider">Active Partitions</span>
+                                        <LayersIcon className="size-4 text-primary" aria-hidden="true" />
+                                    </div>
+                                    <div className="text-2xl font-bold text-foreground">
+                                        {successfulPartitions.length}
+                                        <span className="text-xs font-normal text-muted-foreground ml-1.5">
+                                            of {partitionEntries.length} total
+                                        </span>
+                                    </div>
+                                    <div className="text-xs text-muted-foreground pt-1 truncate">
+                                        {successfulPartitions.map(([name]) => name).join(", ") || "None"}
+                                    </div>
+                                </CardContent>
+                            </Card>
 
-                {/* Partition Breakdown */}
-                {partitionEntries.length > 0 && (
-                    <Card className="border-border/60 shadow-sm">
-                        <CardHeader className="pb-3 border-b border-border/40">
-                            <CardTitle className="text-base font-semibold flex items-center gap-2">
-                                <LayersIcon className="size-4 text-primary" aria-hidden="true" />
-                                Partition Extraction Details
-                            </CardTitle>
-                            <CardDescription>
-                                Overview of firmware partitions and resources extracted during unbundling.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="pt-4">
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-sm text-left border-collapse">
-                                    <thead>
-                                        <tr className="border-b border-border/60 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                            <th className="py-2.5 px-3">Partition</th>
-                                            <th className="py-2.5 px-3">Status</th>
-                                            <th className="py-2.5 px-3 text-right">Files</th>
-                                            <th className="py-2.5 px-3 text-right">APKs</th>
-                                            <th className="py-2.5 px-3 text-right">Build Properties</th>
-                                            <th className="py-2.5 px-3 text-right">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-border/40">
-                                        {partitionEntries.map(([name, data]) => {
-                                            const isSuccess = Boolean(data?.is_import_success);
-                                            const fileCount = data?.firmware_file_count ?? 0;
-                                            const appCount = data?.android_app_count ?? 0;
-                                            const propCount = data?.build_prop_count ?? 0;
+                            <Card className="border-border/60 shadow-sm">
+                                <CardContent className="pt-4 space-y-1">
+                                    <div className="flex items-center justify-between text-muted-foreground">
+                                        <span className="text-xs font-semibold uppercase tracking-wider">OS Platform</span>
+                                        <CpuIcon className="size-4 text-primary" aria-hidden="true" />
+                                    </div>
+                                    <div className="text-2xl font-bold text-foreground truncate">
+                                        {firmware.osVendor || "Android"}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground pt-1">
+                                        {firmware.versionDetected ? `Version ${firmware.versionDetected}` : "Version undetected"}
+                                        {totalBuildProps > 0 && ` (${totalBuildProps} build.prop)`}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
 
-                                            return (
-                                                <tr key={name} className="hover:bg-muted/30 transition-colors">
-                                                    <td className="py-2.5 px-3 font-mono font-medium text-foreground">
-                                                        <Badge variant="outline" className="font-mono text-xs">
-                                                            {name}
-                                                        </Badge>
-                                                    </td>
-                                                    <td className="py-2.5 px-3">
-                                                        {isSuccess ? (
-                                                            <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                                                                <CheckCircle2Icon className="size-3.5" />
-                                                                Extracted
-                                                            </span>
-                                                        ) : (
-                                                            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                                                                <XCircleIcon className="size-3.5" />
-                                                                Skipped / Empty
-                                                            </span>
-                                                        )}
-                                                    </td>
-                                                    <td className="py-2.5 px-3 text-right font-medium text-foreground">
-                                                        {fileCount.toLocaleString()}
-                                                    </td>
-                                                    <td className="py-2.5 px-3 text-right">
-                                                        {appCount > 0 ? (
-                                                            <Badge variant="secondary" className="font-mono text-xs">
-                                                                {appCount} APKs
-                                                            </Badge>
-                                                        ) : (
-                                                            <span className="text-muted-foreground text-xs">0</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="py-2.5 px-3 text-right text-xs text-muted-foreground">
-                                                        {propCount > 0 ? `${propCount} prop` : "—"}
-                                                    </td>
-                                                    <td className="py-2.5 px-3 text-right">
-                                                        {isSuccess && (
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-7 text-xs text-primary hover:text-primary"
-                                                                onClick={() => {
-                                                                    void navigate(`${FIRMWARE_URL}/${encodeURIComponent(firmwareId)}${FILES_URL}`);
-                                                                }}
-                                                            >
-                                                                Browse
-                                                            </Button>
-                                                        )}
-                                                    </td>
+                        {/* Build Properties & Platform Specs */}
+                        <BuildPropsCard
+                            buildPropFiles={buildPropFiles}
+                            loading={buildPropsLoading}
+                        />
+
+                        {/* Partition Breakdown */}
+                        {partitionEntries.length > 0 && (
+                            <Card className="border-border/60 shadow-sm">
+                                <CardHeader className="pb-3 border-b border-border/40">
+                                    <CardTitle className="text-base font-semibold flex items-center gap-2">
+                                        <LayersIcon className="size-4 text-primary" aria-hidden="true" />
+                                        Partition Extraction Details
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Overview of firmware partitions and resources extracted during unbundling.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="pt-4">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-sm text-left border-collapse">
+                                            <thead>
+                                                <tr className="border-b border-border/60 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                                    <th className="py-2.5 px-3">Partition</th>
+                                                    <th className="py-2.5 px-3">Status</th>
+                                                    <th className="py-2.5 px-3 text-right">Files</th>
+                                                    <th className="py-2.5 px-3 text-right">APKs</th>
+                                                    <th className="py-2.5 px-3 text-right">Build Properties</th>
+                                                    <th className="py-2.5 px-3 text-right">Action</th>
                                                 </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
+                                            </thead>
+                                            <tbody className="divide-y divide-border/40">
+                                                {partitionEntries.map(([name, data]) => {
+                                                    const isSuccess = Boolean(data?.is_import_success);
+                                                    const fileCount = data?.firmware_file_count ?? 0;
+                                                    const appCount = data?.android_app_count ?? 0;
+                                                    const propCount = data?.build_prop_count ?? 0;
 
-                {/* Firmware Details & Storage Paths */}
-                <Card className="border-border/60 shadow-sm">
-                    <CardHeader className="pb-3 border-b border-border/40">
-                        <CardTitle className="text-base font-semibold flex items-center gap-2">
-                            <FolderTreeIcon className="size-4 text-primary" aria-hidden="true" />
-                            Firmware Information & Storage
-                        </CardTitle>
-                        <CardDescription>
-                            File attributes, disk storage locations, and build file references.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        {firmware.pk && (
-                            <div className="space-y-1 md:col-span-2">
-                                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                                    <KeyIcon className="size-3.5" aria-hidden="true" /> MongoDB ObjectId
-                                </span>
-                                <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
-                                    <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
-                                        {firmware.pk}
-                                    </code>
-                                    <CopyButton value={firmware.pk} label="Copy firmware ObjectId" />
-                                </div>
-                            </div>
+                                                    return (
+                                                        <tr key={name} className="hover:bg-muted/30 transition-colors">
+                                                            <td className="py-2.5 px-3 font-mono font-medium text-foreground">
+                                                                <Badge variant="outline" className="font-mono text-xs">
+                                                                    {name}
+                                                                </Badge>
+                                                            </td>
+                                                            <td className="py-2.5 px-3">
+                                                                {isSuccess ? (
+                                                                    <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                                                                        <CheckCircle2Icon className="size-3.5" />
+                                                                        Extracted
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                                                                        <XCircleIcon className="size-3.5" />
+                                                                        Skipped / Empty
+                                                                    </span>
+                                                                )}
+                                                            </td>
+                                                            <td className="py-2.5 px-3 text-right font-medium text-foreground">
+                                                                {fileCount.toLocaleString()}
+                                                            </td>
+                                                            <td className="py-2.5 px-3 text-right">
+                                                                {appCount > 0 ? (
+                                                                    <Badge variant="secondary" className="font-mono text-xs">
+                                                                        {appCount} APKs
+                                                                    </Badge>
+                                                                ) : (
+                                                                    <span className="text-muted-foreground text-xs">0</span>
+                                                                )}
+                                                            </td>
+                                                            <td className="py-2.5 px-3 text-right text-xs text-muted-foreground">
+                                                                {propCount > 0 ? `${propCount} prop` : "—"}
+                                                            </td>
+                                                            <td className="py-2.5 px-3 text-right">
+                                                                {isSuccess && (
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        className="h-7 text-xs text-primary hover:text-primary"
+                                                                        onClick={() => {
+                                                                            void navigate(`${FIRMWARE_URL}/${encodeURIComponent(firmwareId)}${FILES_URL}`);
+                                                                        }}
+                                                                    >
+                                                                        Browse
+                                                                    </Button>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         )}
-                        <div className="space-y-1">
-                            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                                <HardDriveIcon className="size-3.5" aria-hidden="true" /> File Size
-                            </span>
-                            <div className="font-medium text-foreground">
-                                {firmware.fileSizeBytes !== null && firmware.fileSizeBytes !== undefined ? (
-                                    <>
-                                        <span title={`${firmware.fileSizeBytes.toLocaleString()} bytes`}>
-                                            {formatBytes(firmware.fileSizeBytes)}
+
+                        {/* Firmware Details & Storage Paths */}
+                        <Card className="border-border/60 shadow-sm">
+                            <CardHeader className="pb-3 border-b border-border/40">
+                                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                                    <FolderTreeIcon className="size-4 text-primary" aria-hidden="true" />
+                                    Firmware Information & Storage
+                                </CardTitle>
+                                <CardDescription>
+                                    File attributes, disk storage locations, and build file references.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                {firmware.pk && (
+                                    <div className="space-y-1 md:col-span-2">
+                                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                                            <KeyIcon className="size-3.5" aria-hidden="true" /> MongoDB ObjectId
                                         </span>
-                                        <span className="text-xs text-muted-foreground ml-2">
-                                            ({firmware.fileSizeBytes.toLocaleString()} bytes)
+                                        <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
+                                            <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
+                                                {firmware.pk}
+                                            </code>
+                                            <CopyButton value={firmware.pk} label="Copy firmware ObjectId" />
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="space-y-1">
+                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                                        <HardDriveIcon className="size-3.5" aria-hidden="true" /> File Size
+                                    </span>
+                                    <div className="font-medium text-foreground">
+                                        {firmware.fileSizeBytes !== null && firmware.fileSizeBytes !== undefined ? (
+                                            <>
+                                                <span title={`${firmware.fileSizeBytes.toLocaleString()} bytes`}>
+                                                    {formatBytes(firmware.fileSizeBytes)}
+                                                </span>
+                                                <span className="text-xs text-muted-foreground ml-2">
+                                                    ({firmware.fileSizeBytes.toLocaleString()} bytes)
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <span className="text-muted-foreground">—</span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                                        <CalendarIcon className="size-3.5" aria-hidden="true" /> Indexed Date
+                                    </span>
+                                    <div className="font-medium text-foreground">
+                                        <span title={firmware.indexedDate ?? undefined}>
+                                            {formatDateTime(firmware.indexedDate)}
                                         </span>
-                                    </>
-                                ) : (
-                                    <span className="text-muted-foreground">—</span>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="space-y-1">
-                            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                                <CalendarIcon className="size-3.5" aria-hidden="true" /> Indexed Date
-                            </span>
-                            <div className="font-medium text-foreground">
-                                <span title={firmware.indexedDate ?? undefined}>
-                                    {formatDateTime(firmware.indexedDate)}
-                                </span>
-                            </div>
-                        </div>
-
-                        {firmware.originalFilename && firmware.originalFilename !== firmware.filename && (
-                            <div className="space-y-1 md:col-span-2">
-                                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                    Original Archive Filename
-                                </span>
-                                <div className="text-sm text-foreground break-all">
-                                    {firmware.originalFilename}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
 
-                        <div className="space-y-1 md:col-span-2">
-                            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                Internal Filename / Hash
-                            </span>
-                            <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
-                                <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
-                                    {firmware.filename || "—"}
-                                </code>
-                                {firmware.filename && <CopyButton value={firmware.filename} label="Copy internal filename" />}
-                            </div>
-                        </div>
-
-                        <div className="space-y-1 md:col-span-2">
-                            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                Relative Store Path
-                            </span>
-                            <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
-                                <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
-                                    {firmware.relativeStorePath || "—"}
-                                </code>
-                                {firmware.relativeStorePath && (
-                                    <CopyButton value={firmware.relativeStorePath} label="Copy relative store path" />
+                                {firmware.originalFilename && firmware.originalFilename !== firmware.filename && (
+                                    <div className="space-y-1 md:col-span-2">
+                                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                            Original Archive Filename
+                                        </span>
+                                        <div className="text-sm text-foreground break-all">
+                                            {firmware.originalFilename}
+                                        </div>
+                                    </div>
                                 )}
-                            </div>
-                        </div>
 
-                        <div className="space-y-1 md:col-span-2">
-                            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                Absolute Store Path
-                            </span>
-                            <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
-                                <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
-                                    {firmware.absoluteStorePath || "—"}
-                                </code>
-                                {firmware.absoluteStorePath && (
-                                    <CopyButton value={firmware.absoluteStorePath} label="Copy absolute store path" />
-                                )}
-                            </div>
-                        </div>
-
-                        {firmware.aecsBuildFilePath && (
-                            <div className="space-y-1 md:col-span-2">
-                                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                    AECS Build File
-                                </span>
-                                <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
-                                    <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
-                                        {firmware.aecsBuildFilePath}
-                                    </code>
-                                    <CopyButton value={firmware.aecsBuildFilePath} label="Copy AECS build path" />
+                                <div className="space-y-1 md:col-span-2">
+                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                        Internal Filename / Hash
+                                    </span>
+                                    <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
+                                        <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
+                                            {firmware.filename || "—"}
+                                        </code>
+                                        {firmware.filename && <CopyButton value={firmware.filename} label="Copy internal filename" />}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
 
-                {/* Cryptographic Hashes & Checksums */}
-                <Card className="border-border/60 shadow-sm">
-                    <CardHeader className="pb-3 border-b border-border/40">
-                        <CardTitle className="text-base font-semibold flex items-center gap-2">
-                            <FingerprintIcon className="size-4 text-primary" aria-hidden="true" />
-                            Cryptographic Integrity & Hashes
-                        </CardTitle>
-                        <CardDescription>
-                            Cryptographic checksums for verifying firmware integrity and tracking threat intelligence signatures.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-4 space-y-3">
-                        <div className="space-y-1">
-                            <span className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">SHA-256</span>
-                            <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
-                                <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
-                                    {firmware.sha256 || "—"}
-                                </code>
-                                {firmware.sha256 && <CopyButton value={firmware.sha256} label="Copy SHA-256" />}
-                            </div>
-                        </div>
+                                <div className="space-y-1 md:col-span-2">
+                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                        Relative Store Path
+                                    </span>
+                                    <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
+                                        <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
+                                            {firmware.relativeStorePath || "—"}
+                                        </code>
+                                        {firmware.relativeStorePath && (
+                                            <CopyButton value={firmware.relativeStorePath} label="Copy relative store path" />
+                                        )}
+                                    </div>
+                                </div>
 
-                        <div className="space-y-1">
-                            <span className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">SHA-1</span>
-                            <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
-                                <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
-                                    {firmware.sha1 || "—"}
-                                </code>
-                                {firmware.sha1 && <CopyButton value={firmware.sha1} label="Copy SHA-1" />}
-                            </div>
-                        </div>
+                                <div className="space-y-1 md:col-span-2">
+                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                        Absolute Store Path
+                                    </span>
+                                    <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
+                                        <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
+                                            {firmware.absoluteStorePath || "—"}
+                                        </code>
+                                        {firmware.absoluteStorePath && (
+                                            <CopyButton value={firmware.absoluteStorePath} label="Copy absolute store path" />
+                                        )}
+                                    </div>
+                                </div>
 
-                        <div className="space-y-1">
-                            <span className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">MD5</span>
-                            <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
-                                <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
-                                    {firmware.md5 || "—"}
-                                </code>
-                                {firmware.md5 && <CopyButton value={firmware.md5} label="Copy MD5" />}
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                                {firmware.aecsBuildFilePath && (
+                                    <div className="space-y-1 md:col-span-2">
+                                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                            AECS Build File
+                                        </span>
+                                        <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
+                                            <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
+                                                {firmware.aecsBuildFilePath}
+                                            </code>
+                                            <CopyButton value={firmware.aecsBuildFilePath} label="Copy AECS build path" />
+                                        </div>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        {/* Cryptographic Hashes & Checksums */}
+                        <Card className="border-border/60 shadow-sm">
+                            <CardHeader className="pb-3 border-b border-border/40">
+                                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                                    <FingerprintIcon className="size-4 text-primary" aria-hidden="true" />
+                                    Cryptographic Integrity & Hashes
+                                </CardTitle>
+                                <CardDescription>
+                                    Cryptographic checksums for verifying firmware integrity and tracking threat intelligence signatures.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="pt-4 space-y-3">
+                                <div className="space-y-1">
+                                    <span className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">SHA-256</span>
+                                    <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
+                                        <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
+                                            {firmware.sha256 || "—"}
+                                        </code>
+                                        {firmware.sha256 && <CopyButton value={firmware.sha256} label="Copy SHA-256" />}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <span className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">SHA-1</span>
+                                    <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
+                                        <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
+                                            {firmware.sha1 || "—"}
+                                        </code>
+                                        {firmware.sha1 && <CopyButton value={firmware.sha1} label="Copy SHA-1" />}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <span className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">MD5</span>
+                                    <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
+                                        <code className="font-mono text-xs text-foreground break-all flex-1 select-all">
+                                            {firmware.md5 || "—"}
+                                        </code>
+                                        {firmware.md5 && <CopyButton value={firmware.md5} label="Copy MD5" />}
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="security">
+                        <FirmwareSecurityOverview
+                            firmwareId={firmwareId}
+                            totalExtractedApps={totalExtractedApps}
+                            reportsCount={rawReports.length}
+                            findings={allSecurityFindings}
+                            appRisks={appRisks}
+                            loading={reportsLoading || buildPropsLoading}
+                            error={reportsError}
+                        />
+                    </TabsContent>
+
+                    <TabsContent value="metadata">
+                        <FirmwareAppMetadataOverview
+                            firmwareId={firmwareId}
+                            aggregation={appMetadataAggregation}
+                            loading={appsCertsLoading || reportsLoading}
+                            error={appsCertsError || reportsError}
+                            onExtractCertificates={() => {
+                                void handleExtractCertificates();
+                            }}
+                            isExtractingCertificates={isExtractingCertificates}
+                        />
+                    </TabsContent>
+                </Tabs>
             </div>
         </BasePage>
     );

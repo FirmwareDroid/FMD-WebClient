@@ -1,8 +1,9 @@
 import type {ColumnDef} from "@tanstack/react-table";
-import {useNavigate} from "react-router";
+import {useLocation, useNavigate} from "react-router";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
 import {ActionButton} from "@/components/data-table-action-columns/action-buttons.tsx";
 import {APPS_URL, FIRMWARE_URL, REPORTS_URL} from "@/components/ui/sidebar/app-sidebar.tsx";
+import {isSafeInternalReturnPath} from "@/lib/report-utils.ts";
 import {EyeIcon} from "lucide-react";
 
 type WithIdAndAppIdAndFirmwareId = {
@@ -32,10 +33,14 @@ export function buildViewReportColumn<T extends WithIdAndAppIdAndFirmwareId>(): 
                 }
                 // eslint-disable-next-line react-hooks/rules-of-hooks
                 const navigate = useNavigate();
+                // eslint-disable-next-line react-hooks/rules-of-hooks
+                const location = useLocation();
                 const reportId = row.original.id;
                 const appId = row.original.androidAppIdReference.id;
                 const firmwareId = row.original.androidAppIdReference.firmwareIdReference?.id;
                 const scannerName = row.original.scannerName ?? "report";
+                const currentReturnPath = `${location.pathname}${location.search}`;
+                const safeReturnTo = isSafeInternalReturnPath(currentReturnPath) ? currentReturnPath : undefined;
 
                 return (
                     <>
@@ -44,7 +49,12 @@ export function buildViewReportColumn<T extends WithIdAndAppIdAndFirmwareId>(): 
                                 <TooltipTrigger asChild>
                                     <ActionButton
                                         variant="outline"
-                                        onClick={() => void navigate(`${FIRMWARE_URL}/${encodeURIComponent(firmwareId)}${APPS_URL}/${encodeURIComponent(appId)}${REPORTS_URL}/${encodeURIComponent(scannerName)}-${encodeURIComponent(reportId)}`)}
+                                        onClick={() => void navigate(
+                                            `${FIRMWARE_URL}/${encodeURIComponent(firmwareId)}${APPS_URL}/${encodeURIComponent(appId)}${REPORTS_URL}/${encodeURIComponent(scannerName)}-${encodeURIComponent(reportId)}`,
+                                            safeReturnTo
+                                                ? { state: { returnTo: safeReturnTo, returnLabel: "Back to Last View" } }
+                                                : undefined
+                                        )}
                                     >
                                         <EyeIcon className="size-5"/>
                                     </ActionButton>

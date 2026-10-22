@@ -1,14 +1,21 @@
 import { describe, expect, it } from "vitest";
 import {
+    aggregateFirmwareAppRisks,
+    classifyFindingCategory,
     extractApkidFindings,
     extractApkleaksFindings,
     extractExodusFindings,
     extractInterestingFindings,
     extractTruffleHogFindings,
+    getFindingCategoryMeta,
+    isSafeInternalReturnPath,
+    isSafeRouteId,
+    isSafeScannerName,
     normalizeSeverity,
     parseReportResults,
     sanitizeExternalUrl,
     resolveFindingDescription,
+    sortFindingsBySeverity,
 } from "./report-utils";
 
 describe("report-utils", () => {
@@ -379,14 +386,13 @@ describe("report-utils", () => {
             const findings = extractInterestingFindings(reports);
             expect(findings.length).toBeGreaterThanOrEqual(4);
 
-            // Verified secret must be critical and ranked first
-            expect(findings[0].severity).toBe("critical");
-            expect(findings[0].title).toContain("Verified Secret: AWS");
-            expect(findings[0].location).toBe("src/config.json:12");
+            // Verified secret must be high severity and ranked among high items
+            expect(findings[0].severity).toBe("high");
+            expect(findings.some(f => f.title.includes("Verified Secret: AWS") && f.location === "src/config.json:12")).toBe(true);
 
-            // High severity items (APKLeaks, APKiD packer, MobSF high)
+            // High severity items (TruffleHog verified secret, APKLeaks, APKiD packer, MobSF high)
             const highFindings = findings.filter(f => f.severity === "high");
-            expect(highFindings.length).toBeGreaterThanOrEqual(2);
+            expect(highFindings.length).toBeGreaterThanOrEqual(3);
             expect(highFindings.some(f => f.title.includes("Exposed Pattern"))).toBe(true);
             expect(highFindings.some(f => f.title.includes("Packer Detected"))).toBe(true);
 
@@ -445,6 +451,9 @@ describe("report-utils", () => {
             expect(highFinding?.title).toBe("Manipulatable Backups");
             expect(highFinding?.description).toContain("Auto Backup feature");
             expect(highFinding?.location).toBe("AndroidManifest.xml");
+            expect(highFinding?.category).toBe("m8-security-misconfiguration");
+            expect(highFinding?.cwe).toBe("CWE-16");
+            expect(highFinding?.masvs).toBe("MASVS-PLATFORM");
 
             // Low severity issue with fallback description
             const lowFinding = findings.find(f => f.severity === "low");
@@ -452,6 +461,88 @@ describe("report-utils", () => {
             expect(lowFinding?.title).toBe("Privacy Concerns");
             expect(lowFinding?.description).toContain("Potential privacy concern");
             expect(lowFinding?.location).toContain("Lcom/example/Adapter");
+            expect(lowFinding?.category).toBe("m6-privacy-controls");
+            expect(lowFinding?.cwe).toBe("CWE-359");
+            expect(lowFinding?.masvs).toBe("MASVS-PRIVACY");
+        });
+
+        it("classifies security finding categories across OWASP Mobile Top 10 (2024), MITRE CWE, and MASVS", () => {
+            expect(classifyFindingCategory({ scannerName: "build.prop" })).toBe("m8-security-misconfiguration");
+            expect(
+                classifyFindingCategory({ scannerName: "build.prop", title: "Unauthenticated ADB (ro.adb.secure=0)" })
+            ).toBe("m3-authn-authz");
+            expect(classifyFindingCategory({ scannerName: "TruffleHog" })).toBe("m1-credential-usage");
+            expect(classifyFindingCategory({ scannerName: "APKLeaks" })).toBe("m1-credential-usage");
+            expect(classifyFindingCategory({ scannerName: "APKiD" })).toBe("m7-binary-protections");
+            expect(classifyFindingCategory({ scannerName: "Exodus" })).toBe("m6-privacy-controls");
+            expect(classifyFindingCategory({ scannerName: "VirusTotal" })).toBe("m2-supply-chain");
+            expect(classifyFindingCategory({ scannerName: "QuarkEngine" })).toBe("m2-supply-chain");
+
+            // Explicit MITRE CWE and OWASP MASVS mapping
+            expect(
+                classifyFindingCategory({
+                    scannerName: "MobSFScan",
+                    cwe: "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+                })
+            ).toBe("m10-insufficient-cryptography");
+            expect(
+                classifyFindingCategory({
+                    scannerName: "MobSFScan",
+                    cwe: "CWE-319: Cleartext Transmission of Sensitive Information",
+                })
+            ).toBe("m5-insecure-communication");
+            expect(
+                classifyFindingCategory({
+                    scannerName: "MobSFScan",
+                    masvs: "MASVS-STORAGE",
+                })
+            ).toBe("m9-insecure-data-storage");
+            expect(
+                classifyFindingCategory({
+                    scannerName: "MobSFScan",
+                    owaspMobile: "M5: Insufficient Cryptography",
+                })
+            ).toBe("m10-insufficient-cryptography");
+
+            // Rule/title-based classification for static scanners
+            expect(
+                classifyFindingCategory({
+                    scannerName: "Trueseeing",
+                    ruleId: "detect-obfuscator",
+                    title: "Lack of obfuscation",
+                })
+            ).toBe("m7-binary-protections");
+            expect(
+                classifyFindingCategory({
+                    scannerName: "Trueseeing",
+                    ruleId: "manifest-manip-activity",
+                    title: "Exported Activity",
+                })
+            ).toBe("m3-authn-authz");
+            expect(
+                classifyFindingCategory({
+                    scannerName: "MobSFScan",
+                    ruleId: "hardcoded_api_key",
+                    title: "Hardcoded API key in source",
+                })
+            ).toBe("m1-credential-usage");
+            expect(
+                classifyFindingCategory({
+                    scannerName: "MobSFScan",
+                    ruleId: "sql_injection",
+                    title: "Raw SQL query execution",
+                })
+            ).toBe("m4-input-output-validation");
+
+            expect(getFindingCategoryMeta("m8-security-misconfiguration").label).toBe(
+                "M8: Security Misconfiguration"
+            );
+            expect(getFindingCategoryMeta("m7-binary-protections").label).toBe(
+                "M7: Insufficient Binary Protections"
+            );
+            expect(getFindingCategoryMeta(undefined).label).toBe(
+                "M4: Insufficient Input/Output Validation"
+            );
         });
 
         it("handles empty or null reports gracefully", () => {
@@ -461,4 +552,153 @@ describe("report-utils", () => {
         });
     });
 
+    describe("route and scanner validation helpers", () => {
+        it("validates route IDs against path traversal and script payloads", () => {
+            expect(isSafeRouteId("64b0f1a9c8e12a3456789abc")).toBe(true);
+            expect(isSafeRouteId("QW5kcm9pZEFwcFR5cGU6NjRiMGYxYTljOGUxMmEzNDU2Nzg5YWJj")).toBe(true);
+            expect(isSafeRouteId("../admin")).toBe(false);
+            expect(isSafeRouteId("id/with/slash")).toBe(false);
+            expect(isSafeRouteId("javascript:alert(1)")).toBe(false);
+            expect(isSafeRouteId("<script>alert(1)</script>")).toBe(false);
+            expect(isSafeRouteId("")).toBe(false);
+            expect(isSafeRouteId(null)).toBe(false);
+        });
+
+        it("validates scanner names strictly", () => {
+            expect(isSafeScannerName("TruffleHog")).toBe(true);
+            expect(isSafeScannerName("MobSFScan")).toBe(true);
+            expect(isSafeScannerName("build.prop")).toBe(true);
+            expect(isSafeScannerName("../etc/passwd")).toBe(false);
+            expect(isSafeScannerName("Scanner<script>")).toBe(false);
+            expect(isSafeScannerName("")).toBe(false);
+            expect(isSafeScannerName(undefined)).toBe(false);
+        });
+    });
+
+    describe("sortFindingsBySeverity and aggregateFirmwareAppRisks", () => {
+        it("sorts findings deterministically by severity and scanner name", () => {
+            const sorted = sortFindingsBySeverity([
+                {
+                    id: "1",
+                    reportId: "r1",
+                    scannerName: "MobSFScan",
+                    reportPk: "r1",
+                    severity: "low",
+                    title: "Low issue",
+                    description: "desc",
+                },
+                {
+                    id: "2",
+                    reportId: "r2",
+                    scannerName: "build.prop",
+                    reportPk: "r2",
+                    severity: "critical",
+                    title: "Critical issue",
+                    description: "desc",
+                },
+                {
+                    id: "3",
+                    reportId: "r3",
+                    scannerName: "APKLeaks",
+                    reportPk: "r3",
+                    severity: "high",
+                    title: "High issue",
+                    description: "desc",
+                },
+            ]);
+            expect(sorted.map(f => f.id)).toEqual(["2", "3", "1"]);
+        });
+
+        it("aggregates per-app risk summaries and resists prototype pollution keys", () => {
+            const reports = [
+                {
+                    pk: "r1",
+                    scannerName: "TruffleHog",
+                    androidAppIdReference: {
+                        pk: "app1",
+                        filename: "SystemUI.apk",
+                        packagename: "com.android.systemui",
+                    },
+                },
+                {
+                    pk: "r2",
+                    scannerName: "MobSFScan",
+                    androidAppIdReference: {
+                        pk: "app2",
+                        filename: "Settings.apk",
+                        packagename: "com.android.settings",
+                    },
+                },
+                {
+                    pk: "r-proto",
+                    scannerName: "__proto__",
+                    androidAppIdReference: {
+                        pk: "__proto__",
+                        filename: "Proto.apk",
+                    },
+                },
+            ];
+
+            const findings = [
+                {
+                    id: "f1",
+                    reportId: "r1",
+                    scannerName: "TruffleHog",
+                    reportPk: "r1",
+                    appId: "app1",
+                    appFilename: "SystemUI.apk",
+                    appPackagename: "com.android.systemui",
+                    partitionName: "system",
+                    severity: "critical" as const,
+                    title: "Verified Secret",
+                    description: "Secret exposed",
+                },
+                {
+                    id: "f2",
+                    reportId: "r2",
+                    scannerName: "MobSFScan",
+                    reportPk: "r2",
+                    appId: "app2",
+                    appFilename: "Settings.apk",
+                    appPackagename: "com.android.settings",
+                    partitionName: "product",
+                    severity: "medium" as const,
+                    title: "Exported Activity",
+                    description: "Activity exported",
+                },
+                {
+                    id: "f-buildprop",
+                    reportId: "",
+                    scannerName: "build.prop",
+                    reportPk: "bp1",
+                    severity: "critical" as const,
+                    title: "ro.debuggable=1",
+                    description: "System-wide debuggable",
+                    category: "m8-security-misconfiguration" as const,
+                },
+            ];
+
+            const risks = aggregateFirmwareAppRisks(reports, findings);
+            expect(risks.length).toBe(3);
+            expect(risks[0].appId).toBe("app1");
+            expect(risks[0].highCount).toBe(1);
+            expect(risks[0].totalFindings).toBe(1);
+            expect(risks[1].appId).toBe("app2");
+            expect(risks[1].mediumCount).toBe(1);
+            expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+        });
+
+        it("validates internal SPA return paths and rejects open redirects or traversal", () => {
+            expect(isSafeInternalReturnPath("/firmwares/fw-123?tab=security")).toBe(true);
+            expect(isSafeInternalReturnPath("/firmwares/fw-123/apps/app-456")).toBe(true);
+            expect(isSafeInternalReturnPath("/firmwares/fw-123?tab=metadata")).toBe(true);
+            expect(isSafeInternalReturnPath("//evil.example.com/phish")).toBe(false);
+            expect(isSafeInternalReturnPath("/\\evil.example.com")).toBe(false);
+            expect(isSafeInternalReturnPath("/firmwares/../admin")).toBe(false);
+            expect(isSafeInternalReturnPath("https://evil.example.com")).toBe(false);
+            expect(isSafeInternalReturnPath("javascript:alert(1)")).toBe(false);
+            expect(isSafeInternalReturnPath(null)).toBe(false);
+            expect(isSafeInternalReturnPath(undefined)).toBe(false);
+        });
+    });
 });

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useQuery } from "@/lib/apollo-hooks";
 import { BasePage } from "@/pages/base-page.tsx";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert.tsx";
@@ -23,7 +23,7 @@ import { CopyButton } from "@/components/ui/copy-button.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.tsx";
 import { formatDateTime } from "@/lib/date-utils.ts";
 import { downloadJsonFile } from "@/lib/format-utils.ts";
-import { parseReportResults } from "@/lib/report-utils.ts";
+import { isSafeInternalReturnPath, isSafeRouteId, parseReportResults } from "@/lib/report-utils.ts";
 import { useSetBreadcrumbTitle } from "@/lib/breadcrumb-store.ts";
 import { APPS_URL, FIRMWARE_URL } from "@/components/ui/sidebar/app-sidebar.tsx";
 import {
@@ -98,7 +98,16 @@ export function GenericReportPage({
     scannerName,
 }: GenericReportPageProps) {
     const navigate = useNavigate();
+    const location = useLocation();
     const [activeTab, setActiveTab] = useState("findings");
+
+    const rawReturnTo = (location.state as { returnTo?: unknown } | null)?.returnTo;
+    const rawReturnLabel = (location.state as { returnLabel?: unknown } | null)?.returnLabel;
+    const safeReturnTo = isSafeInternalReturnPath(rawReturnTo) ? rawReturnTo : null;
+    const safeReturnLabel =
+        typeof rawReturnLabel === "string" && rawReturnLabel.trim().length > 0 && rawReturnLabel.length <= 48
+            ? rawReturnLabel.trim()
+            : "Back to Last View";
 
     useSetBreadcrumbTitle(reportId, `${scannerName} Report`);
 
@@ -162,9 +171,31 @@ export function GenericReportPage({
     const isCompleted = scanStatus === "completed" || scanStatus === "finished" || scanStatus === "success";
     const isFailed = scanStatus === "failed" || scanStatus === "error" || parsedResults.isError;
 
+    const safeFirmwareId = isSafeRouteId(firmwareId) ? firmwareId : null;
+    const safeAppId = isSafeRouteId(appId) ? appId : null;
+    const appUrl =
+        safeFirmwareId && safeAppId
+            ? `${FIRMWARE_URL}/${encodeURIComponent(safeFirmwareId)}${APPS_URL}/${encodeURIComponent(safeAppId)}`
+            : null;
+    const securityOverviewUrl = safeFirmwareId
+        ? `${FIRMWARE_URL}/${encodeURIComponent(safeFirmwareId)}?tab=security`
+        : null;
+
+    const handleBackToPreviousView = () => {
+        if (safeReturnTo) {
+            void navigate(safeReturnTo);
+        } else if (securityOverviewUrl) {
+            void navigate(securityOverviewUrl);
+        } else if (appUrl) {
+            void navigate(appUrl);
+        } else {
+            void navigate(-1);
+        }
+    };
+
     const handleBackToApp = () => {
-        if (firmwareId && appId) {
-            void navigate(`${FIRMWARE_URL}/${encodeURIComponent(firmwareId)}${APPS_URL}/${encodeURIComponent(appId)}`);
+        if (appUrl) {
+            void navigate(appUrl);
         } else {
             void navigate(-1);
         }
@@ -293,15 +324,32 @@ export function GenericReportPage({
                             </div>
 
                             <div className="flex items-center gap-2 flex-wrap">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={handleBackToApp}
-                                    title={appFilename ? `Back to ${appFilename}` : "Back to Application"}
-                                >
-                                    <ArrowLeftIcon className="size-4 mr-1.5" aria-hidden="true" />
-                                    Back to App
-                                </Button>
+                                {(safeReturnTo || securityOverviewUrl) && (
+                                    <Button
+                                        variant="secondary"
+                                        size="sm"
+                                        onClick={handleBackToPreviousView}
+                                        title={safeReturnTo ? safeReturnLabel : "Back to Firmware Security Issues"}
+                                    >
+                                        <ArrowLeftIcon className="size-4 mr-1.5" aria-hidden="true" />
+                                        {safeReturnTo ? safeReturnLabel : "Back to Security Issues"}
+                                    </Button>
+                                )}
+                                {(!safeReturnTo || (appUrl && safeReturnTo !== appUrl)) && (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleBackToApp}
+                                        title={appFilename ? `Open ${appFilename} details` : "Back to Application"}
+                                    >
+                                        {safeReturnTo || securityOverviewUrl ? (
+                                            <SmartphoneIcon className="size-4 mr-1.5" aria-hidden="true" />
+                                        ) : (
+                                            <ArrowLeftIcon className="size-4 mr-1.5" aria-hidden="true" />
+                                        )}
+                                        Back to App
+                                    </Button>
+                                )}
                                 <Button
                                     variant="outline"
                                     size="sm"

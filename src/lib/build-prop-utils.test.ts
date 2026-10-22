@@ -3,6 +3,7 @@ import {
     normalizePropKey,
     categorizeProperty,
     extractBuildPropHighlights,
+    extractBuildPropSecurityFindings,
     formatRawBuildProps,
     parseBuildPropDictionary,
 } from "./build-prop-utils";
@@ -107,5 +108,93 @@ describe("build-prop-utils", () => {
         expect(items[0].category).toBe("security");
         expect(items[1].displayKey).toBe("ro.product.model");
         expect(items[1].category).toBe("device");
+    });
+
+    describe("extractBuildPropSecurityFindings", () => {
+        it("extracts high, medium, and low build.prop security misconfigurations", () => {
+            const files = [
+                {
+                    id: "bp-1",
+                    properties: JSON.stringify({
+                        ro_debuggable: "1",
+                        ro_secure: "0",
+                        ro_adb_secure: "0",
+                        ro_build_tags: "test-keys",
+                        ro_build_type: "userdebug",
+                        ro_oem_unlock_supported: "1",
+                        ro_allow_mock_location: "1",
+                    }),
+                },
+            ];
+
+            const findings = extractBuildPropSecurityFindings(files);
+            expect(findings.length).toBe(7);
+
+            const high = findings.filter(f => f.severity === "high");
+            expect(high).toHaveLength(4);
+            expect(high.map(f => f.snippet)).toEqual(
+                expect.arrayContaining([
+                    "ro.debuggable=1",
+                    "ro.secure=0",
+                    "ro.adb.secure=0",
+                    "ro.build.tags=test-keys",
+                ])
+            );
+
+            const medium = findings.filter(f => f.severity === "medium");
+            expect(medium).toHaveLength(2);
+            expect(medium.map(f => f.snippet)).toEqual(
+                expect.arrayContaining(["ro.build.type=userdebug", "ro.oem.unlock.supported=1"])
+            );
+
+            const low = findings.filter(f => f.severity === "low");
+            expect(low).toHaveLength(1);
+            expect(low[0].snippet).toBe("ro.allow.mock.location=1");
+
+            const debuggableFinding = findings.find(f => f.snippet === "ro.debuggable=1");
+            expect(debuggableFinding?.category).toBe("m8-security-misconfiguration");
+            expect(debuggableFinding?.cwe).toBe("CWE-489");
+
+            const adbFinding = findings.find(f => f.snippet === "ro.adb.secure=0");
+            expect(adbFinding?.category).toBe("m3-authn-authz");
+            expect(adbFinding?.cwe).toBe("CWE-306");
+
+            const testKeysFinding = findings.find(f => f.snippet === "ro.build.tags=test-keys");
+            expect(testKeysFinding?.category).toBe("m2-supply-chain");
+            expect(testKeysFinding?.cwe).toBe("CWE-347");
+        });
+
+        it("deduplicates identical findings across multiple build.prop files", () => {
+            const files = [
+                {
+                    id: "bp-sys",
+                    properties: { ro_debuggable: "1", ro_build_tags: "test-keys" },
+                },
+                {
+                    id: "bp-vendor",
+                    properties: { ro_debuggable: "1", ro_build_tags: "test-keys" },
+                },
+            ];
+
+            const findings = extractBuildPropSecurityFindings(files);
+            expect(findings).toHaveLength(2);
+        });
+
+        it("handles null, malformed JSON, and prototype pollution keys safely", () => {
+            expect(extractBuildPropSecurityFindings(null)).toEqual([]);
+            expect(extractBuildPropSecurityFindings(undefined)).toEqual([]);
+            expect(
+                extractBuildPropSecurityFindings([
+                    null,
+                    { properties: "{invalid-json" },
+                    {
+                        properties: JSON.parse(
+                            '{"__proto__": {"polluted": "yes"}, "constructor": "1", "prototype": "1", "ro_debuggable": "0"}'
+                        ),
+                    },
+                ])
+            ).toEqual([]);
+            expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+        });
     });
 });

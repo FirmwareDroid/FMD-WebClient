@@ -64,6 +64,55 @@ export const GET_APPS_BY_FIRMWARE_OBJECT_IDS = gql(`
     }
 `);
 
+export const GET_FIRMWARE_APPS_WITH_CERTIFICATES = gql(`
+    query GetFirmwareAppsWithCertificates($objectIds: [String!]) {
+        android_firmware_connection(objectIdList: $objectIds) {
+            edges {
+                node {
+                    androidAppIdList {
+                        edges {
+                            node {
+                                id
+                                pk
+                                filename
+                                originalFilename
+                                packagename
+                                partitionName
+                                fileSizeBytes
+                                sha256
+                                relativeFirmwarePath
+                                certificateIdList {
+                                    edges {
+                                        node {
+                                            id
+                                            sha1
+                                            sha256
+                                            issuer
+                                            issuerDict
+                                            subject
+                                            subjectDict
+                                            publicKeyAlgorithm
+                                            publicKeyBitSize
+                                            signatureAlgo
+                                            hashAlgo
+                                            notValidBefore
+                                            notValidAfter
+                                            serialNumber
+                                            isSelfSignedStr
+                                            isCa
+                                            isSelfIssued
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+`);
+
 export const GET_APP_BY_ID = gql(`
     query GetAppById($id: ID!) {
         android_firmware_connection {

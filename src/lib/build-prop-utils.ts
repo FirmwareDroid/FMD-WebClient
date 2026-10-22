@@ -1,3 +1,11 @@
+import {
+    FindingCategory,
+    getFindingCategoryMeta,
+    InterestingFinding,
+    NormalizedSeverity,
+    sortFindingsBySeverity,
+} from "@/lib/report-utils.ts";
+
 export type PropCategory = "all" | "security" | "device" | "os_build" | "runtime" | "system";
 
 export interface ParsedPropItem {
@@ -292,4 +300,162 @@ export function downloadBuildPropFile(filename: string, content: string): void {
     link.click();
     document.body.removeChild(link);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+export interface BuildPropFileForSecurityAnalysis {
+    id?: string | null;
+    pk?: string | null;
+    properties?: string | Record<string, unknown> | null;
+    firmwareFileIdReference?: {
+        id?: string | null;
+        name?: string | null;
+        relativePath?: string | null;
+        partitionName?: string | null;
+    } | null;
+}
+
+const MAX_BUILD_PROP_FILES = 50;
+const MAX_PROPERTIES_PER_FILE = 5000;
+const MAX_PROP_STRING_LEN = 512;
+const FORBIDDEN_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
+function truncateSafe(value: string, maxLen = MAX_PROP_STRING_LEN): string {
+    return value.length > maxLen ? `${value.slice(0, maxLen)}…` : value;
+}
+
+/**
+ * Extracts firmware-level security misconfigurations from `build.prop` files as normalized `InterestingFinding` items.
+ * Defends against prototype pollution, malformed JSON, and excessive property counts.
+ */
+export function extractBuildPropSecurityFindings(
+    buildPropFiles: readonly (BuildPropFileForSecurityAnalysis | null | undefined)[] | null | undefined,
+    firmwareId?: string
+): InterestingFinding[] {
+    if (!Array.isArray(buildPropFiles) || buildPropFiles.length === 0) {
+        return [];
+    }
+
+    const findings: InterestingFinding[] = [];
+    const seenSignatures = new Set<string>();
+    const boundedFiles = buildPropFiles.slice(0, MAX_BUILD_PROP_FILES);
+
+    for (let fileIdx = 0; fileIdx < boundedFiles.length; fileIdx++) {
+        const bpFile = boundedFiles[fileIdx];
+        if (!bpFile || !bpFile.properties) continue;
+
+        let parsedObj: Record<string, unknown> | null = null;
+        if (typeof bpFile.properties === "string") {
+            const trimmed = bpFile.properties.trim();
+            if (!trimmed || trimmed === "{}") continue;
+            try {
+                const candidate = JSON.parse(trimmed);
+                if (candidate && typeof candidate === "object" && !Array.isArray(candidate)) {
+                    parsedObj = candidate as Record<string, unknown>;
+                }
+            } catch {
+                parsedObj = null;
+            }
+        } else if (typeof bpFile.properties === "object" && !Array.isArray(bpFile.properties)) {
+            parsedObj = bpFile.properties as Record<string, unknown>;
+        }
+
+        if (!parsedObj) continue;
+
+        const partitionName = bpFile.firmwareFileIdReference?.partitionName?.trim() || undefined;
+        const relativePath = bpFile.firmwareFileIdReference?.relativePath?.trim() || undefined;
+        const fileName = bpFile.firmwareFileIdReference?.name?.trim() || "build.prop";
+        const location = relativePath
+            ? truncateSafe(relativePath)
+            : partitionName
+            ? `${truncateSafe(partitionName, 64)}/${truncateSafe(fileName, 128)}`
+            : truncateSafe(fileName, 128);
+
+        const entries = Object.entries(parsedObj).slice(0, MAX_PROPERTIES_PER_FILE);
+        for (let propIdx = 0; propIdx < entries.length; propIdx++) {
+            const [rawKey, rawVal] = entries[propIdx];
+            if (!rawKey || FORBIDDEN_KEYS.has(rawKey)) continue;
+
+            const valueStr = truncateSafe(
+                typeof rawVal === "string" ? rawVal.trim() : JSON.stringify(rawVal ?? "")
+            );
+            const displayKey = truncateSafe(normalizePropKey(rawKey), 128);
+            const { isSecuritySensitive, securitySeverity, securityNote } = categorizeProperty(rawKey, valueStr);
+
+            if (!isSecuritySensitive || (securitySeverity !== "critical" && securitySeverity !== "warning")) {
+                continue;
+            }
+
+            const dedupKey = `${partitionName || ""}::${displayKey.toLowerCase()}::${valueStr.toLowerCase()}`;
+            if (seenSignatures.has(dedupKey)) {
+                continue;
+            }
+            seenSignatures.add(dedupKey);
+
+            const kLower = rawKey.toLowerCase();
+            let severity: NormalizedSeverity = securitySeverity === "critical" ? "high" : "medium";
+            let title = `Insecure Build Property: ${displayKey}`;
+            let category: FindingCategory = "m8-security-misconfiguration";
+            let cwe = "CWE-16";
+
+            if (kLower === "ro_debuggable" || kLower === "ro.debuggable") {
+                severity = "high";
+                title = "Debuggable Firmware Build (ro.debuggable=1)";
+                category = "m8-security-misconfiguration";
+                cwe = "CWE-489";
+            } else if (kLower === "ro_secure" || kLower === "ro.secure") {
+                severity = "high";
+                title = "System Security Checks Disabled (ro.secure=0)";
+                category = "m8-security-misconfiguration";
+                cwe = "CWE-276";
+            } else if (kLower === "ro_adb_secure" || kLower === "ro.adb.secure") {
+                severity = "high";
+                title = "Unauthenticated ADB Daemon (ro.adb.secure=0)";
+                category = "m3-authn-authz";
+                cwe = "CWE-306";
+            } else if (kLower.includes("build_tags") || kLower.includes("build.tags")) {
+                severity = "high";
+                title = "Firmware Signed with Public AOSP Test-Keys (test-keys)";
+                category = "m2-supply-chain";
+                cwe = "CWE-347";
+            } else if (kLower === "ro_build_type" || kLower === "ro.build.type") {
+                severity = "medium";
+                title = `Non-Production Build Flavor (ro.build.type=${valueStr})`;
+                category = "m8-security-misconfiguration";
+                cwe = "CWE-489";
+            } else if (kLower.includes("oem_unlock")) {
+                severity = "medium";
+                title = `OEM Bootloader Unlock Permitted (${displayKey}=${valueStr})`;
+                category = "m8-security-misconfiguration";
+                cwe = "CWE-16";
+            } else if (kLower.includes("allow_mock")) {
+                severity = "low";
+                title = `Mock Locations Enabled (${displayKey}=${valueStr})`;
+                category = "m8-security-misconfiguration";
+                cwe = "CWE-16";
+            }
+
+            const catMeta = getFindingCategoryMeta(category);
+            const fileId = bpFile.pk || bpFile.id || `bp-${fileIdx}`;
+            findings.push({
+                id: `buildprop-${fileId}-${propIdx}`,
+                reportId: "",
+                scannerName: "build.prop",
+                severity,
+                title,
+                description:
+                    securityNote ||
+                    `Security-sensitive Android system property configured with potentially risky value in ${location}.`,
+                snippet: `${displayKey}=${valueStr}`,
+                location,
+                partitionName,
+                category,
+                cwe,
+                owaspMobile: catMeta.label,
+                masvs: catMeta.masvs,
+                firmwareId,
+            });
+        }
+    }
+
+    return sortFindingsBySeverity(findings);
 }

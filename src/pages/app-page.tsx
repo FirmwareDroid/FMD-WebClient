@@ -1,4 +1,4 @@
-import {useNavigate, useParams} from "react-router";
+import {useLocation, useNavigate, useParams} from "react-router";
 import {useEffect, useRef, useState} from "react";
 import {BasePage} from "@/pages/base-page.tsx";
 import {useMutation, useQuery} from "@/lib/apollo-hooks";
@@ -6,13 +6,14 @@ import {convertIdToObjectId, isNonNullish} from "@/lib/graphql/graphql-utils.ts"
 import {APP_ALL, GET_APP_BY_ID, SCAN_APKS_BY_OBJECT_IDS} from "@/components/graphql/app.graphql.ts";
 import {GET_APP_REPORTS_WITH_FINDINGS, META_APK_SCANNER_REPORT} from "@/components/graphql/report.graphql.ts";
 import {SecurityFindingsCard} from "@/components/report/security-findings-card.tsx";
-import {extractInterestingFindings} from "@/lib/report-utils.ts";
+import {extractInterestingFindings, isSafeInternalReturnPath, isSafeRouteId} from "@/lib/report-utils.ts";
 import {useMemo} from "react";
 import {GET_RQ_JOB_LIST} from "@/components/graphql/rq-job.graphql.ts";
 import {useFragment as readFragment} from "@/__generated__";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
 import {
     AlertCircleIcon,
+    ArrowLeftIcon,
     CalendarIcon,
     DownloadIcon,
     FileIcon,
@@ -100,9 +101,18 @@ const reportColumns: ColumnDef<MetaReportFieldsFragment, unknown>[] = [
 export function AppPage() {
     const {appId} = useParams<{ appId: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
     const toast = useToastStore();
     const [isTriggeringScan, setIsTriggeringScan] = useState(false);
     const [scanApk] = useMutation(SCAN_APKS_BY_OBJECT_IDS);
+
+    const rawReturnTo = (location.state as { returnTo?: unknown } | null)?.returnTo;
+    const rawReturnLabel = (location.state as { returnLabel?: unknown } | null)?.returnLabel;
+    const safeReturnTo = isSafeInternalReturnPath(rawReturnTo) ? rawReturnTo : null;
+    const safeReturnLabel =
+        typeof rawReturnLabel === "string" && rawReturnLabel.trim().length > 0 && rawReturnLabel.length <= 48
+            ? rawReturnLabel.trim()
+            : "Back to Last View";
 
     const {
         loading: appsLoading,
@@ -287,6 +297,20 @@ export function AppPage() {
 
     const firmwareId = app.firmwareIdReference?.id;
     const firmwareFileId = app.firmwareFileReference?.id;
+    const safeFirmwareId = isSafeRouteId(firmwareId) ? firmwareId : null;
+    const firmwareOverviewUrl = safeFirmwareId
+        ? `${FIRMWARE_URL}/${encodeURIComponent(safeFirmwareId)}`
+        : null;
+
+    const handleBackToPreviousView = () => {
+        if (safeReturnTo) {
+            void navigate(safeReturnTo);
+        } else if (firmwareOverviewUrl) {
+            void navigate(firmwareOverviewUrl);
+        } else {
+            void navigate(-1);
+        }
+    };
 
     return (
         <BasePage title={app.filename || "App Details"}>
@@ -344,6 +368,17 @@ export function AppPage() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 flex-wrap">
+                                {(safeReturnTo || firmwareOverviewUrl) && (
+                                    <Button
+                                        variant="secondary"
+                                        size="sm"
+                                        onClick={handleBackToPreviousView}
+                                        title={safeReturnTo ? safeReturnLabel : "Back to Firmware Overview"}
+                                    >
+                                        <ArrowLeftIcon className="size-4 mr-1.5" aria-hidden="true" />
+                                        {safeReturnTo ? safeReturnLabel : "Back to Firmware"}
+                                    </Button>
+                                )}
                                 <ScanAppActionButton
                                     ids={[appId]}
                                     tooltip="Scan this app"

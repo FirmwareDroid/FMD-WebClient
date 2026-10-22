@@ -23,6 +23,7 @@ export type Scanner = {
 
 const SCANNER_DESCRIPTIONS: Record<string, string> = {
     MANIFEST: "Parses AndroidManifest.xml for permissions, activities, services, receivers, and SDK target",
+    CERTIFICATE: "Fast extraction of APK signing certificates (v1/v2/v3) and X.509 vendor metadata without bytecode decompilation",
     APKID: "Scans for compilers, obfuscators, packers, protectors, and anti-analysis mechanisms",
     EXODUS: "Extracts known tracking libraries and embedded user analytics frameworks",
     TRUFFLEHOG: "Scans decompiled resources and code for API keys, secret credentials, and tokens",

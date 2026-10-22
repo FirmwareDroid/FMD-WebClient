@@ -1,20 +1,34 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import {
+    ChevronDownIcon,
+    ChevronRightIcon,
+    CodeIcon,
+    ExternalLinkIcon,
+    FolderKanbanIcon,
+    ListIcon,
+    MapPinIcon,
+    SearchIcon,
     ShieldAlertIcon,
     ShieldCheckIcon,
-    ExternalLinkIcon,
-    SearchIcon,
     SmartphoneIcon,
-    MapPinIcon,
-    CodeIcon,
+    TagIcon,
 } from "lucide-react";
-import { getSeverityBadgeProps, InterestingFinding, NormalizedSeverity } from "@/lib/report-utils.ts";
+import {
+    FINDING_CATEGORY_ORDER,
+    FindingCategory,
+    getFindingCategoryMeta,
+    getSeverityBadgeProps,
+    InterestingFinding,
+    isSafeRouteId,
+    isSafeScannerName,
+    NormalizedSeverity,
+} from "@/lib/report-utils.ts";
 import { APPS_URL, FIRMWARE_URL, REPORTS_URL } from "@/components/ui/sidebar/app-sidebar.tsx";
 
 interface SecurityFindingsCardProps {
@@ -32,57 +46,288 @@ export function SecurityFindingsCard({
     currentAppId,
     defaultFirmwareId,
     title = "Interesting Security Findings",
-    description = "Critical vulnerabilities, verified secrets, and high-risk indicators detected across scanner reports.",
+    description = "High-priority vulnerabilities, verified secrets, and security indicators detected across scanner reports.",
 }: SecurityFindingsCardProps) {
     const navigate = useNavigate();
+    const location = useLocation();
     const [searchQuery, setSearchQuery] = useState("");
-    const [severityFilter, setSeverityFilter] = useState<"all" | "critical_high">("all");
+    const [severityFilter, setSeverityFilter] = useState<"all" | "high" | "medium" | "low">("all");
+    const [selectedCategory, setSelectedCategory] = useState<FindingCategory | "all">("all");
+    const [viewMode, setViewMode] = useState<"flat" | "grouped">("flat");
+    const [collapsedCategories, setCollapsedCategories] = useState<Set<FindingCategory>>(new Set());
     const [isExpanded, setIsExpanded] = useState(false);
 
-    // Calculate counts
-    const criticalCount = findings.filter((f) => f.severity === "critical").length;
-    const highCount = findings.filter((f) => f.severity === "high").length;
-    const mediumCount = findings.filter((f) => f.severity === "medium").length;
-    const lowCount = findings.filter((f) => f.severity === "low" || f.severity === "info").length;
+    // Calculate counts (High consolidates any legacy critical items)
+    const highCount = findings.filter((f) => f.severity === "critical" || f.severity === "high").length;
+    const mediumCount = findings.filter((f) => f.severity === "medium" || f.severity === "warning").length;
+    const lowCount = findings.filter(
+        (f) => f.severity === "low" || f.severity === "info" || f.severity === "unknown"
+    ).length;
+
+    // Category breakdown in canonical order
+    const categoryCounts = useMemo(() => {
+        const counts = new Map<FindingCategory, number>();
+        for (const f of findings) {
+            const cat = getFindingCategoryMeta(f.category).category;
+            counts.set(cat, (counts.get(cat) ?? 0) + 1);
+        }
+        return FINDING_CATEGORY_ORDER.filter((cat) => (counts.get(cat) ?? 0) > 0).map((cat) => ({
+            category: cat,
+            meta: getFindingCategoryMeta(cat),
+            count: counts.get(cat) ?? 0,
+        }));
+    }, [findings]);
 
     // Filter findings
     const filteredFindings = useMemo(() => {
         let list = findings;
-        if (severityFilter === "critical_high") {
+        if (severityFilter === "high") {
             list = list.filter((f) => f.severity === "critical" || f.severity === "high");
+        } else if (severityFilter === "medium") {
+            list = list.filter((f) => f.severity === "medium" || f.severity === "warning");
+        } else if (severityFilter === "low") {
+            list = list.filter((f) => f.severity === "low" || f.severity === "info" || f.severity === "unknown");
         }
+
+        if (selectedCategory !== "all") {
+            list = list.filter((f) => getFindingCategoryMeta(f.category).category === selectedCategory);
+        }
+
         if (searchQuery.trim()) {
             const q = searchQuery.toLowerCase().trim();
-            list = list.filter(
-                (f) =>
+            list = list.filter((f) => {
+                const catMeta = getFindingCategoryMeta(f.category);
+                const catLabel = catMeta.label.toLowerCase();
+                const cweStr = (f.cwe || catMeta.cwe).toLowerCase();
+                const masvsStr = (f.masvs || catMeta.masvs).toLowerCase();
+                return (
                     f.title.toLowerCase().includes(q) ||
                     f.scannerName.toLowerCase().includes(q) ||
+                    catLabel.includes(q) ||
+                    cweStr.includes(q) ||
+                    masvsStr.includes(q) ||
                     (f.description && f.description.toLowerCase().includes(q)) ||
                     (f.location && f.location.toLowerCase().includes(q)) ||
                     (f.appFilename && f.appFilename.toLowerCase().includes(q))
-            );
+                );
+            });
         }
         return list;
-    }, [findings, severityFilter, searchQuery]);
+    }, [findings, severityFilter, selectedCategory, searchQuery]);
 
     const displayedFindings = isExpanded ? filteredFindings : filteredFindings.slice(0, 6);
 
+    const groupedFindings = useMemo(() => {
+        const map = new Map<FindingCategory, InterestingFinding[]>();
+        for (const f of filteredFindings) {
+            const cat = getFindingCategoryMeta(f.category).category;
+            let list = map.get(cat);
+            if (!list) {
+                list = [];
+                map.set(cat, list);
+            }
+            list.push(f);
+        }
+        return FINDING_CATEGORY_ORDER.filter((cat) => (map.get(cat)?.length ?? 0) > 0).map((cat) => {
+            const items = map.get(cat) ?? [];
+            let high = 0;
+            let medium = 0;
+            let low = 0;
+            for (const item of items) {
+                if (item.severity === "critical" || item.severity === "high") high++;
+                else if (item.severity === "medium" || item.severity === "warning") medium++;
+                else low++;
+            }
+            return {
+                category: cat,
+                meta: getFindingCategoryMeta(cat),
+                items,
+                high,
+                medium,
+                low,
+            };
+        });
+    }, [filteredFindings]);
+
+    const toggleCategoryCollapse = (cat: FindingCategory) => {
+        setCollapsedCategories((prev) => {
+            const next = new Set(prev);
+            if (next.has(cat)) {
+                next.delete(cat);
+            } else {
+                next.add(cat);
+            }
+            return next;
+        });
+    };
+
     const highestSeverity: NormalizedSeverity =
-        criticalCount > 0 ? "critical" : highCount > 0 ? "high" : mediumCount > 0 ? "medium" : "low";
+        highCount > 0 ? "high" : mediumCount > 0 ? "medium" : "low";
 
     const getSeverityBorderColor = (sev: NormalizedSeverity) => {
         switch (sev) {
             case "critical":
-                return "border-l-red-600 dark:border-l-red-500";
             case "high":
                 return "border-l-rose-500 dark:border-l-rose-400";
             case "medium":
+            case "warning":
                 return "border-l-amber-500 dark:border-l-amber-400";
             case "low":
                 return "border-l-blue-500 dark:border-l-blue-400";
             default:
                 return "border-l-border";
         }
+    };
+
+    const renderFindingRow = (finding: InterestingFinding) => {
+        const sevBadge = getSeverityBadgeProps(finding.severity);
+        const catMeta = getFindingCategoryMeta(finding.category);
+        const targetFwId = finding.firmwareId || defaultFirmwareId;
+        const targetAppId = finding.appId || currentAppId;
+
+        const safeAppUrl =
+            isSafeRouteId(targetFwId) && isSafeRouteId(targetAppId)
+                ? `${FIRMWARE_URL}/${encodeURIComponent(targetFwId.trim())}${APPS_URL}/${encodeURIComponent(
+                      targetAppId.trim()
+                  )}`
+                : null;
+
+        const reportUrl =
+            isSafeRouteId(targetFwId) &&
+            isSafeRouteId(targetAppId) &&
+            isSafeScannerName(finding.scannerName) &&
+            isSafeRouteId(finding.reportId)
+                ? `${FIRMWARE_URL}/${encodeURIComponent(targetFwId.trim())}${APPS_URL}/${encodeURIComponent(
+                      targetAppId.trim()
+                  )}${REPORTS_URL}/${encodeURIComponent(finding.scannerName.trim())}-${encodeURIComponent(
+                      finding.reportId.trim()
+                  )}`
+                : null;
+
+        return (
+            <div
+                key={finding.id}
+                className={`group flex flex-col md:flex-row md:items-center justify-between gap-3 p-3.5 rounded-lg border border-border/60 bg-card hover:bg-muted/30 transition-all border-l-4 ${getSeverityBorderColor(
+                    finding.severity
+                )}`}
+            >
+                <div className="space-y-1.5 min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <Badge
+                            variant={sevBadge.variant}
+                            className={`text-[10px] font-semibold px-2 py-0.5 uppercase tracking-wider ${sevBadge.className}`}
+                        >
+                            {sevBadge.label}
+                        </Badge>
+
+                        <Badge
+                            variant="outline"
+                            className={`text-[11px] font-medium gap-1 cursor-pointer ${catMeta.className}`}
+                            onClick={() =>
+                                setSelectedCategory((prev) =>
+                                    prev === catMeta.category ? "all" : catMeta.category
+                                )
+                            }
+                            title={`${catMeta.label} (${catMeta.masvs} • ${catMeta.cwe}): ${catMeta.description}`}
+                        >
+                            <TagIcon className="size-3" aria-hidden="true" />
+                            <span>{catMeta.label}</span>
+                        </Badge>
+
+                        <Badge
+                            variant="outline"
+                            className="text-[10px] font-mono border-border/70 bg-muted/30 text-muted-foreground"
+                            title={`MITRE Common Weakness Enumeration: ${finding.cwe || `${catMeta.cwe} (${catMeta.cweName})`}`}
+                        >
+                            {finding.cwe || catMeta.cwe}
+                        </Badge>
+
+                        <Badge
+                            variant="outline"
+                            className="text-[10px] font-mono border-border/70 bg-muted/30 text-muted-foreground hidden sm:inline-flex"
+                            title={`OWASP Mobile Application Security Verification Standard: ${finding.masvs || catMeta.masvs}`}
+                        >
+                            {finding.masvs || catMeta.masvs}
+                        </Badge>
+
+                        <Badge
+                            variant="outline"
+                            className="text-[11px] font-medium border-border/80 bg-muted/40"
+                        >
+                            {finding.scannerName}
+                        </Badge>
+
+                        {finding.appFilename && (
+                            <Badge
+                                variant="secondary"
+                                className="text-[11px] gap-1 font-mono text-muted-foreground hover:text-foreground cursor-pointer"
+                                onClick={() => {
+                                    if (safeAppUrl) {
+                                        void navigate(safeAppUrl);
+                                    }
+                                }}
+                                title="View app details"
+                            >
+                                <SmartphoneIcon className="size-3" />
+                                <span className="truncate max-w-[180px]">{finding.appFilename}</span>
+                            </Badge>
+                        )}
+                    </div>
+
+                    <h4 className="text-sm font-semibold text-foreground break-words">
+                        {finding.title}
+                    </h4>
+
+                    {finding.description && (
+                        <p className="text-xs text-muted-foreground break-words">
+                            {finding.description}
+                        </p>
+                    )}
+
+                    {finding.location && (
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-0.5">
+                            <MapPinIcon className="size-3 text-primary shrink-0" />
+                            <code className="font-mono text-[11px] text-foreground/80 break-all select-all">
+                                {finding.location}
+                            </code>
+                        </div>
+                    )}
+
+                    {finding.snippet && (
+                        <div className="flex items-start gap-1.5 text-xs pt-1">
+                            <CodeIcon className="size-3 text-muted-foreground shrink-0 mt-0.5" />
+                            <code className="font-mono text-[11px] p-1 rounded bg-muted/60 text-foreground break-all select-all max-h-16 overflow-y-auto block">
+                                {finding.snippet}
+                            </code>
+                        </div>
+                    )}
+                </div>
+
+                {reportUrl && (
+                    <div className="shrink-0 flex items-center md:self-center">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-8 gap-1.5 text-xs font-medium border-primary/40 hover:bg-primary/10 hover:text-primary transition-colors"
+                            onClick={() =>
+                                void navigate(reportUrl, {
+                                    state: {
+                                        returnTo: `${location.pathname}${location.search}`,
+                                        returnLabel: currentAppId
+                                            ? "Back to App Overview"
+                                            : "Back to Overview",
+                                    },
+                                })
+                            }
+                        >
+                            View Full Report
+                            <ExternalLinkIcon className="size-3.5" />
+                        </Button>
+                    </div>
+                )}
+            </div>
+        );
     };
 
     if (loading) {
@@ -120,11 +365,11 @@ export function SecurityFindingsCard({
                             <ShieldCheckIcon className="size-8" />
                         </div>
                         <h4 className="font-semibold text-foreground text-sm">
-                            No Critical or High-Risk Security Findings Detected
+                            No High-Risk Security Findings Detected
                         </h4>
                         <p className="text-xs text-muted-foreground max-w-md">
                             All completed security scans have reported zero verified secrets, known malicious signatures,
-                            or critical vulnerabilities.
+                            or high-severity vulnerabilities.
                         </p>
                     </div>
                 </CardContent>
@@ -134,14 +379,12 @@ export function SecurityFindingsCard({
 
     return (
         <Card className="border-border/60 shadow-sm">
-            <CardHeader className="pb-3 border-b border-border/40">
+            <CardHeader className="pb-3 border-b border-border/40 space-y-2.5">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="flex items-center gap-2.5">
                         <div
                             className={`p-2 rounded-lg ${
-                                highestSeverity === "critical"
-                                    ? "bg-red-500/15 text-red-500"
-                                    : highestSeverity === "high"
+                                highestSeverity === "high"
                                     ? "bg-rose-500/15 text-rose-500"
                                     : "bg-amber-500/15 text-amber-500"
                             }`}
@@ -152,20 +395,18 @@ export function SecurityFindingsCard({
                             <div className="flex items-center gap-2 flex-wrap">
                                 <CardTitle className="text-base font-semibold">{title}</CardTitle>
                                 <Badge variant="secondary" className="font-mono text-xs">
-                                    {findings.length}
+                                    {filteredFindings.length}
+                                    {filteredFindings.length !== findings.length
+                                        ? ` / ${findings.length}`
+                                        : ""}
                                 </Badge>
                             </div>
                             <CardDescription className="text-xs sm:text-sm">{description}</CardDescription>
                         </div>
                     </div>
 
-                    {/* Severity Counters */}
+                    {/* Severity Counters + View Mode Toggle */}
                     <div className="flex items-center gap-1.5 flex-wrap">
-                        {criticalCount > 0 && (
-                            <Badge variant="destructive" className="bg-red-600 text-white font-mono text-[11px] px-2">
-                                {criticalCount} Critical
-                            </Badge>
-                        )}
                         {highCount > 0 && (
                             <Badge
                                 variant="destructive"
@@ -184,15 +425,42 @@ export function SecurityFindingsCard({
                         )}
                         {lowCount > 0 && (
                             <Badge variant="outline" className="font-mono text-[11px] px-2 text-muted-foreground">
-                                {lowCount} Low
+                                {lowCount} Low / Info
                             </Badge>
                         )}
+
+                        <div
+                            className="inline-flex items-center gap-0.5 bg-muted/60 p-0.5 rounded-md border border-border/60 ml-1"
+                            role="group"
+                            aria-label="Findings display mode"
+                        >
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant={viewMode === "flat" ? "secondary" : "ghost"}
+                                className="h-6 text-[11px] px-2 gap-1"
+                                onClick={() => setViewMode("flat")}
+                            >
+                                <ListIcon className="size-3" aria-hidden="true" />
+                                Flat List
+                            </Button>
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant={viewMode === "grouped" ? "secondary" : "ghost"}
+                                className="h-6 text-[11px] px-2 gap-1"
+                                onClick={() => setViewMode("grouped")}
+                            >
+                                <FolderKanbanIcon className="size-3" aria-hidden="true" />
+                                Group by Category
+                            </Button>
+                        </div>
                     </div>
                 </div>
 
                 {/* Filter and Search Bar */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-3">
-                    <div className="flex items-center gap-1.5">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                         <Button
                             type="button"
                             size="sm"
@@ -202,156 +470,204 @@ export function SecurityFindingsCard({
                         >
                             All ({findings.length})
                         </Button>
-                        <Button
-                            type="button"
-                            size="sm"
-                            variant={severityFilter === "critical_high" ? "secondary" : "ghost"}
-                            className="h-7 text-xs px-2.5 text-rose-500 dark:text-rose-400 hover:text-rose-600"
-                            onClick={() => setSeverityFilter("critical_high")}
-                        >
-                            Critical & High ({criticalCount + highCount})
-                        </Button>
+                        {highCount > 0 && (
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant={severityFilter === "high" ? "secondary" : "ghost"}
+                                className="h-7 text-xs px-2.5 text-rose-500 dark:text-rose-400 hover:text-rose-600"
+                                onClick={() => setSeverityFilter("high")}
+                            >
+                                High ({highCount})
+                            </Button>
+                        )}
+                        {mediumCount > 0 && (
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant={severityFilter === "medium" ? "secondary" : "ghost"}
+                                className="h-7 text-xs px-2.5"
+                                onClick={() => setSeverityFilter("medium")}
+                            >
+                                Medium ({mediumCount})
+                            </Button>
+                        )}
+                        {lowCount > 0 && (
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant={severityFilter === "low" ? "secondary" : "ghost"}
+                                className="h-7 text-xs px-2.5"
+                                onClick={() => setSeverityFilter("low")}
+                            >
+                                Low / Info ({lowCount})
+                            </Button>
+                        )}
                     </div>
 
                     <div className="relative w-full sm:w-64">
                         <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
                         <Input
                             type="text"
-                            placeholder="Filter findings..."
+                            placeholder="Filter findings or categories..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="h-8 pl-8 text-xs bg-muted/30 border-border/70"
                         />
                     </div>
                 </div>
+
+                {/* Category Filter Pills */}
+                {categoryCounts.length > 0 && (
+                    <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                        <span className="text-[11px] font-medium text-muted-foreground mr-1">
+                            Category:
+                        </span>
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant={selectedCategory === "all" ? "secondary" : "outline"}
+                            className="h-6 text-[11px] px-2"
+                            onClick={() => setSelectedCategory("all")}
+                        >
+                            All Categories
+                        </Button>
+                        {categoryCounts.map(({ category, meta, count }) => (
+                            <Button
+                                key={category}
+                                type="button"
+                                size="sm"
+                                variant={selectedCategory === category ? "secondary" : "outline"}
+                                className={`h-6 text-[11px] px-2 gap-1 ${
+                                    selectedCategory === category ? meta.className : ""
+                                }`}
+                                onClick={() =>
+                                    setSelectedCategory((prev) =>
+                                        prev === category ? "all" : category
+                                    )
+                                }
+                                title={meta.description}
+                            >
+                                <TagIcon className="size-2.5" aria-hidden="true" />
+                                <span>
+                                    {meta.shortLabel} ({count})
+                                </span>
+                            </Button>
+                        ))}
+                    </div>
+                )}
             </CardHeader>
 
             <CardContent className="pt-4 space-y-3">
-                {displayedFindings.length === 0 ? (
+                {filteredFindings.length === 0 ? (
                     <div className="text-center py-6 text-muted-foreground text-xs">
                         No findings match your filter criteria.
                     </div>
-                ) : (
-                    displayedFindings.map((finding) => {
-                        const sevBadge = getSeverityBadgeProps(finding.severity);
-                        const targetFwId = finding.firmwareId || defaultFirmwareId;
-                        const targetAppId = finding.appId || currentAppId;
-
-                        const reportUrl =
-                            targetFwId && targetAppId && finding.reportId
-                                ? `${FIRMWARE_URL}/${encodeURIComponent(targetFwId)}${APPS_URL}/${encodeURIComponent(
-                                      targetAppId
-                                  )}${REPORTS_URL}/${encodeURIComponent(finding.scannerName)}-${encodeURIComponent(
-                                      finding.reportId
-                                  )}`
-                                : null;
-
-                        return (
-                            <div
-                                key={finding.id}
-                                className={`group flex flex-col md:flex-row md:items-center justify-between gap-3 p-3.5 rounded-lg border border-border/60 bg-card hover:bg-muted/30 transition-all border-l-4 ${getSeverityBorderColor(
-                                    finding.severity
-                                )}`}
-                            >
-                                <div className="space-y-1.5 min-w-0 flex-1">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                        <Badge
-                                            variant={sevBadge.variant}
-                                            className={`text-[10px] font-semibold px-2 py-0.5 uppercase tracking-wider ${sevBadge.className}`}
-                                        >
-                                            {sevBadge.label}
-                                        </Badge>
-
-                                        <Badge
-                                            variant="outline"
-                                            className="text-[11px] font-medium border-border/80 bg-muted/40"
-                                        >
-                                            {finding.scannerName}
-                                        </Badge>
-
-                                        {finding.appFilename && (
+                ) : viewMode === "grouped" ? (
+                    <div className="space-y-4" data-testid="grouped-findings-container">
+                        {groupedFindings.map(({ category, meta, items, high, medium, low }) => {
+                            const isCollapsed = collapsedCategories.has(category);
+                            return (
+                                <div
+                                    key={category}
+                                    className="rounded-lg border border-border/70 bg-muted/10 overflow-hidden"
+                                >
+                                    <button
+                                        type="button"
+                                        className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3 bg-muted/40 hover:bg-muted/60 transition-colors text-left"
+                                        onClick={() => toggleCategoryCollapse(category)}
+                                        aria-expanded={!isCollapsed}
+                                    >
+                                        <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                                            {isCollapsed ? (
+                                                <ChevronRightIcon className="size-4 text-muted-foreground shrink-0" />
+                                            ) : (
+                                                <ChevronDownIcon className="size-4 text-muted-foreground shrink-0" />
+                                            )}
                                             <Badge
-                                                variant="secondary"
-                                                className="text-[11px] gap-1 font-mono text-muted-foreground hover:text-foreground cursor-pointer"
-                                                onClick={() => {
-                                                    if (targetFwId && targetAppId) {
-                                                        void navigate(
-                                                            `${FIRMWARE_URL}/${encodeURIComponent(
-                                                                targetFwId
-                                                            )}${APPS_URL}/${encodeURIComponent(targetAppId)}`
-                                                        );
-                                                    }
-                                                }}
-                                                title="View app details"
+                                                variant="outline"
+                                                className={`text-xs font-semibold gap-1 ${meta.className}`}
                                             >
-                                                <SmartphoneIcon className="size-3" />
-                                                <span className="truncate max-w-[180px]">{finding.appFilename}</span>
+                                                <TagIcon className="size-3" aria-hidden="true" />
+                                                <span>{meta.label}</span>
                                             </Badge>
-                                        )}
-                                    </div>
-
-                                    <h4 className="text-sm font-semibold text-foreground break-words">
-                                        {finding.title}
-                                    </h4>
-
-                                    {finding.description && (
-                                        <p className="text-xs text-muted-foreground break-words">
-                                            {finding.description}
-                                        </p>
-                                    )}
-
-                                    {finding.location && (
-                                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-0.5">
-                                            <MapPinIcon className="size-3 text-primary shrink-0" />
-                                            <code className="font-mono text-[11px] text-foreground/80 break-all select-all">
-                                                {finding.location}
-                                            </code>
+                                            <Badge
+                                                variant="outline"
+                                                className="text-[10px] font-mono bg-background/60 text-muted-foreground"
+                                            >
+                                                {meta.cwe}
+                                            </Badge>
+                                            <Badge
+                                                variant="outline"
+                                                className="text-[10px] font-mono bg-background/60 text-muted-foreground"
+                                            >
+                                                {meta.masvs}
+                                            </Badge>
+                                            <span className="text-xs text-muted-foreground hidden lg:inline truncate">
+                                                {meta.description}
+                                            </span>
                                         </div>
-                                    )}
 
-                                    {finding.snippet && (
-                                        <div className="flex items-start gap-1.5 text-xs pt-1">
-                                            <CodeIcon className="size-3 text-muted-foreground shrink-0 mt-0.5" />
-                                            <code className="font-mono text-[11px] p-1 rounded bg-muted/60 text-foreground break-all select-all max-h-16 overflow-y-auto block">
-                                                {finding.snippet}
-                                            </code>
+                                        <div className="flex items-center gap-1.5 flex-wrap shrink-0">
+                                            {high > 0 && (
+                                                <Badge
+                                                    variant="destructive"
+                                                    className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[11px] px-2"
+                                                >
+                                                    {high} High
+                                                </Badge>
+                                            )}
+                                            {medium > 0 && (
+                                                <Badge
+                                                    variant="secondary"
+                                                    className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 font-mono text-[11px] px-2"
+                                                >
+                                                    {medium} Medium
+                                                </Badge>
+                                            )}
+                                            {low > 0 && (
+                                                <Badge
+                                                    variant="outline"
+                                                    className="font-mono text-[11px] px-2 text-muted-foreground"
+                                                >
+                                                    {low} Low / Info
+                                                </Badge>
+                                            )}
+                                            <Badge variant="secondary" className="font-mono text-xs ml-1">
+                                                {items.length} total
+                                            </Badge>
+                                        </div>
+                                    </button>
+
+                                    {!isCollapsed && (
+                                        <div className="p-3 space-y-2.5 border-t border-border/50">
+                                            {items.map((finding) => renderFindingRow(finding))}
                                         </div>
                                     )}
                                 </div>
-
-                                {reportUrl && (
-                                    <div className="shrink-0 flex items-center md:self-center">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            className="h-8 gap-1.5 text-xs font-medium border-primary/40 hover:bg-primary/10 hover:text-primary transition-colors"
-                                            onClick={() => void navigate(reportUrl)}
-                                        >
-                                            View Full Report
-                                            <ExternalLinkIcon className="size-3.5" />
-                                        </Button>
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })
-                )}
-
-                {filteredFindings.length > 6 && (
-                    <div className="pt-2 text-center">
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs text-muted-foreground hover:text-foreground"
-                            onClick={() => setIsExpanded((prev) => !prev)}
-                        >
-                            {isExpanded
-                                ? "Show Fewer Findings"
-                                : `Show All ${filteredFindings.length} Findings (${filteredFindings.length - 6} more)`}
-                        </Button>
+                            );
+                        })}
                     </div>
+                ) : (
+                    <>
+                        {displayedFindings.map((finding) => renderFindingRow(finding))}
+
+                        {filteredFindings.length > 6 && (
+                            <div className="pt-2 text-center">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-xs text-muted-foreground hover:text-foreground"
+                                    onClick={() => setIsExpanded((prev) => !prev)}
+                                >
+                                    {isExpanded
+                                        ? "Show Fewer Findings"
+                                        : `Show All ${filteredFindings.length} Findings (${filteredFindings.length - 6} more)`}
+                                </Button>
+                            </div>
+                        )}
+                    </>
                 )}
             </CardContent>
         </Card>
